@@ -4,143 +4,129 @@ import (
 	"database/sql"
 	"desabiller/configs"
 	"desabiller/models"
-	"fmt"
 	"log"
 	"strconv"
 	"time"
 )
 
-const field = `
-id, client_name, created_at, created_by, updated_at, updated_by
-`
+const field = `id, client_name, created_at, created_by, updated_at, updated_by`
 
-func (ctx hierarchy) AddClient(req models.ReqGetListClient) (status bool) {
+func (ctx hierarchy) AddClient(req models.ReqGetClient, tx *sql.DB) (err error) {
+
 	t := time.Now()
-	id := 0
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	query := `insert into clients (
-client_name,
-created_at,
-created_by,
-updated_at,
-updated_by
-) values ($1,$2,$3,$4,$5) returning id
-`
-	err := ctx.repo.Db.QueryRow(query, req.ClientName, dbTime, "sys", dbTime, "sys").Scan(&id)
-	// fmt.Println("::::", query)
+				client_name,
+				created_at,
+				created_by,
+				updated_at,
+				updated_by
+				) values ($1,$2,$3,$4,$5) returning id
+				`
+	if tx != nil {
+		_, err = tx.Exec(query, req.ClientName, dbTime, req.Filter.CreatedBy, dbTime, req.Filter.CreatedBy)
+	} else {
+		_, err = ctx.repo.Db.Exec(query, req.ClientName, dbTime, req.Filter.CreatedBy, dbTime, req.Filter.CreatedBy)
+	}
 	if err != nil {
 		log.Println("Err AddClient :: ", err)
-		return false
+		return err
 	}
-	fmt.Println(id)
-	return true
+	return nil
 }
-func (ctx hierarchy) DropClient(req models.ReqGetListClient) (status bool) {
-	// query := ` delete from clients where id = $1`
-	// err := ctx.repo.Db.QueryRow(query, req.ID)
-	// if err.Err() != nil {
-	// 	log.Println("UpdateClient :: ", err.Err())
-	// 	return false
-	// }
-	// return true
-	var id int
-	t := time.Now()
-	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
-	query := `update clients set 
-				deleted_at = $1,
-				deleted_by =$2
-				where id = $3 returning id
-				`
-	err := ctx.repo.Db.QueryRow(query, dbTime, "sys", req.ID).Scan(&id)
+func (ctx hierarchy) DropClient(id int, tx *sql.DB) (err error) {
+	query := `delete from clients where id = $1`
+	if tx != nil {
+		_, err = tx.Exec(query, id)
+	} else {
+		_, err = ctx.repo.Db.Exec(query, id)
+	}
 	if err != nil {
-		log.Println("UpdateClient :: ", err.Error())
-		return false
+		log.Println("DropClient :: ", err.Error())
+		return err
 	}
-	log.Println("ID : ", id)
-	return true
+	return nil
 }
-func (ctx hierarchy) UpdateClient(req models.ReqGetListClient) (result models.ResGetClient, status bool) {
+func (ctx hierarchy) UpdateClient(req models.ReqGetClient, tx *sql.DB) (err error) {
 	t := time.Now()
+
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	query := `update clients set 
 				client_name = $1,
 				updated_at = $2,
 				updated_by =$3
-				where id = $4 returning id, client_name
+				where id = $4 
 				`
-	err := ctx.repo.Db.QueryRow(query, req.ClientName, dbTime, "sys", req.ID).Scan(&result.ID, &result.ClientName)
+	if tx != nil {
+		_, err = tx.Exec(query, req.ClientName, dbTime, "sys", req.ID)
+	} else {
+		_, err = ctx.repo.Db.Exec(query, req.ClientName, dbTime, "sys", req.ID)
+	}
 	if err != nil {
 		log.Println("UpdateClient :: ", err.Error())
-		return result, false
+		return err
 	}
-	return result, true
+	return nil
 }
-func (ctx hierarchy) GetListClientCount(req models.ReqGetListClient) (result int, status bool) {
-	if req.ClientName != "" && req.ID != 0 {
-		req.ID = 0
-	}
-	query := `select count(id) from clients where deleted_by='' `
+func (ctx hierarchy) GetCount(req models.ReqGetClient) (result int, err error) {
+	// if req.ClientName != "" && req.ID != 0 {
+	// 	req.ID = 0
+	// }
+	query := `select count(id) from clients where true `
 	if req.ClientName != "" {
 		query += ` and client_name = '` + req.ClientName + `' `
 	}
 	if req.ID != 0 {
 		query += ` and id = '` + strconv.Itoa(req.ID) + `' `
 	}
-	if req.StartDate != "" {
-		query += `and created_at between '` + req.StartDate + `' and '` + req.EndDate + `'`
-	}
 
-	err := ctx.repo.Db.QueryRow(query).Scan(&result)
-	fmt.Println(":::", query, err)
-
+	err = ctx.repo.Db.QueryRow(query).Scan(&result)
 	if err != nil {
-		log.Println("GetListClientCount :: ", err.Error())
-		return 0, false
+		log.Println("GetCount :: ", err.Error())
+		return 0, err
 	}
-	return result, true
+	return result, nil
 }
-func (ctx hierarchy) GetListClient(req models.ReqGetListClient) (result []models.ResGetClient, status bool) {
-	if req.ClientName != "" && req.ID != 0 {
-		req.ID = 0
-	}
-	query := `select ` + field + ` from clients where deleted_by='' `
+func (ctx hierarchy) GetClients(req models.ReqGetClient) (result []models.RespGetClient, err error) {
+	// if req.ClientName != "" && req.ID != 0 {
+	// 	req.ID = 0
+	// }
+	query := `select ` + field + ` from clients where true `
 	if req.ClientName != "" {
 		query += ` and client_name = '` + req.ClientName + `' `
 	}
 	if req.ID != 0 {
 		query += ` and id = '` + strconv.Itoa(req.ID) + `' `
 	}
-	if req.StartDate != "" {
-		query += ` and created_at between '` + req.StartDate + `' and '` + req.EndDate + `'`
-	}
-	if req.Limit != 0 {
-		query += ` limit  ` + strconv.Itoa(req.Limit) + `  offset  ` + strconv.Itoa(req.Offset)
+
+	if req.Filter.Limit != 0 {
+		query += ` limit  ` + strconv.Itoa(req.Filter.Limit) + `  offset  ` + strconv.Itoa(req.Filter.Offset)
 	} else {
-		if req.OrderBy != "" {
-			query += `  order by '` + req.OrderBy + `' asc`
+		if req.Filter.OrderBy != "" {
+			query += `  order by '` + req.Filter.OrderBy + `' asc`
 		} else {
 			query += `  order by client_name asc`
 		}
 	}
 	rows, err := ctx.repo.Db.Query(query)
-	fmt.Println(query)
 	if err != nil {
-		log.Println("GetListClient :: ", err.Error())
-		return result, false
+		log.Println("GetClients :: ", err.Error())
+		return result, err
 	}
-	result, status = DataRow(rows)
-	if !status {
-		return result, status
+	result, err = DataRow(rows)
+	if err != nil {
+		log.Println("GetClients :: ", err.Error())
+		return result, err
 	}
-	if len(result) == 0 {
-		log.Println("Data not found")
-		return result, false
-	}
-	return result, true
+	// if len(result) == 0 {
+	// 	log.Println("Data not found")
+	// 	return result, false
+	// }
+	return result, nil
 }
-func DataRow(rows *sql.Rows) (result []models.ResGetClient, status bool) {
+func DataRow(rows *sql.Rows) (result []models.RespGetClient, err error) {
 	for rows.Next() {
-		var val models.ResGetClient
+		var val models.RespGetClient
 		err := rows.Scan(
 			&val.ID,
 			&val.ClientName,
@@ -151,9 +137,31 @@ func DataRow(rows *sql.Rows) (result []models.ResGetClient, status bool) {
 		)
 		if err != nil {
 			log.Println("DataRow :: ", err.Error())
-			return result, false
+			return result, err
 		}
 		result = append(result, val)
 	}
-	return result, true
+	return result, nil
+}
+func (ctx hierarchy) GetClient(req models.ReqGetClient) (result models.RespGetClient, err error) {
+	query := `select ` + field + ` from clients where true `
+	if req.ClientName != "" {
+		query += ` and client_name = '` + req.ClientName + `' `
+	}
+	if req.ID != 0 {
+		query += ` and id = '` + strconv.Itoa(req.ID) + `' `
+	}
+	err = ctx.repo.Db.QueryRow(query).Scan(
+		&result.ID,
+		&result.ClientName,
+		&result.CreatedAt,
+		&result.CreatedBy,
+		&result.UpdatedAt,
+		&result.UpdatedBy,
+	)
+	if err != nil {
+		log.Println("GetClient :: ", err.Error())
+		return result, err
+	}
+	return result, nil
 }

@@ -19,5 +19,5 @@ const (
 	LAYOUT_TIMESTAMPTRX = "20060102"
 	// MONGO_COL_RESEND_EMAIL = "colVerificationEmailAttempts"
 	// KEY         = "MKPRetailDev2022"
-	KEY = "desabillerGOALSFOR2024"
+	KEY = "Des@Biller120824"
 )

@@ -1,10 +1,10 @@
 package hierarchyservice
 
 import (
+	"database/sql"
 	"desabiller/configs"
 	"desabiller/helpers"
 	"desabiller/models"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -12,45 +12,47 @@ import (
 	"github.com/labstack/echo"
 )
 
-func (svc HierarcyService) GetListClient(ctx echo.Context) error {
+func (svc HierarcyService) GetClients(ctx echo.Context) error {
 	var (
 		svcName = "GetListClient"
 		respSvc models.ResponseList
 	)
-	req := new(models.ReqGetListClient)
+	req := new(models.ReqGetClient)
 	//binding request
-	status, err := helpers.BindValidate(req, ctx)
+	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
-		log.Println("FAILLED BINDING", err.Error())
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "FAILLED BINDING"+err.Error(), nil)
-		return ctx.JSON(http.StatusNotFound, result)
+		log.Println("Err ", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		return ctx.JSON(http.StatusOK, result)
 	}
 	req.ClientName = strings.ToUpper(req.ClientName)
-	request := models.ReqGetListClient{
+	request := models.ReqGetClient{
 		ID:         req.ID,
 		ClientName: req.ClientName,
-		Limit:      req.Limit,
-		Offset:     req.Offset,
-		OrderBy:    req.OrderBy,
-		StartDate:  req.StartDate,
-		EndDate:    req.EndDate,
-		Username:   req.Username,
+		Filter: models.FilterReq{
+			Limit:     req.Filter.Limit,
+			Offset:    req.Filter.Offset,
+			OrderBy:   req.Filter.OrderBy,
+			CreatedAt: req.Filter.CreatedAt,
+			CreatedBy: req.Filter.CreatedBy,
+			UpdatedAt: req.Filter.UpdatedAt,
+			UpdatedBy: req.Filter.UpdatedBy,
+		},
 	}
-	count, _ := svc.service.ApiHierarchy.GetListClientCount(request)
-	if count == 0 {
-		log.Println("Error " + svcName + " // GetListClient :: Not found")
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, "34", "Data :: empty", nil)
-		return ctx.JSON(http.StatusNotFound, result)
+	count, err := svc.service.ApiHierarchy.GetCount(request)
+	if err != nil {
+		log.Println("Err "+svcName+" GetCount ", err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Data :: empty", nil)
+		return ctx.JSON(http.StatusOK, result)
 	}
-	resClient, status := svc.service.ApiHierarchy.GetListClient(request)
-	if !status {
-		log.Println("Error " + svcName + " // GetListClient :: Not found")
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, "34", "Data :: empty", nil)
-		return ctx.JSON(http.StatusNotFound, result)
+	resClient, err := svc.service.ApiHierarchy.GetClients(request)
+	if err != nil {
+		log.Println("Err ", svcName, " GetClients ", err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Data :: empty", nil)
+		return ctx.JSON(http.StatusOK, result)
 	}
 	respSvc.TotalData = count
 	respSvc.Data = resClient
-	fmt.Println(":::RESULT::: ", resClient)
 	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, "SUCCESS", respSvc)
 	return ctx.JSON(http.StatusOK, result)
 }
@@ -58,66 +60,80 @@ func (svc HierarcyService) AddClient(ctx echo.Context) error {
 	var (
 		svcName = "AddClient"
 	)
-	req := new(models.ReqGetListClient)
-	status, err := helpers.BindValidate(req, ctx)
+	req := new(models.ReqGetClient)
+	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
-		log.Println("FAILLED BINDING", err.Error())
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "FAILLED Validate"+err.Error(), nil)
-		return ctx.JSON(http.StatusBadRequest, result)
+		log.Println("Err ", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		return ctx.JSON(http.StatusOK, result)
 	}
 	if req.ClientName == "" {
-		log.Println("Error " + svcName + " // ClientName :: empty")
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "ClientName :: empty", nil)
-		return ctx.JSON(http.StatusBadRequest, result)
+		log.Println("Err ", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE,
+			configs.VALIDATE_ERROR_CODE,
+			"client name is empty",
+			nil)
+		return ctx.JSON(http.StatusOK, result)
 	}
 	req.ClientName = strings.ToUpper(req.ClientName)
-	request := models.ReqGetListClient{
-		ID:         req.ID,
+	request := models.ReqGetClient{
 		ClientName: req.ClientName,
-		Limit:      req.Limit,
-		Offset:     0,
-		OrderBy:    req.OrderBy,
-		StartDate:  req.StartDate,
-		EndDate:    req.EndDate,
-		Username:   req.Username,
+		Filter:     models.FilterReq{},
 	}
-	resClient, status := svc.service.ApiHierarchy.GetListClient(request)
-	fmt.Println("::::::", resClient)
-	if status {
-		for _, data := range resClient {
-			fmt.Println(":::", data.ClientName, req.ClientName)
-			if data.ClientName == req.ClientName {
-				log.Println("Error " + svcName + " // ClientName :: client name rejected")
-				result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "ClientName :: rejected", nil)
-				return ctx.JSON(http.StatusNotFound, result)
+	_, err = svc.service.ApiHierarchy.GetClient(request)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = svc.service.ApiHierarchy.AddClient(request, nil)
+			if err != nil {
+				log.Println("Err ", svcName, "AddClient", err)
+				result := helpers.ResponseJSON(configs.FALSE_VALUE,
+					configs.VALIDATE_ERROR_CODE,
+					"failed",
+					nil)
+				return ctx.JSON(http.StatusOK, result)
 			}
+		} else {
+			log.Println("Err ", svcName, "GetClient", err)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE,
+				configs.VALIDATE_ERROR_CODE,
+				"failed",
+				nil)
+			return ctx.JSON(http.StatusOK, result)
 		}
+	} else {
+		log.Println("Err ", svcName, "GetClient", " client name is exist")
+		result := helpers.ResponseJSON(configs.FALSE_VALUE,
+			configs.VALIDATE_ERROR_CODE,
+			"client name is exist",
+			nil)
+		return ctx.JSON(http.StatusOK, result)
 	}
-	status = svc.service.ApiHierarchy.AddClient(request)
-	if !status {
-		log.Println("Error " + svcName + " // AddClient :: failed")
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Data :: empty", nil)
-		return ctx.JSON(http.StatusNotFound, result)
-	}
-	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, "Success", nil)
+
+	result := helpers.ResponseJSON(configs.TRUE_VALUE,
+		configs.SUCCESS_CODE,
+		"Success",
+		nil)
 	return ctx.JSON(http.StatusOK, result)
 }
 func (svc HierarcyService) DropClient(ctx echo.Context) error {
 	var (
 		svcName = "DropClient"
 	)
-	req := new(models.ReqGetListClient)
-	status, err := helpers.BindValidate(req, ctx)
-	if !status {
-		log.Println("FAILLED BINDING", err.Error())
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "FAILLED Validate"+err.Error(), nil)
-		return ctx.JSON(http.StatusBadRequest, result)
+	req := new(models.ReqGetClient)
+	_, err := helpers.BindValidate(req, ctx)
+	if err != nil {
+		log.Println("Err ", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		return ctx.JSON(http.StatusOK, result)
 	}
-	status = svc.service.ApiHierarchy.DropClient(*req)
-	if !status {
-		log.Println("Error " + svcName + "// DropClient :: Failed")
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "FAILLED Validate", nil)
-		return ctx.JSON(http.StatusNotFound, result)
+	err = svc.service.ApiHierarchy.DropClient(req.ID, nil)
+	if err != nil {
+		log.Println("Err ", svcName, "DropClient", err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE,
+			configs.VALIDATE_ERROR_CODE,
+			"failed",
+			nil)
+		return ctx.JSON(http.StatusOK, result)
 	}
 	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, "Success", nil)
 	return ctx.JSON(http.StatusOK, result)
@@ -127,31 +143,23 @@ func (svc HierarcyService) UpdateClient(ctx echo.Context) error {
 		svcName = "UpdateClient"
 		// respSvc    models.ResponseList
 	)
-	req := new(models.ReqGetListClient)
-	status, err := helpers.BindValidate(req, ctx)
-	if !status {
-		log.Println("FAILLED BINDING", err.Error())
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "FAILLED Validate"+err.Error(), nil)
-		return ctx.JSON(http.StatusBadRequest, result)
+	req := new(models.ReqGetClient)
+	_, err := helpers.BindValidate(req, ctx)
+	if err != nil {
+		log.Println("Err ", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		return ctx.JSON(http.StatusOK, result)
 	}
 	req.ClientName = strings.ToUpper(req.ClientName)
-	update := models.ReqGetListClient{
-		ID:         req.ID,
-		ClientName: req.ClientName,
-		Limit:      req.Limit,
-		Offset:     req.Offset,
-		OrderBy:    req.OrderBy,
-		StartDate:  req.StartDate,
-		EndDate:    req.EndDate,
-		Username:   req.Username,
+	err = svc.service.ApiHierarchy.UpdateClient(*req, nil)
+	if err != nil {
+		log.Println("Err ", svcName, "UpdateClient", err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE,
+			configs.VALIDATE_ERROR_CODE,
+			"failed",
+			nil)
+		return ctx.JSON(http.StatusOK, result)
 	}
-	resUpd, status := svc.service.ApiHierarchy.UpdateClient(update)
-	if !status {
-		log.Println("Error " + svcName + " // UpdateClient :: ")
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "FAILLED Validate", nil)
-		return ctx.JSON(http.StatusNotFound, result)
-	}
-	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, "SUCCESS", resUpd)
+	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, "SUCCESS", nil)
 	return ctx.JSON(http.StatusOK, result)
-
 }

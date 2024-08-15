@@ -12,13 +12,13 @@ import (
 	"github.com/labstack/echo"
 )
 
-func (svc HierarcyService) GetMerchants(ctx echo.Context) error {
+func (svc HierarcyService) GetGroups(ctx echo.Context) error {
 	var (
-		svcName = "GetMerchants"
+		svcName = "GetGroups"
 		respSvc models.ResponseList
 	)
-	req := new(models.ReqGetMerchant)
-	//binding request
+	req := new(models.ReqGetGroup)
+	//binding *req
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
@@ -27,29 +27,28 @@ func (svc HierarcyService) GetMerchants(ctx echo.Context) error {
 	}
 	req.ClientName = strings.ToUpper(req.ClientName)
 	req.GroupName = strings.ToUpper(req.GroupName)
-	req.MerchantName = strings.ToUpper(req.MerchantName)
-	count, err := svc.service.ApiHierarchy.GetMerchantCount(*req)
+	count, err := svc.service.ApiHierarchy.GetGroupCount(*req)
 	if err != nil {
-		log.Println("Err "+svcName+" GetMerchantCount ", err)
+		log.Println("Err "+svcName+" GetGroupCount ", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Data :: empty", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	resMerchant, err := svc.service.ApiHierarchy.GetMerchants(*req)
+	resGroup, err := svc.service.ApiHierarchy.GetGroups(*req)
 	if err != nil {
-		log.Println("Err ", svcName, " GetMerchants ", err)
+		log.Println("Err ", svcName, " GetGroups ", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Data :: empty", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	respSvc.TotalData = count
-	respSvc.Data = resMerchant
+	respSvc.Data = resGroup
 	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, "SUCCESS", respSvc)
 	return ctx.JSON(http.StatusOK, result)
 }
-func (svc HierarcyService) AddMerchant(ctx echo.Context) error {
+func (svc HierarcyService) AddGroup(ctx echo.Context) error {
 	var (
-		svcName = "AddMerchant"
+		svcName = "AddGroup"
 	)
-	req := new(models.ReqGetMerchant)
+	req := new(models.ReqGetGroup)
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
@@ -72,24 +71,15 @@ func (svc HierarcyService) AddMerchant(ctx echo.Context) error {
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	if req.MerchantName == "" {
-		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.VALIDATE_ERROR_CODE,
-			"merchant name is empty",
-			nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
 	req.ClientName = strings.ToUpper(req.ClientName)
 	req.GroupName = strings.ToUpper(req.GroupName)
-	req.MerchantName = strings.ToUpper(req.MerchantName)
 
-	_, err = svc.service.ApiHierarchy.GetMerchant(*req)
+	_, err = svc.service.ApiHierarchy.GetGroup(*req)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			err = svc.service.ApiHierarchy.AddMerchant(*req)
+			err = svc.service.ApiHierarchy.AddGroup(*req, nil)
 			if err != nil {
-				log.Println("Err ", svcName, "AddMerchant", err)
+				log.Println("Err ", svcName, "AddGroup", err)
 				result := helpers.ResponseJSON(configs.FALSE_VALUE,
 					configs.VALIDATE_ERROR_CODE,
 					"failed",
@@ -97,7 +87,7 @@ func (svc HierarcyService) AddMerchant(ctx echo.Context) error {
 				return ctx.JSON(http.StatusOK, result)
 			}
 		} else {
-			log.Println("Err ", svcName, "GetMerchant", err)
+			log.Println("Err ", svcName, "GetGroup", err)
 			result := helpers.ResponseJSON(configs.FALSE_VALUE,
 				configs.VALIDATE_ERROR_CODE,
 				"failed",
@@ -105,10 +95,10 @@ func (svc HierarcyService) AddMerchant(ctx echo.Context) error {
 			return ctx.JSON(http.StatusOK, result)
 		}
 	} else {
-		log.Println("Err ", svcName, "GetMerchant", " Merchant is exist")
+		log.Println("Err ", svcName, "GetGroup", " client name is exist")
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
-			"Merchant name is exist",
+			"client name is exist",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
@@ -119,20 +109,20 @@ func (svc HierarcyService) AddMerchant(ctx echo.Context) error {
 		nil)
 	return ctx.JSON(http.StatusOK, result)
 }
-func (svc HierarcyService) DropMerchant(ctx echo.Context) error {
+func (svc HierarcyService) DropGroup(ctx echo.Context) error {
 	var (
-		svcName = "DropMerchant"
+		svcName = "DropGroup"
 	)
-	req := new(models.ReqGetMerchant)
+	req := new(models.ReqGetGroup)
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	err = svc.service.ApiHierarchy.DropMerchant(*req)
+	err = svc.service.ApiHierarchy.DropGroup(req.ID)
 	if err != nil {
-		log.Println("Err ", svcName, "DropMerchant", err)
+		log.Println("Err ", svcName, "DropGroup", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
 			"failed",
@@ -142,12 +132,12 @@ func (svc HierarcyService) DropMerchant(ctx echo.Context) error {
 	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, "Success", nil)
 	return ctx.JSON(http.StatusOK, result)
 }
-func (svc HierarcyService) UpdateMerchant(ctx echo.Context) error {
+func (svc HierarcyService) UpdateGroup(ctx echo.Context) error {
 	var (
-		svcName = "UpdateMerchant"
+		svcName = "UpdateGroup"
 		// respSvc    models.ResponseList
 	)
-	req := new(models.ReqGetMerchant)
+	req := new(models.ReqGetGroup)
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
@@ -156,11 +146,10 @@ func (svc HierarcyService) UpdateMerchant(ctx echo.Context) error {
 	}
 	req.ClientName = strings.ToUpper(req.ClientName)
 	req.GroupName = strings.ToUpper(req.GroupName)
-	req.MerchantName = strings.ToUpper(req.MerchantName)
 
-	_, err = svc.service.ApiHierarchy.UpdateMerchant(*req)
+	_, err = svc.service.ApiHierarchy.UpdateGroup(*req)
 	if err != nil {
-		log.Println("Err ", svcName, "UpdateMerchant", err)
+		log.Println("Err ", svcName, "UpdateGroup", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
 			"failed",

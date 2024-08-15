@@ -4,60 +4,48 @@ import (
 	"database/sql"
 	"desabiller/configs"
 	"desabiller/models"
-	"fmt"
 	"log"
 	"strconv"
 	"time"
 )
 
-func (ctx hierarchy) DropMerchant(req models.ReqGetListMerchant) (status bool) {
-	// query := ` delete from merchants where id = $1`
-	// err := ctx.repo.Db.QueryRow(query, req.ID)
-	// if err != nil {
-	// 	log.Println("UpdateMerchant :: ", err.Err())
-	// 	return false
-	// }
-	// return true
-	t := time.Now()
-
-	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
-	var id int
-	query := `update merchants set 
-				deleted_at = $1,
-				deleted_by =$2
-				where id = $3 returning id
-				`
-	err := ctx.repo.Db.QueryRow(query, dbTime, "sys", req.ID).Scan(&id)
+func (ctx hierarchy) DropMerchant(req models.ReqGetMerchant) (err error) {
+	query := ` delete from merchants where id = $1`
+	_, err = ctx.repo.Db.Exec(query, req.ID)
 	if err != nil {
-		log.Println("UpdateMerchant :: ", err.Error())
-		return false
+		log.Println("UpdateMerchant :: ", err)
+		return err
 	}
-	return true
+	return nil
 }
-func (ctx hierarchy) UpdateMerchant(req models.ReqGetListMerchant) (result models.ResGetMerchant, status bool) {
+func (ctx hierarchy) UpdateMerchant(req models.ReqGetMerchant) (result models.RespGetMerchant, err error) {
 	t := time.Now()
-
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	query := `update merchants set 
 				merchant_name = $1,
-				updated_at = $2,
-				updated_by =$3
-				where id = $4 returning id, merchant_name
+				group_id=$2,
+				updated_at = $3,
+				updated_by =$4
+				where id = $5
 				`
-	err := ctx.repo.Db.QueryRow(query, req.MerchantName, dbTime, req.Username, req.ID).Scan(&result.ID, &result.MerchantName)
+	_, err = ctx.repo.Db.Exec(query, req.MerchantName, req.GroupId, dbTime, req.Filter.UpdatedBy, req.ID)
 	if err != nil {
 		log.Println("UpdateMerchant :: ", err.Error())
-		return result, false
+		return result, err
 	}
-	return result, true
+	return result, nil
 }
-func (ctx hierarchy) GetListMerchantCount(req models.ReqGetListMerchant) (result int, status bool) {
+func (ctx hierarchy) GetMerchantCount(req models.ReqGetMerchant) (result int, err error) {
 	query := `select count(a.id)
-from merchants as a
-join clients as b on a.client_id=b.id
-where a.deleted_by=''`
+	from merchants as a
+	join groups as b on a.group_id=b.id
+	join clients as c on b.client_id=c.id
+	where true `
 	if req.ClientId != 0 {
-		query += ` and a.client_id = ` + strconv.Itoa(req.ClientId)
+		query += ` and c.id = ` + strconv.Itoa(req.ClientId)
+	}
+	if req.GroupId != 0 {
+		query += ` and b.id = ` + strconv.Itoa(req.GroupId)
 	}
 	if req.MerchantName != "" {
 		query += ` and a.merchant_name = '` + req.MerchantName + `' `
@@ -65,31 +53,33 @@ where a.deleted_by=''`
 	if req.ID != 0 {
 		query += ` and a.id = ` + strconv.Itoa(req.ID)
 	}
-	if req.StartDate != "" {
-		query += ` and a.created_at between '` + req.StartDate + `' and '` + req.EndDate + `'`
-	}
-	err := ctx.repo.Db.QueryRow(query).Scan(&result)
-	fmt.Println(":::", query)
+	err = ctx.repo.Db.QueryRow(query).Scan(&result)
 	if err != nil {
 		log.Println("GetListMerchantCount :: ", err.Error())
-		return 0, false
+		return 0, err
 	}
-	return result, true
+	return result, nil
 }
-func (ctx hierarchy) GetListMerchant(req models.ReqGetListMerchant) (result []models.ResGetMerchant, status bool) {
+func (ctx hierarchy) GetMerchants(req models.ReqGetMerchant) (result []models.RespGetMerchant, err error) {
 	query := `select 
 	a.id,
 	a.merchant_name,
+	b.id,
+	b.group_name,
+	c.id,
+	c.client_name,
 	a.created_at,
 	a.created_by,
 	a.updated_at,
-	a.updated_by,
-	a.client_id,
-	b.client_name from merchants as a
-	join clients as b on a.client_id=b.id
-	where a.deleted_by='' `
+	a.updated_by from merchants as a
+	join groups as b on a.group_id=b.id
+	join clients as c on b.client_id=c.id
+	where true `
 	if req.ClientId != 0 {
-		query += ` and a.client_id = ` + strconv.Itoa(req.ClientId)
+		query += ` and c.id = ` + strconv.Itoa(req.ClientId)
+	}
+	if req.GroupId != 0 {
+		query += ` and b.id = ` + strconv.Itoa(req.GroupId)
 	}
 	if req.MerchantName != "" {
 		query += ` and a.merchant_name = '` + req.MerchantName + `' `
@@ -97,75 +87,129 @@ func (ctx hierarchy) GetListMerchant(req models.ReqGetListMerchant) (result []mo
 	if req.ID != 0 {
 		query += ` and a.id = ` + strconv.Itoa(req.ID)
 	}
-	if req.StartDate != "" {
-		query += ` and a.created_at between '` + req.StartDate + `' and '` + req.EndDate + `'`
-	}
-	if req.Limit != 0 {
-		query += ` limit  ` + strconv.Itoa(req.Limit) + `  offset  ` + strconv.Itoa(req.Offset)
+	// if req.StartDate != "" {
+	// 	query += ` and a.created_at between '` + req.StartDate + `' and '` + req.EndDate + `'`
+	// }
+	if req.Filter.Limit != 0 {
+		query += ` limit  ` + strconv.Itoa(req.Filter.Limit) + `  offset  ` + strconv.Itoa(req.Filter.Offset)
 	} else {
-		if req.OrderBy != "" {
-			query += `  order by a.` + req.OrderBy + ` asc`
+		if req.Filter.OrderBy != "" {
+			query += `  order by a.` + req.Filter.OrderBy + ` asc`
 		} else {
 			query += `  order by a.merchant_name asc`
 		}
 	}
-	fmt.Println("::", query)
 	rows, err := ctx.repo.Db.Query(query)
-	fmt.Println(":::", query)
 	if err != nil {
 		log.Println("GetListMerchant :: ", err.Error())
-		return result, false
+		return result, err
 	}
-	result, status = DataRowMerchant(rows)
-	if !status {
-		return result, status
+	result, err = DataRowMerchant(rows)
+	if err != nil {
+		return result, err
 	}
-	if len(result) == 0 {
-		log.Println("Data not found")
-		return result, false
-	}
-	return result, true
+	// if len(result) == 0 {
+	// 	log.Println("Data not found")
+	// 	return result,
+	// }
+	return result, nil
 }
-func DataRowMerchant(rows *sql.Rows) (result []models.ResGetMerchant, status bool) {
+func DataRowMerchant(rows *sql.Rows) (result []models.RespGetMerchant, err error) {
 	for rows.Next() {
-		var val models.ResGetMerchant
+		var val models.RespGetMerchant
 		err := rows.Scan(
 			&val.ID,
 			&val.MerchantName,
+			&val.GroupId,
+			&val.GroupName,
+			&val.ClientId,
+			&val.ClientName,
 			&val.CreatedAt,
 			&val.CreatedBy,
 			&val.UpdatedAt,
 			&val.UpdatedBy,
-			&val.ClientId,
-			&val.ClientName,
 		)
 		if err != nil {
 			log.Println("DataRow :: ", err.Error())
-			return result, false
+			return result, err
 		}
 		result = append(result, val)
 	}
-	return result, true
+	return result, nil
 }
-func (ctx hierarchy) AddMerchant(req models.ReqGetListMerchant) (status bool) {
+func (ctx hierarchy) AddMerchant(req models.ReqGetMerchant) (err error) {
 	t := time.Now()
-	id := 0
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	query := `insert into merchants (
-merchant_name,
-client_id,
-created_at,
-created_by,
-updated_at,
-updated_by
-) values ($1,$2,$3,$4,$5,$6) returning id
-`
-	err := ctx.repo.Db.QueryRow(query, req.MerchantName, req.ClientId, dbTime, "sys", dbTime, "sys").Scan(&id)
-	// fmt.Println("::::", query)
+				merchant_name,
+				group_id,
+				created_at,
+				created_by,
+				updated_at,
+				updated_by
+				) values ($1,$2,$3,$4,$5,$6) 
+				`
+	_, err = ctx.repo.Db.Exec(query, req.MerchantName, req.GroupId, dbTime, "sys", dbTime, "sys")
 	if err != nil {
 		log.Println("Err AddMerchant :: ", err)
-		return false
+		return err
 	}
-	fmt.Println(id)
-	return true
+	return nil
+}
+func (ctx hierarchy) GetMerchant(req models.ReqGetMerchant) (result models.RespGetMerchant, err error) {
+	query := `select 
+	a.id,
+	a.merchant_name,
+	b.id,
+	b.group_name,
+	c.id,
+	c.client_name,
+	a.created_at,
+	a.created_by,
+	a.updated_at,
+	a.updated_by from merchants as a
+	join groups as b on a.group_id=b.id
+	join clients as c on b.client_id=c.id
+	where true `
+	if req.ClientId != 0 {
+		query += ` and c.id = ` + strconv.Itoa(req.ClientId)
+	}
+	if req.GroupId != 0 {
+		query += ` and b.id = ` + strconv.Itoa(req.GroupId)
+	}
+	if req.MerchantName != "" {
+		query += ` and a.merchant_name = '` + req.MerchantName + `' `
+	}
+	if req.ID != 0 {
+		query += ` and a.id = ` + strconv.Itoa(req.ID)
+	}
+	// if req.StartDate != "" {
+	// 	query += ` and a.created_at between '` + req.StartDate + `' and '` + req.EndDate + `'`
+	// }
+	if req.Filter.Limit != 0 {
+		query += ` limit  ` + strconv.Itoa(req.Filter.Limit) + `  offset  ` + strconv.Itoa(req.Filter.Offset)
+	} else {
+		if req.Filter.OrderBy != "" {
+			query += `  order by a.` + req.Filter.OrderBy + ` asc`
+		} else {
+			query += `  order by a.merchant_name asc`
+		}
+	}
+	err = ctx.repo.Db.QueryRow(query).Scan(
+		&result.ID,
+		&result.MerchantName,
+		&result.GroupId,
+		&result.GroupName,
+		&result.ClientId,
+		&result.ClientName,
+		&result.CreatedAt,
+		&result.CreatedBy,
+		&result.UpdatedAt,
+		&result.UpdatedBy,
+	)
+	if err != nil {
+		log.Println("GetListMerchant :: ", err.Error())
+		return result, err
+	}
+	return result, nil
 }
