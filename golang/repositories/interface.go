@@ -34,95 +34,18 @@ type Hierarchyrepo interface {
 	GetMerchantOutlets(req models.ReqGetMerchantOutlet) (result []models.RespGetMerchantOutlet, err error)
 	AddMerchantOutlet(req models.ReqGetMerchantOutlet) (err error)
 	GetMerchantOutlet(req models.ReqGetMerchantOutlet) (result models.RespGetMerchantOutlet, err error)
-	//merchant
-	// AddMerchant(req models.ReqGetListMerchant) (status bool)
-	// DropMerchant(req models.ReqGetListMerchant) (status bool)
-	// UpdateMerchant(req models.ReqGetListMerchant) (result models.ResGetMerchant, status bool)
-	// GetListMerchant(req models.ReqGetListMerchant) (result []models.ResGetMerchant, status bool)
-	// GetListMerchantCount(req models.ReqGetListMerchant) (result int, status bool)
-	// //merchantOutlet
-	// DropMerchantOutlet(req models.ReqGetListMerchantOutlet) (status bool)
-	// UpdateMerchantOutlet(req models.ReqGetListMerchantOutlet) (result models.ResGetMerchantOutlet, status bool)
-	// GetListMerchantOutletCount(req models.ReqGetListMerchantOutlet) (result int, status bool)
-	// GetListMerchantOutlet(req models.ReqGetListMerchantOutlet) (result []models.ResGetMerchantOutlet, status bool)
-	// AddMerchantOutlet(req models.ReqGetListMerchantOutlet) (status bool)
-	// //useroutlet
-	// DropUserOutlet(req models.ReqGetListUserOutlet) (status bool)
-	// UpdateUserOutlet(req models.ReqGetListUserOutlet) (result models.ResGetUserOutlet, status bool)
-	// GetListUserOutletCount(req models.ReqGetListUserOutlet) (result int, status bool)
-	// GetListUserOutlet(req models.ReqGetListUserOutlet) (result []models.ResGetUserOutlet, status bool)
-	// AddUserOutlet(req models.ReqGetListUserOutlet) (status bool)
-	// //outletDevice
-	// DropOutletDevice(req models.ReqGetListOutletDevice) (status bool)
-	// UpdateOutletDevice(req models.ReqGetListOutletDevice) (result models.ResGetOutletDevice, status bool)
-	// GetListOutletDeviceCount(req models.ReqGetListOutletDevice) (result int, status bool)
-	// GetListOutletDevice(req models.ReqGetListOutletDevice) (result []models.ResGetOutletDevice, status bool)
-	// AddOutletDevice(req models.ReqGetListOutletDevice) (status bool)
-
-	// GetListUser(req models.ReqUserList) (resp []models.RespUserList, err error, status bool)
-	// GetHierarchy(mID int) (result models.RespHierarchy, status bool)
-	// GetHierarchyByOutlet(oUID int) (result models.RespHierarchy, status bool)
 }
 type ProductRepo interface {
-	//productType
-	// GetListProductType() (result []models.ListProductType, err error)
-	// //productCategory
-	// GetListProductCategory(req models.ReqGetListProductCategory) (result []models.ResGetProductCategory, status bool)
-	// AddProductCategory(req models.ReqGetListProductCategory) (result models.ResGetProductCategory, status bool)
-	// UpdateProductCategory(req models.ReqGetListProductCategory) (result models.ResGetProductCategory, status bool)
-	// DropProductCategory(req models.ReqGetListProductCategory) (status bool)
-	// //productBillerProvider
-	// AddProductBillerProvider(req models.ReqGetListProductBillerProvider) (result models.ResGetProductBillerProvider, status bool)
-	// GetListProductBillerProvider(req models.ReqGetListProductBillerProvider) (result []models.ResGetProductBillerProvider, status bool)
-	// UpdateProductBillerProvider(req models.ReqGetListProductBillerProvider) (result models.ResGetProductBillerProvider, status bool)
-	// DropProductBillerProvider(req models.ReqGetListProductBillerProvider) (status bool)
-	// //productBiller
-	// AddProductBiller(req models.ReqGetListProductBiller) (result models.ResGetProductBiller, status bool)
-	// GetListProductBiller(req models.ReqGetListProductBiller) (result []models.ResGetProductBiller, status bool)
-	// UpdateProductBiller(req models.ReqGetListProductBiller) (result models.ResGetProductBiller, status bool)
-	// DropProductBiller(req models.ReqGetListProductBiller) (status bool)
-	// //productPos
-	// AddProductPos(req models.ReqGetListProductPos) (result models.ResGetProductPos, status bool)
-	// GetListProductPos(req models.ReqGetListProductPos) (result []models.ResGetProductPos, status bool)
-	// UpdateProductPos(req models.ReqGetListProductPos) (result models.ResGetProductPos, status bool)
-	// DropProductPos(req models.ReqGetListProductPos) (status bool)
-	// GetListProductPosMany(productId []int, merchantId int) (result []models.ResGetProductPos, status bool)
-	// //segment
-	// AddSegment(req models.ReqListSegment) (result models.ResListSegment, status bool)
-	// GetListSegment(req models.ReqListSegment) (result []models.ResListSegment, status bool)
-	// UpdateSegment(req models.ReqListSegment) (result models.ResListSegment, status bool)
-	// DropSegment(req models.ReqListSegment) (status bool)
-	// // segmentproduct
-	// AddSegmentProduct(req models.ReqListSegmentProduct) (result models.ResListSegmentProduct, status bool)
-	// GetListSegmentProduct(req models.ReqListSegmentProduct) (result []models.ResListSegmentProduct, status bool)
-	// UpdateSegmentProduct(req models.ReqListSegmentProduct) (result models.ResListSegmentProduct, status bool)
-	// DropSegmentProduct(req models.ReqListSegmentProduct) (status bool)
+	AddProvider(req models.ReqGetProvider) (err error)
+	GetProviders(req models.ReqGetProvider) (result []models.RespGetProvider, err error)
+	UpdateProvider(req models.ReqGetProvider) (result models.RespGetProvider, err error)
+	DropProvider(req models.ReqGetProvider) (err error)
+	GetProvider(req models.ReqGetProvider) (result models.RespGetProvider, err error)
+	GetProviderCount(req models.ReqGetProvider) (result int, err error)
 }
 type PaymentRepo interface {
-	//payment
-	// GetPaymentMethod(req models.ReqGetListPaymentMethod) (result models.ResPaymentMethod, status bool)
-	// AddPaymentMethod(req models.ReqGetListPaymentMethod) (result models.ResPaymentMethod, status bool)
-	// UpdatePaymentMethod(req models.ReqGetListPaymentMethod) (result models.ResPaymentMethod, status bool)
-	// DropPaymentMethod(id int) (status bool)
-	// GetListPaymentMethod(req models.ReqGetListPaymentMethod) (result []models.ResPaymentMethod, status bool)
-
-	// //payment category
-	// GetPaymentMethodCategory(req models.ReqGetListPaymentMethodCategory) (result models.ResPaymentMethodCategory, status bool)
-	// AddPaymentMethodCategory(req models.ReqGetListPaymentMethodCategory) (result models.ResPaymentMethodCategory, status bool)
-	// UpdatePaymentMethodCategory(req models.ReqGetListPaymentMethodCategory) (result models.ResPaymentMethodCategory, status bool)
-	// DropPaymentMethodCategory(id int) (status bool)
-	// GetListPaymentMethodCategory(req models.ReqGetListPaymentMethodCategory) (result []models.ResPaymentMethodCategory, status bool)
 }
 type TrxRepo interface {
-	// GetTrxListPos(req models.ReqTrx, table string) (result []models.RespTrxList, status bool)
-	// GetTrxPos(req models.ReqTrx, table string) (result models.RespTrxList, status bool)
-	// InsertTrxPos(req models.ReqInsertTrx, table string, tx *sql.Tx) (id int, status bool)
-	// UpdateTrxPos(req models.ReqUpdateTrx, table string) (status bool)
-	// GetTrxListBiller(req models.ReqTrx, table string) (result []models.RespTrxList, status bool)
-	// GetTrxBiller(req models.ReqTrx, table string) (result models.RespTrxList, status bool)
-	// InsertTrxBiller(req models.ReqInsertTrx, table string) (id int, status bool)
-	// UpdateTrxBiller(req models.ReqUpdateTrx, table string) (status bool)
-	// InsertTrxDetails(req []models.ReqInsertTrxDetails, tx *sql.Tx) (status bool)
 }
 type NoTrxGenerator interface {
 	GetLastTrxNo() (noTrx string, status bool)

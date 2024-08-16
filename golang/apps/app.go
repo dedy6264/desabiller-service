@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"desabiller/repositories"
 	hierarchyrepo "desabiller/repositories/hierarchyRepo"
+	productrepo "desabiller/repositories/productRepo"
 	"desabiller/services"
 )
 
@@ -11,7 +12,7 @@ func SetupApp(DB *sql.DB, repo repositories.Repositories) services.UsecaseServic
 
 	// transactionRepo := transactionRepository.NewTransactionRepository(repo)
 	hierarchyRepo := hierarchyrepo.NewHierarcyRepo(repo)
-	// productRepo := productrepo.NewProductRepo(repo)
+	productRepo := productrepo.NewProductRepo(repo)
 	// trxRepo := trxrepo.NewTrxRepo(repo)
 	// trxNoRepo := trxgeneratorrepo.NewTrxNoGenerator(repo)
 	// paymentRepo := paymentrepo.NewPaymentRepo(repo)
@@ -23,7 +24,7 @@ func SetupApp(DB *sql.DB, repo repositories.Repositories) services.UsecaseServic
 	usecaseSvc := services.NewUsecaseService(
 		DB,
 		hierarchyRepo,
-		// productRepo,
+		productRepo,
 		// trxRepo,
 		// trxNoRepo,
 		// paymentRepo,

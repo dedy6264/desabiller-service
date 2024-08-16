@@ -12,7 +12,7 @@ import (
 	// merchantservicego "desabiller/services/nHierarchyService/merchantService"
 	// useroutlettservicego "desabiller/services/nHierarchyService/userOutletService"
 	// nuserdashboardservice "desabiller/services/nUserDashboardService"
-	// productservice "desabiller/services/productService"
+	providerservice "desabiller/services/providerServices"
 	// trxservice "desabiller/services/trxService"
 
 	"github.com/labstack/echo"
@@ -20,7 +20,7 @@ import (
 )
 
 func RouteApi(e echo.Echo, service services.UsecaseService) {
-	// productSvc := productservice.ApiProduct(service)
+	providerSvc := providerservice.NewApiProviderServices(service)
 	// admSvc := administrationservice.ApiAdministration(service)
 	hierachySvc := hierarchyservicego.ApiHierarchy(service)
 	aa := e.Group("/client")
@@ -75,6 +75,19 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 	dd.POST("/gets", hierachySvc.GetMerchantOutlets)
 	dd.POST("/drop", hierachySvc.DropMerchantOutlet)
 	dd.POST("/update", hierachySvc.UpdateMerchantOutlet)
+	ee := e.Group("/provider")
+	ee.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+		log.Println("[Start]")
+		log.Println("EndPoint :", c.Path())
+		log.Println("Header :", c.Request().Header)
+		log.Println("Body :", string(reqBody))
+		log.Println("Response :", string(resBody))
+		log.Println("[End]")
+	}))
+	ee.POST("/add", providerSvc.AddProvider)
+	ee.POST("/gets", providerSvc.GetProviders)
+	ee.POST("/drop", providerSvc.DropProvider)
+	ee.POST("/update", providerSvc.UpdateProvider)
 	// trxSvc := trxservice.NewApiTrxService(service)
 	// // nHierachySvc := nhierarchyservice.NewApiNHierarchyServices(service)
 	// nClientSvc := clientservicego.NewApiNHierarchyClientServices(service)

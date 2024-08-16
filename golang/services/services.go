@@ -10,7 +10,7 @@ type UsecaseService struct {
 	// cron   *cron.Cron
 	// GenAutonumRepo                        genautonum.GenerateAutonumberRepository
 	ApiHierarchy repositories.Hierarchyrepo
-	// ApiProduct   repositories.ProductRepo
+	ApiProduct   repositories.ProductRepo
 	// ApiTrx       repositories.TrxRepo
 	// ApiNoTrx     repositories.NoTrxGenerator
 	// ApiPayment   repositories.PaymentRepo
@@ -22,7 +22,7 @@ type UsecaseService struct {
 func NewUsecaseService(
 	repoDB *sql.DB,
 	ApiHierarchyRepo repositories.Hierarchyrepo,
-	// ApiProduct repositories.ProductRepo,
+	ApiProduct repositories.ProductRepo,
 	// ApiTrx repositories.TrxRepo,
 	// ApiNoTrx repositories.NoTrxGenerator,
 	// ApiPayment repositories.PaymentRepo,
@@ -35,7 +35,7 @@ func NewUsecaseService(
 	return UsecaseService{
 		RepoDB:       repoDB,
 		ApiHierarchy: ApiHierarchyRepo,
-		// ApiProduct:    ApiProduct,
+		ApiProduct:   ApiProduct,
 		// ApiTrx:        ApiTrx,
 		// ApiNoTrx:      ApiNoTrx,
 		// ApiPayment:    ApiPayment,
