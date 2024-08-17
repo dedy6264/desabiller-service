@@ -15,6 +15,20 @@ type (
 		CreatedBy    string `json:"createdBy"`
 		UpdatedBy    string `json:"updatedBy"`
 	}
+	ReqGetProductClan struct {
+		ID           int       `json:"id"`
+		ProductClanName string    `json:"productClanName"`
+		Filter       FilterReq `json:"filter"`
+	}
+	/////
+	RespGetProductClan struct {
+		ID           int    `json:"id"`
+		ProductClanName string `json:"productClanName"`
+		CreatedAt    string `json:"createdAt"`
+		UpdatedAt    string `json:"updatedAt"`
+		CreatedBy    string `json:"createdBy"`
+		UpdatedBy    string `json:"updatedBy"`
+	}
 	// ResGetProductCategory struct {
 	// 	ID                  int    `json:"id"`
 	// 	ProductCategoryName string `json:"productCategoryName"`

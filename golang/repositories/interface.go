@@ -42,6 +42,13 @@ type ProductRepo interface {
 	DropProvider(req models.ReqGetProvider) (err error)
 	GetProvider(req models.ReqGetProvider) (result models.RespGetProvider, err error)
 	GetProviderCount(req models.ReqGetProvider) (result int, err error)
+
+		 AddClan(req models.ReqGetProductClanClan) (err error) 
+	 GetProductClans(req models.ReqGetProductClan) (result []models.RespGetProductClan, err error) 
+	 UpdateProductClan(req models.ReqGetProductClan) (result models.RespGetProductClan, err error) 
+	 DropProductClan(req models.ReqGetProductClan) (err error) 
+	 GetProductClanCount(req models.ReqGetProductClan) (result int, err error) 
+	 GetProductClan(req models.ReqGetProductClan) (result models.RespGetProductClan, err error) 
 }
 type PaymentRepo interface {
 }
