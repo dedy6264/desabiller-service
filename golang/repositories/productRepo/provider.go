@@ -63,6 +63,7 @@ from providers where true
 		log.Println("Err GetProviders ", err.Error())
 		return result, err
 	}
+	defer rows.Close()
 	var val models.RespGetProvider
 	for rows.Next() {
 		err := rows.Scan(

@@ -144,6 +144,7 @@ func (ctx hierarchy) GetGroups(req models.ReqGetGroup) (result []models.RespGetG
 		log.Println("GetListMerchant :: ", err.Error())
 		return result, err
 	}
+	defer rows.Close()
 	result, err = DataRowGroup(rows)
 	if err != nil {
 		return result, err

@@ -11,56 +11,33 @@ import (
 	"github.com/labstack/echo"
 )
 
-func (svc providerServices) AddProvider(ctx echo.Context) error {
+func (svc providerServices) AddProductType(ctx echo.Context) error {
 	var (
-		svcName = "AddProvider"
+		svcName = "AddProductType"
 	)
-	req := new(models.ReqGetProvider)
+	req := new(models.ReqGetProductType)
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	if req.ProviderName == "" {
+	if req.ProductTypeName == "" {
 		log.Println("Err ", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
-			"Provider name is empty",
+			"Product Type name is empty",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	req.ProviderName = strings.ToUpper(req.ProviderName)
-	err = svc.services.ApiProduct.AddProvider(*req)
+	req.ProductTypeName = strings.ToUpper(req.ProductTypeName)
+	_, err = svc.services.ApiProduct.AddProductType(*req)
 	if err != nil {
-		log.Println("Err ", svcName, "AddProvider", err)
+		log.Println("Err ", svcName, "AddProductType", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
 			"failed",
 			nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
-	result := helpers.ResponseJSON(configs.TRUE_VALUE,
-		configs.SUCCESS_CODE,
-		"Success",
-		nil)
-	return ctx.JSON(http.StatusOK, result)
-}
-func (svc providerServices) DropProvider(ctx echo.Context) error {
-	var (
-		svcName = "DropProvider"
-	)
-	req := new(models.ReqGetProvider)
-	_, err := helpers.BindValidate(req, ctx)
-	if err != nil {
-		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
-	err = svc.services.ApiProduct.DropProvider(*req)
-	if err != nil {
-		log.Println("Err ", svcName, "DropProvider", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 
@@ -70,51 +47,27 @@ func (svc providerServices) DropProvider(ctx echo.Context) error {
 		nil)
 	return ctx.JSON(http.StatusOK, result)
 }
-func (svc providerServices) UpdateProvider(ctx echo.Context) error {
+func (svc providerServices) GetProductTypes(ctx echo.Context) error {
 	var (
-		svcName = "UpdateProvider"
-	)
-	req := new(models.ReqGetProvider)
-	_, err := helpers.BindValidate(req, ctx)
-	if err != nil {
-		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
-	req.ProviderName = strings.ToUpper(req.ProviderName)
-	_, err = svc.services.ApiProduct.UpdateProvider(*req)
-	if err != nil {
-		log.Println("Err ", svcName, "UpdateProvider", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
-	result := helpers.ResponseJSON(configs.TRUE_VALUE,
-		configs.SUCCESS_CODE,
-		"Success",
-		nil)
-	return ctx.JSON(http.StatusOK, result)
-}
-func (svc providerServices) GetProviders(ctx echo.Context) error {
-	var (
-		svcName = "GetProviders"
+		svcName = "GetProductTypes"
 		respSvc models.ResponseList
 	)
-	req := new(models.ReqGetProvider)
+	req := new(models.ReqGetProductType)
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	count, err := svc.services.ApiProduct.GetProviderCount(*req)
+	count, err := svc.services.ApiProduct.GetProductTypeCount(*req)
 	if err != nil {
-		log.Println("Err ", svcName, "GetProviderCount", err)
+		log.Println("Err ", svcName, "GetProductTypeCount", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	resp, err := svc.services.ApiProduct.GetProviders(*req)
+	resp, err := svc.services.ApiProduct.GetProductTypes(*req)
 	if err != nil {
-		log.Println("Err ", svcName, "GetProviders", err)
+		log.Println("Err ", svcName, "GetProductTypes", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
@@ -124,5 +77,53 @@ func (svc providerServices) GetProviders(ctx echo.Context) error {
 		configs.SUCCESS_CODE,
 		"Success",
 		respSvc)
+	return ctx.JSON(http.StatusOK, result)
+}
+func (svc providerServices) DropProductType(ctx echo.Context) error {
+	var (
+		svcName = "DropProductType"
+	)
+	req := new(models.ReqGetProductType)
+	_, err := helpers.BindValidate(req, ctx)
+	if err != nil {
+		log.Println("Err ", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
+	err = svc.services.ApiProduct.DropProductType(*req)
+	if err != nil {
+		log.Println("Err ", svcName, "DropProductType", err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "failed", nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
+
+	result := helpers.ResponseJSON(configs.TRUE_VALUE,
+		configs.SUCCESS_CODE,
+		"Success",
+		nil)
+	return ctx.JSON(http.StatusOK, result)
+}
+func (svc providerServices) UpdateProductType(ctx echo.Context) error {
+	var (
+		svcName = "UpdateProductType"
+	)
+	req := new(models.ReqGetProductType)
+	_, err := helpers.BindValidate(req, ctx)
+	if err != nil {
+		log.Println("Err ", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
+	req.ProductTypeName = strings.ToUpper(req.ProductTypeName)
+	_, err = svc.services.ApiProduct.UpdateProductType(*req)
+	if err != nil {
+		log.Println("Err ", svcName, "UpdateProductType", err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "failed", nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
+	result := helpers.ResponseJSON(configs.TRUE_VALUE,
+		configs.SUCCESS_CODE,
+		"Success",
+		nil)
 	return ctx.JSON(http.StatusOK, result)
 }

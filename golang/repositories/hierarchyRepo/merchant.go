@@ -104,6 +104,7 @@ func (ctx hierarchy) GetMerchants(req models.ReqGetMerchant) (result []models.Re
 		log.Println("GetListMerchant :: ", err.Error())
 		return result, err
 	}
+	defer rows.Close()
 	result, err = DataRowMerchant(rows)
 	if err != nil {
 		return result, err

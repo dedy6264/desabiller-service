@@ -16,18 +16,64 @@ type (
 		UpdatedBy    string `json:"updatedBy"`
 	}
 	ReqGetProductClan struct {
-		ID           int       `json:"id"`
+		ID              int       `json:"id"`
 		ProductClanName string    `json:"productClanName"`
-		Filter       FilterReq `json:"filter"`
+		Filter          FilterReq `json:"filter"`
 	}
 	/////
 	RespGetProductClan struct {
-		ID           int    `json:"id"`
+		ID              int    `json:"id"`
 		ProductClanName string `json:"productClanName"`
-		CreatedAt    string `json:"createdAt"`
-		UpdatedAt    string `json:"updatedAt"`
-		CreatedBy    string `json:"createdBy"`
-		UpdatedBy    string `json:"updatedBy"`
+		CreatedAt       string `json:"createdAt"`
+		UpdatedAt       string `json:"updatedAt"`
+		CreatedBy       string `json:"createdBy"`
+		UpdatedBy       string `json:"updatedBy"`
+	}
+	ReqGetProductCategory struct {
+		ID                  int       `json:"id"`
+		ProductCategoryName string    `json:"productCategoryName"`
+		Filter              FilterReq `json:"filter"`
+	}
+	/////
+	RespGetProductCategory struct {
+		ID                  int    `json:"id"`
+		ProductCategoryName string `json:"productCategoryName"`
+		CreatedAt           string `json:"createdAt"`
+		UpdatedAt           string `json:"updatedAt"`
+		CreatedBy           string `json:"createdBy"`
+		UpdatedBy           string `json:"updatedBy"`
+	}
+	ReqGetProductType struct {
+		ID              int       `json:"id"`
+		ProductTypeName string    `json:"productTypeName"`
+		Filter          FilterReq `json:"filter"`
+	}
+	/////
+	RespGetProductType struct {
+		ID              int    `json:"id"`
+		ProductTypeName string `json:"productTypeName"`
+		CreatedAt       string `json:"createdAt"`
+		UpdatedAt       string `json:"updatedAt"`
+		CreatedBy       string `json:"createdBy"`
+		UpdatedBy       string `json:"updatedBy"`
+	}
+	ReqGetProductProvider struct {
+		ID                  int       `json:"id"`
+		ProductProviderName string    `json:"productProviderName"`
+		Filter              FilterReq `json:"filter"`
+	}
+	/////
+	RespGetProductProvider struct {
+		ID                         int     `json:"id"`
+		ProductProviderName        string  `json:"productProviderName"`
+		ProviderId                 int     `json:"providerId"`
+		ProductProviderAdminFee    float64 `json:"productProviderAdminFee"`
+		ProductProviderPrice       float64 `json:"productProviderPrice"`
+		ProductProviderMerchantFee float64 `json:"productProviderMerchantFee"`
+		CreatedAt                  string  `json:"createdAt"`
+		UpdatedAt                  string  `json:"updatedAt"`
+		CreatedBy                  string  `json:"createdBy"`
+		UpdatedBy                  string  `json:"updatedBy"`
 	}
 	// ResGetProductCategory struct {
 	// 	ID                  int    `json:"id"`

@@ -113,6 +113,7 @@ func (ctx hierarchy) GetClients(req models.ReqGetClient) (result []models.RespGe
 		log.Println("GetClients :: ", err.Error())
 		return result, err
 	}
+	defer rows.Close()
 	result, err = DataRow(rows)
 	if err != nil {
 		log.Println("GetClients :: ", err.Error())

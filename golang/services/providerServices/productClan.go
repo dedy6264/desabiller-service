@@ -11,56 +11,33 @@ import (
 	"github.com/labstack/echo"
 )
 
-func (svc providerServices) AddProvider(ctx echo.Context) error {
+func (svc providerServices) AddProductClan(ctx echo.Context) error {
 	var (
-		svcName = "AddProvider"
+		svcName = "AddProductClan"
 	)
-	req := new(models.ReqGetProvider)
+	req := new(models.ReqGetProductClan)
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	if req.ProviderName == "" {
+	if req.ProductClanName == "" {
 		log.Println("Err ", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
-			"Provider name is empty",
+			"Product clan name is empty",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	req.ProviderName = strings.ToUpper(req.ProviderName)
-	err = svc.services.ApiProduct.AddProvider(*req)
+	req.ProductClanName = strings.ToUpper(req.ProductClanName)
+	err = svc.services.ApiProduct.AddProductClan(*req)
 	if err != nil {
-		log.Println("Err ", svcName, "AddProvider", err)
+		log.Println("Err ", svcName, "AddProductClan", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
 			"failed",
 			nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
-	result := helpers.ResponseJSON(configs.TRUE_VALUE,
-		configs.SUCCESS_CODE,
-		"Success",
-		nil)
-	return ctx.JSON(http.StatusOK, result)
-}
-func (svc providerServices) DropProvider(ctx echo.Context) error {
-	var (
-		svcName = "DropProvider"
-	)
-	req := new(models.ReqGetProvider)
-	_, err := helpers.BindValidate(req, ctx)
-	if err != nil {
-		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
-	err = svc.services.ApiProduct.DropProvider(*req)
-	if err != nil {
-		log.Println("Err ", svcName, "DropProvider", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 
@@ -70,51 +47,27 @@ func (svc providerServices) DropProvider(ctx echo.Context) error {
 		nil)
 	return ctx.JSON(http.StatusOK, result)
 }
-func (svc providerServices) UpdateProvider(ctx echo.Context) error {
+func (svc providerServices) GetProductClans(ctx echo.Context) error {
 	var (
-		svcName = "UpdateProvider"
-	)
-	req := new(models.ReqGetProvider)
-	_, err := helpers.BindValidate(req, ctx)
-	if err != nil {
-		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
-	req.ProviderName = strings.ToUpper(req.ProviderName)
-	_, err = svc.services.ApiProduct.UpdateProvider(*req)
-	if err != nil {
-		log.Println("Err ", svcName, "UpdateProvider", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
-	result := helpers.ResponseJSON(configs.TRUE_VALUE,
-		configs.SUCCESS_CODE,
-		"Success",
-		nil)
-	return ctx.JSON(http.StatusOK, result)
-}
-func (svc providerServices) GetProviders(ctx echo.Context) error {
-	var (
-		svcName = "GetProviders"
+		svcName = "GetProductClans"
 		respSvc models.ResponseList
 	)
-	req := new(models.ReqGetProvider)
+	req := new(models.ReqGetProductClan)
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	count, err := svc.services.ApiProduct.GetProviderCount(*req)
+	count, err := svc.services.ApiProduct.GetProductClanCount(*req)
 	if err != nil {
-		log.Println("Err ", svcName, "GetProviderCount", err)
+		log.Println("Err ", svcName, "GetProductClanCount", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	resp, err := svc.services.ApiProduct.GetProviders(*req)
+	resp, err := svc.services.ApiProduct.GetProductClans(*req)
 	if err != nil {
-		log.Println("Err ", svcName, "GetProviders", err)
+		log.Println("Err ", svcName, "GetProductClans", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
@@ -124,5 +77,53 @@ func (svc providerServices) GetProviders(ctx echo.Context) error {
 		configs.SUCCESS_CODE,
 		"Success",
 		respSvc)
+	return ctx.JSON(http.StatusOK, result)
+}
+func (svc providerServices) DropProductClan(ctx echo.Context) error {
+	var (
+		svcName = "DropProductClan"
+	)
+	req := new(models.ReqGetProductClan)
+	_, err := helpers.BindValidate(req, ctx)
+	if err != nil {
+		log.Println("Err ", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
+	err = svc.services.ApiProduct.DropProductClan(*req)
+	if err != nil {
+		log.Println("Err ", svcName, "DropProductClan", err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "failed", nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
+
+	result := helpers.ResponseJSON(configs.TRUE_VALUE,
+		configs.SUCCESS_CODE,
+		"Success",
+		nil)
+	return ctx.JSON(http.StatusOK, result)
+}
+func (svc providerServices) UpdateProductClan(ctx echo.Context) error {
+	var (
+		svcName = "UpdateProductClan"
+	)
+	req := new(models.ReqGetProductClan)
+	_, err := helpers.BindValidate(req, ctx)
+	if err != nil {
+		log.Println("Err ", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
+	req.ProductClanName = strings.ToUpper(req.ProductClanName)
+	_, err = svc.services.ApiProduct.UpdateProductClan(*req)
+	if err != nil {
+		log.Println("Err ", svcName, "UpdateProductClan", err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "failed", nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
+	result := helpers.ResponseJSON(configs.TRUE_VALUE,
+		configs.SUCCESS_CODE,
+		"Success",
+		nil)
 	return ctx.JSON(http.StatusOK, result)
 }

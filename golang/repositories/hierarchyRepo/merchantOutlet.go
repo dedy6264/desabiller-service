@@ -123,11 +123,11 @@ func (ctx hierarchy) GetMerchantOutlets(req models.ReqGetMerchantOutlet) (result
 	}
 
 	rows, err := ctx.repo.Db.Query(query)
-	fmt.Println(":::", query)
 	if err != nil {
 		log.Println("GetListMerchantOutlet :: ", err.Error())
 		return result, err
 	}
+	defer rows.Close()
 	result, err = DataRowMerchantOutlet(rows)
 	if err != nil {
 		return result, err

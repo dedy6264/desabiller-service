@@ -13,6 +13,7 @@ import (
 	// useroutlettservicego "desabiller/services/nHierarchyService/userOutletService"
 	// nuserdashboardservice "desabiller/services/nUserDashboardService"
 	providerservice "desabiller/services/providerServices"
+
 	// trxservice "desabiller/services/trxService"
 
 	"github.com/labstack/echo"
@@ -88,6 +89,45 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 	ee.POST("/gets", providerSvc.GetProviders)
 	ee.POST("/drop", providerSvc.DropProvider)
 	ee.POST("/update", providerSvc.UpdateProvider)
+	ff := e.Group("/clan")
+	ff.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+		log.Println("[Start]")
+		log.Println("EndPoint :", c.Path())
+		log.Println("Header :", c.Request().Header)
+		log.Println("Body :", string(reqBody))
+		log.Println("Response :", string(resBody))
+		log.Println("[End]")
+	}))
+	ff.POST("/add", providerSvc.AddProductClan)
+	ff.POST("/gets", providerSvc.GetProductClans)
+	ff.POST("/drop", providerSvc.DropProductClan)
+	ff.POST("/update", providerSvc.UpdateProductClan)
+	gg := e.Group("/category")
+	gg.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+		log.Println("[Start]")
+		log.Println("EndPoint :", c.Path())
+		log.Println("Header :", c.Request().Header)
+		log.Println("Body :", string(reqBody))
+		log.Println("Response :", string(resBody))
+		log.Println("[End]")
+	}))
+	gg.POST("/add", providerSvc.AddProductCategory)
+	gg.POST("/gets", providerSvc.GetProductCategories)
+	gg.POST("/drop", providerSvc.DropProductCategory)
+	gg.POST("/update", providerSvc.UpdateProductCategory)
+	hh := e.Group("/type")
+	hh.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+		log.Println("[Start]")
+		log.Println("EndPoint :", c.Path())
+		log.Println("Header :", c.Request().Header)
+		log.Println("Body :", string(reqBody))
+		log.Println("Response :", string(resBody))
+		log.Println("[End]")
+	}))
+	hh.POST("/add", providerSvc.AddProductType)
+	hh.POST("/gets", providerSvc.GetProductTypes)
+	hh.POST("/drop", providerSvc.DropProductType)
+	hh.POST("/update", providerSvc.UpdateProductType)
 	// trxSvc := trxservice.NewApiTrxService(service)
 	// // nHierachySvc := nhierarchyservice.NewApiNHierarchyServices(service)
 	// nClientSvc := clientservicego.NewApiNHierarchyClientServices(service)

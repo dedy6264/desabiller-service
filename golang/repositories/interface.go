@@ -43,12 +43,26 @@ type ProductRepo interface {
 	GetProvider(req models.ReqGetProvider) (result models.RespGetProvider, err error)
 	GetProviderCount(req models.ReqGetProvider) (result int, err error)
 
-		 AddClan(req models.ReqGetProductClanClan) (err error) 
-	 GetProductClans(req models.ReqGetProductClan) (result []models.RespGetProductClan, err error) 
-	 UpdateProductClan(req models.ReqGetProductClan) (result models.RespGetProductClan, err error) 
-	 DropProductClan(req models.ReqGetProductClan) (err error) 
-	 GetProductClanCount(req models.ReqGetProductClan) (result int, err error) 
-	 GetProductClan(req models.ReqGetProductClan) (result models.RespGetProductClan, err error) 
+	AddProductClan(req models.ReqGetProductClan) (err error)
+	GetProductClans(req models.ReqGetProductClan) (result []models.RespGetProductClan, err error)
+	UpdateProductClan(req models.ReqGetProductClan) (result models.RespGetProductClan, err error)
+	DropProductClan(req models.ReqGetProductClan) (err error)
+	GetProductClanCount(req models.ReqGetProductClan) (result int, err error)
+	GetProductClan(req models.ReqGetProductClan) (result models.RespGetProductClan, err error)
+
+	AddProductCategory(req models.ReqGetProductCategory) (result models.RespGetProductCategory, err error)
+	GetProductCategories(req models.ReqGetProductCategory) (result []models.RespGetProductCategory, err error)
+	UpdateProductCategory(req models.ReqGetProductCategory) (result models.RespGetProductCategory, err error)
+	DropProductCategory(req models.ReqGetProductCategory) (err error)
+	GetProductCategory(req models.ReqGetProductCategory) (result models.RespGetProductCategory, err error)
+	GetProductCategoryCount(req models.ReqGetProductCategory) (result int, err error)
+
+	AddProductType(req models.ReqGetProductType) (result models.RespGetProductType, err error)
+	GetProductTypes(req models.ReqGetProductType) (result []models.RespGetProductType, err error)
+	UpdateProductType(req models.ReqGetProductType) (result models.RespGetProductType, err error)
+	DropProductType(req models.ReqGetProductType) (err error)
+	GetProductType(req models.ReqGetProductType) (result models.RespGetProductType, err error)
+	GetProductTypeCount(req models.ReqGetProductType) (result int, err error)
 }
 type PaymentRepo interface {
 }

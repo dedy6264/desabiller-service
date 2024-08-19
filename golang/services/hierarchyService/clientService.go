@@ -1,7 +1,6 @@
 package hierarchyservice
 
 import (
-	"database/sql"
 	"desabiller/configs"
 	"desabiller/helpers"
 	"desabiller/models"
@@ -63,35 +62,15 @@ func (svc HierarcyService) AddClient(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	req.ClientName = strings.ToUpper(req.ClientName)
-	_, err = svc.service.ApiHierarchy.GetClient(*req)
+	err = svc.service.ApiHierarchy.AddClient(*req, nil)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			err = svc.service.ApiHierarchy.AddClient(*req, nil)
-			if err != nil {
-				log.Println("Err ", svcName, "AddClient", err)
-				result := helpers.ResponseJSON(configs.FALSE_VALUE,
-					configs.VALIDATE_ERROR_CODE,
-					"failed",
-					nil)
-				return ctx.JSON(http.StatusOK, result)
-			}
-		} else {
-			log.Println("Err ", svcName, "GetClient", err)
-			result := helpers.ResponseJSON(configs.FALSE_VALUE,
-				configs.VALIDATE_ERROR_CODE,
-				"failed",
-				nil)
-			return ctx.JSON(http.StatusOK, result)
-		}
-	} else {
-		log.Println("Err ", svcName, "GetClient", " client name is exist")
+		log.Println("Err ", svcName, "AddClient", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
-			"client name is exist",
+			"failed",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
 		configs.SUCCESS_CODE,
 		"Success",

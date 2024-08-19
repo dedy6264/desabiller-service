@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (ctx product) AddClan(req models.ReqGetProductClanClan) (err error) {
+func (ctx product) AddProductClan(req models.ReqGetProductClan) (err error) {
 	t := time.Now()
 
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
@@ -36,7 +36,7 @@ func (ctx product) AddClan(req models.ReqGetProductClanClan) (err error) {
 func (ctx product) GetProductClans(req models.ReqGetProductClan) (result []models.RespGetProductClan, err error) {
 	query := `select 
 		id,
-		product_cln_name,
+		product_clan_name,
 		created_at,
 		updated_at,
 		created_by,
@@ -63,6 +63,7 @@ func (ctx product) GetProductClans(req models.ReqGetProductClan) (result []model
 		log.Println("Err GetProductClans ", err.Error())
 		return result, err
 	}
+	defer rows.Close()
 	var val models.RespGetProductClan
 	for rows.Next() {
 		err := rows.Scan(
@@ -92,6 +93,7 @@ func (ctx product) UpdateProductClan(req models.ReqGetProductClan) (result model
 		dbTime,
 		"sys",
 		req.ID)
+
 	if err != nil {
 		log.Println("Err UpdateProductClan ", err.Error())
 		return result, err
@@ -132,7 +134,7 @@ func (ctx product) GetProductClan(req models.ReqGetProductClan) (result models.R
 	updated_at,
 	created_by,
 	updated_by
-	from products where true 
+	from product_clans where true 
 	`
 	if req.ProductClanName != "" {
 		query += ` and product_clan_name= '` + req.ProductClanName + `'`
