@@ -98,6 +98,11 @@ type (
 		CreatedBy              string `json:"createdBy"`
 		UpdatedBy              string `json:"updatedBy"`
 	}
+	DataToken struct {
+		MerchantOutletId       int    `json:"merchantOutletId"`
+		MerchantOutletUsername string `json:"merchantOutletUsername"`
+		MerchantId             int    `json:"merchantId"`
+	}
 	// //userOutlet
 	// ReqGetListUserOutlet struct {
 	// 	ID                 int    `json:"id"`

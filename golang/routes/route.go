@@ -1,8 +1,12 @@
 package routes
 
 import (
+	"desabiller/configs"
 	"desabiller/services"
+	administrationservice "desabiller/services/administrationService"
 	hierarchyservicego "desabiller/services/hierarchyService"
+	trxservice "desabiller/services/trxService"
+	useractivityservice "desabiller/services/userActivityService"
 	"log"
 
 	// nfeatureassignmentsservice "desabiller/services/nFeaturesService/featureAssignmentService"
@@ -22,8 +26,10 @@ import (
 
 func RouteApi(e echo.Echo, service services.UsecaseService) {
 	providerSvc := providerservice.NewApiProviderServices(service)
-	// admSvc := administrationservice.ApiAdministration(service)
+	admSvc := administrationservice.ApiAdministration(service)
 	hierachySvc := hierarchyservicego.ApiHierarchy(service)
+	userAct := useractivityservice.NewApiUserActivityService(service)
+	trxSvc := trxservice.NewApiTrxService(service)
 	aa := e.Group("/client")
 	aa.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
 		log.Println("[Start]")
@@ -128,6 +134,68 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 	hh.POST("/gets", providerSvc.GetProductTypes)
 	hh.POST("/drop", providerSvc.DropProductType)
 	hh.POST("/update", providerSvc.UpdateProductType)
+	ii := e.Group("/product-provider")
+	ii.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+		log.Println("[Start]")
+		log.Println("EndPoint :", c.Path())
+		log.Println("Header :", c.Request().Header)
+		log.Println("Body :", string(reqBody))
+		log.Println("Response :", string(resBody))
+		log.Println("[End]")
+	}))
+	ii.POST("/add", providerSvc.AddProductProvider)
+	ii.POST("/gets", providerSvc.GetProductProviders)
+	ii.POST("/drop", providerSvc.DropProductProvider)
+	ii.POST("/update", providerSvc.UpdateProductProvider)
+	jj := e.Group("/product")
+	jj.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+		log.Println("[Start]")
+		log.Println("EndPoint :", c.Path())
+		log.Println("Header :", c.Request().Header)
+		log.Println("Body :", string(reqBody))
+		log.Println("Response :", string(resBody))
+		log.Println("[End]")
+	}))
+	jj.POST("/add", providerSvc.AddProduct)
+	jj.POST("/gets", providerSvc.GetProducts)
+	jj.POST("/drop", providerSvc.DropProduct)
+	jj.POST("/update", providerSvc.UpdateProduct)
+
+	kk := e.Group("/login")
+	kk.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+		log.Println("[Start]")
+		log.Println("EndPoint :", c.Path())
+		log.Println("Header :", c.Request().Header)
+		log.Println("Body :", string(reqBody))
+		log.Println("Response :", string(resBody))
+		log.Println("[End]")
+	}))
+	kk.POST("/", admSvc.Login)
+	ll := e.Group("/user")
+	ll.Use(middleware.JWT([]byte(configs.KEY)))
+	ll.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+		log.Println("[Start]")
+		log.Println("EndPoint :", c.Path())
+		log.Println("Header :", c.Request().Header)
+		log.Println("Body :", string(reqBody))
+		log.Println("Response :", string(resBody))
+		log.Println("[End]")
+	}))
+	ll.POST("/", admSvc.CekJwt)
+	ll.POST("/get", userAct.GetMerchantOutlets)
+	ll.POST("/update", userAct.UpdateMerchantOutlet)
+	mm := e.Group("/biller")
+	mm.Use(middleware.JWT([]byte(configs.KEY)))
+	mm.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+		log.Println("[Start]")
+		log.Println("EndPoint :", c.Path())
+		log.Println("Header :", c.Request().Header)
+		log.Println("Body :", string(reqBody))
+		log.Println("Response :", string(resBody))
+		log.Println("[End]")
+	}))
+	mm.POST("/inquiry", trxSvc.InquiryBiller)
+	mm.POST("/payment", trxSvc.PaymentBiller)
 	// trxSvc := trxservice.NewApiTrxService(service)
 	// // nHierachySvc := nhierarchyservice.NewApiNHierarchyServices(service)
 	// nClientSvc := clientservicego.NewApiNHierarchyClientServices(service)

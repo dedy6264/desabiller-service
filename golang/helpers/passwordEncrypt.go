@@ -5,6 +5,7 @@ import (
 	"crypto/cipher"
 	"crypto/md5"
 	"desabiller/configs"
+	"desabiller/models"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
@@ -12,72 +13,71 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/labstack/echo"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-// type JwtCustClaim struct {
-// 	SnDevice   string `json:"snDevice"`
-// 	UserId     string `json:"userId"`
-// 	OutletId   string `json:"outletId"`
-// 	MerchantId string `json:"merchantId"`
-// 	jwt.RegisteredClaims
-// }
-
-func TokenJwtGenerate(mID, uID, oID, cID int, snDev string) (tkn string, err error) {
-	// claim := &JwtCustClaim{
-	// 	SnDevice:   "qqqq",
-	// 	UserId:     "wwww",
-	// 	OutletId:   "eee",
-	// 	MerchantId: "rrrrr",
-	// 	RegisteredClaims: jwt.RegisteredClaims{
-	// 		ExpiresAt: &jwt.NumericDate{time.Now().Add(time.Hour * 72)},
-	// 	},
-	// }
-	token := jwt.New(jwt.SigningMethodHS256)
-	claims := token.Claims.(jwt.MapClaims)
-	claims["snDevice"] = snDev
-	claims["userId"] = uID
-	claims["outletId"] = oID
-	claims["merchantId"] = mID
-	claims["clientId"] = cID
-	//claims["exp"] = time.Now().Add(time.Minute * 5).Unix()
-	claims["exp"] = time.Now().Add(time.Hour * 3).Unix()
-
-	t, err := token.SignedString([]byte(configs.KEY))
-	fmt.Println("PPPPPPPP", err)
-	if err != nil {
-		return tkn, err
-	}
-	return t, nil
+//	type JwtCustClaim struct {
+//		SnDevice   string `json:"snDevice"`
+//		UserId     string `json:"userId"`
+//		OutletId   string `json:"outletId"`
+//		MerchantId string `json:"merchantId"`
+//		jwt.RegisteredClaims
+//	}
+func TokenJWTDecode(ctx echo.Context) (data models.DataToken) {
+	user := ctx.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	data.MerchantId = int(claims["merchantId"].(float64))
+	data.MerchantOutletId = int(claims["outletId"].(float64))
+	data.MerchantOutletUsername = claims["outletUsername"].(string)
+	return data
 }
-func TokenJwtGenerateDashboard(uID int) (tkn string, err error) {
-	// claim := &JwtCustClaim{
-	// 	SnDevice:   "qqqq",
-	// 	UserId:     "wwww",
-	// 	OutletId:   "eee",
-	// 	MerchantId: "rrrrr",
-	// 	RegisteredClaims: jwt.RegisteredClaims{
-	// 		ExpiresAt: &jwt.NumericDate{time.Now().Add(time.Hour * 72)},
-	// 	},
-	// }
+func TokenJwtGenerate(mID, oID int, oUsername string) (tkn string, err error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	// claims["snDevice"] = snDev
-	claims["userDashboardId"] = uID
-	// claims["outletId"] = oID
-	// claims["merchantId"] = mID
+	claims["outletUsername"] = oUsername
+	claims["outletId"] = oID
+	claims["merchantId"] = mID
 	// claims["clientId"] = cID
 	//claims["exp"] = time.Now().Add(time.Minute * 5).Unix()
-	claims["exp"] = time.Now().Add(time.Hour * 3).Unix()
+	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
 
 	t, err := token.SignedString([]byte(configs.KEY))
-	fmt.Println("PPPPPPPP", err)
 	if err != nil {
 		return tkn, err
 	}
 	return t, nil
 }
+
+// func TokenJwtGenerateDashboard(uID int) (tkn string, err error) {
+// 	// claim := &JwtCustClaim{
+// 	// 	SnDevice:   "qqqq",
+// 	// 	UserId:     "wwww",
+// 	// 	OutletId:   "eee",
+// 	// 	MerchantId: "rrrrr",
+// 	// 	RegisteredClaims: jwt.RegisteredClaims{
+// 	// 		ExpiresAt: &jwt.NumericDate{time.Now().Add(time.Hour * 72)},
+// 	// 	},
+// 	// }
+// 	token := jwt.New(jwt.SigningMethodHS256)
+// 	claims := token.Claims.(jwt.MapClaims)
+// 	// claims["snDevice"] = snDev
+// 	claims["userDashboardId"] = uID
+// 	// claims["outletId"] = oID
+// 	// claims["merchantId"] = mID
+// 	// claims["clientId"] = cID
+// 	//claims["exp"] = time.Now().Add(time.Minute * 5).Unix()
+// 	claims["exp"] = time.Now().Add(time.Hour * 3).Unix()
+
+//		t, err := token.SignedString([]byte(configs.KEY))
+//		fmt.Println("PPPPPPPP", err)
+//		if err != nil {
+//			return tkn, err
+//		}
+//		return t, nil
+//	}
 func PassEncrypt(pswrd string) (result string, err error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(pswrd), bcrypt.DefaultCost)
 	if err != nil {

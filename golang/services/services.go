@@ -11,37 +11,20 @@ type UsecaseService struct {
 	// GenAutonumRepo                        genautonum.GenerateAutonumberRepository
 	ApiHierarchy repositories.Hierarchyrepo
 	ApiProduct   repositories.ProductRepo
-	// ApiTrx       repositories.TrxRepo
-	// ApiNoTrx     repositories.NoTrxGenerator
-	// ApiPayment   repositories.PaymentRepo
-	// ApiNHierarchy     repositories.NHierarchy
-	// ApiNUserDashboard repositories.NUserDashboard
-	// ApiNFeatures      repositories.NFeatures
+	ApiTrx       repositories.TrxRepo
 }
 
 func NewUsecaseService(
 	repoDB *sql.DB,
 	ApiHierarchyRepo repositories.Hierarchyrepo,
 	ApiProduct repositories.ProductRepo,
-	// ApiTrx repositories.TrxRepo,
-	// ApiNoTrx repositories.NoTrxGenerator,
-	// ApiPayment repositories.PaymentRepo,
-	// ApiNHierarchy repositories.NHierarchy,
-	// // ApiMongo repositories.ApiMongoRepository,
-	// ApiNUserDashboard repositories.NUserDashboard,
-	// ApiNFeatures repositories.NFeatures,
+	ApiTrx repositories.TrxRepo,
 
 ) UsecaseService {
 	return UsecaseService{
 		RepoDB:       repoDB,
 		ApiHierarchy: ApiHierarchyRepo,
 		ApiProduct:   ApiProduct,
-		// ApiTrx:        ApiTrx,
-		// ApiNoTrx:      ApiNoTrx,
-		// ApiPayment:    ApiPayment,
-		// ApiNHierarchy: ApiNHierarchy,
-		// ApiMongo:     ApiMongo,,
-		// 	ApiNUserDashboard: ApiNUserDashboard,
-		// 	ApiNFeatures:      ApiNFeatures,
+		ApiTrx:       ApiTrx,
 	}
 }

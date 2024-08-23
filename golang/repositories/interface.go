@@ -63,59 +63,34 @@ type ProductRepo interface {
 	DropProductType(req models.ReqGetProductType) (err error)
 	GetProductType(req models.ReqGetProductType) (result models.RespGetProductType, err error)
 	GetProductTypeCount(req models.ReqGetProductType) (result int, err error)
-}
-type PaymentRepo interface {
-}
-type TrxRepo interface {
-}
-type NoTrxGenerator interface {
-	GetLastTrxNo() (noTrx string, status bool)
-	InsertTrxNo(noTrx string) (id int, status bool)
-	GenerateNo(datatype string, prefix string, leadingZero ...int) (code string, err error)
+
+	AddProductProvider(req models.ReqGetProductProvider) (result models.RespGetProductProvider, err error)
+	GetProductProviders(req models.ReqGetProductProvider) (result []models.RespGetProductProvider, err error)
+	GetProductProviderCount(req models.ReqGetProductProvider) (result int, err error)
+	UpdateProductProvider(req models.ReqGetProductProvider) (result models.RespGetProductProvider, err error)
+	DropProductProvider(req models.ReqGetProductProvider) (err error)
+	GetProductProvider(req models.ReqGetProductProvider) (result models.RespGetProductProvider, err error)
+
+	AddProduct(req models.ReqGetProduct) (result models.RespGetProduct, err error)
+	GetProducts(req models.ReqGetProduct) (result []models.RespGetProduct, err error)
+	GetProductCount(req models.ReqGetProduct) (result int, err error)
+	GetProduct(req models.ReqGetProduct) (result models.RespGetProduct, err error)
+	UpdateProduct(req models.ReqGetProduct) (result models.RespGetProduct, err error)
+	DropProduct(req models.ReqGetProduct) (err error)
 }
 
-// type NHierarchy interface {
-// 	NCreateClient(req models.ReqGetListNClient) (id int, err error)
-// 	NReadClient(req models.ReqGetListNClient) (result []models.ResGetNClient, err error)
-// 	NReadSingleClient(req models.ReqGetListNClient) (result models.ResGetNClient, err error)
-// 	NDropClient(id int) (status bool, err error)
-// 	NUpdateClient(req models.ReqUpdateNClient) (result models.ResGetNClient, err error)
-// 	///merchant
-// 	NCreateMerchant(req models.ReqGetListNMerchant) (id int, err error)
-// 	NReadMerchant(req models.ReqGetListNMerchant) (result []models.ResGetNMerchant, err error)
-// 	NReadSingleMerchant(req models.ReqGetListNMerchant) (result models.ResGetNMerchant, err error)
-// 	NDropMerchant(id int) (status bool, err error)
-// 	NUpdateMerchant(req models.ReqUpdateNMerchant) (result models.ResGetNMerchant, err error)
-// 	//merchantOutlet
-// 	NCreateMerchantOutlet(req models.ReqGetListNMerchantOutlet) (id int, err error)
-// 	NReadMerchantOutlet(req models.ReqGetListNMerchantOutlet) (result []models.ResGetNMerchantOutlet, err error)
-// 	NReadSingleMerchantOutlet(req models.ReqGetListNMerchantOutlet) (result models.ResGetNMerchantOutlet, err error)
-// 	NDropMerchantOutlet(id int) (status bool, err error)
-// 	NUpdateMerchantOutlet(req models.ReqUpdateNMerchantOutlet) (result models.ResGetNMerchantOutlet, err error)
-// 	//userOutlet
-// 	NCreateUserOutlet(req models.ReqGetListNUserOutlet) (id int, err error)
-// 	NReadUserOutlet(req models.ReqGetListNUserOutlet) (result []models.ResGetNUserOutlet, err error)
-// 	NReadSingleUserOutlet(req models.ReqGetListNUserOutlet) (result models.ResGetNUserOutlet, err error)
-// 	NDropUserOutlet(id int) (status bool, err error)
-// 	NUpdateUserOutlet(req models.ReqUpdateNUserOutlet) (result models.ResGetNUserOutlet, err error)
-// }
-// type NUserDashboard interface {
-// 	NCreateUserDashboard(req models.ReqCreateNUserDashboard) (id int, err error)
-// 	NReadUserDashboard(req models.ReqGetListNUserDashboard) (result []models.RespGetListNUserDashboard, err error)
-// 	NReadSingleUserDashboard(req models.ReqCreateNUserDashboard) (result models.RespGetListNUserDashboard, err error)
-// 	NDropUserDashboard(id int) (status bool, err error)
-// 	NUpdateUserDashboard(req models.ReqCreateNUserDashboard) (result models.RespGetListNUserDashboard, err error)
-// }
-// type NFeatures interface {
-// 	NCreateFeature(req models.ReqCreateNFeature) (id int, err error)
-// 	NReadFeature(req models.ReqGetListNFeature) (result []models.RespGetListNFeature, err error)
-// 	NReadSingleFeature(req models.ReqCreateNFeature) (result models.RespGetListNFeature, err error)
-// 	NDropFeature(id int) (status bool, err error)
-// 	NUpdateFeature(req models.ReqCreateNFeature) (result models.RespGetListNFeature, err error)
-// 	//
-// 	NCreateFeatureAssignment(req models.ReqCreateNFeatureAssignment) (id int, err error)
-// 	NReadFeatureAssignment(req models.ReqGetListNFeatureAssignment) (result []models.RespGetListNFeatureAssignment, err error)
-// 	NReadSingleFeatureAssignment(req models.ReqCreateNFeatureAssignment) (result models.RespGetListNFeatureAssignment, err error)
-// 	NDropFeatureAssignment(id int) (status bool, err error)
-// 	NUpdateFeatureAssignment(req models.ReqCreateNFeatureAssignment) (result models.RespGetListNFeatureAssignment, err error)
-// }
+type TrxRepo interface {
+	GetTrx(req models.ReqGetTrx) (result models.RespGetTrx, err error)
+	GetTrxCount(req models.ReqGetTrx) (result int, err error)
+	GetTrxs(req models.ReqGetTrx) (result []models.RespGetTrx, err error)
+	InsertTrx(req models.ReqGetTrx, tx *sql.Tx) (err error)
+	UpdateTrx(req models.ReqGetTrx, table string) (err error)
+
+	InsertTrxStatus(req models.ReqGetTrxStatus) (err error)
+
+	GenerateNo(datatype string, prefix string, leadingZero ...int) (code string, err error)
+}
+type TrxNoGenerator interface {
+	GetLastTrxNo() (noTrx string, status bool)
+	InsertTrxNo(noTrx string) (id int, status bool)
+}

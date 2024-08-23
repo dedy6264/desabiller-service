@@ -11,10 +11,6 @@ const (
 	// MONGO_COL_LOG_LOGIN     = "colDataLogin"
 	// MONGO_COL_LOGIN_SESSION = "colDataSesion"
 
-	VALIDATE_ERROR_CODE = "34"
-	SUCCESS_CODE        = "00"
-	DB_ERROR            = "81"
-	DB_NOT_FOUND        = "82"
 	LAYOUT_TIMESTAMP    = "2006-01-02 15:04:05"
 	LAYOUT_TIMESTAMPTRX = "20060102"
 	// MONGO_COL_RESEND_EMAIL = "colVerificationEmailAttempts"

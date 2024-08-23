@@ -1,7 +1,6 @@
-package trxgeneratorrepo
+package trxrepo
 
 import (
-	"desabiller/repositories"
 	"fmt"
 	"log"
 	"math"
@@ -9,57 +8,6 @@ import (
 	"strings"
 )
 
-type trxNoGenerator struct {
-	repo repositories.Repositories
-}
-
-func NewTrxNoGenerator(repo repositories.Repositories) trxNoGenerator {
-	return trxNoGenerator{
-		repo: repo,
-	}
-}
-
-// func (ctx trxNoGenerator) GetLastTrxNo() (noTrx string, status bool) {
-// 	t := time.Now()
-// 	dbTime := t.Local().Format("2006-01-02")
-// 	query := `select trx_number from tia_no_generator where date(created_at)= $1 order by created_at desc limit 1`
-// 	err := ctx.repo.Db.QueryRow(query, dbTime).Scan(&noTrx)
-// 	if err != nil {
-// 		return "", false
-// 	}
-// 	return noTrx, true
-// }
-// func (ctx trxNoGenerator) InsertTrxNo(noTrx string) (id int, status bool) {
-// 	t := time.Now()
-// 	dbTime := t.Local().Format("2006-01-02")
-// 	query := `insert into tia_no_generator set trx_number = $1 , created_at = $2 returning id`
-// 	err := ctx.repo.Db.QueryRow(query, noTrx, dbTime).Scan(&id)
-// 	if err != nil {
-// 		return 0, false
-// 	}
-// 	return id, true
-// }
-
-// func (ctx trxNoGenerator) Generate(prefix string) (notrx string) {
-// 	var (
-// 		t      = time.Now()
-// 		dbTime = t.Local().Format("2006-01-02")
-// 		noTrx  string
-// 	)
-// 	//productType
-// 	//date
-// 	//order
-// 	query := `select trx_number from tia_no_generator where date(created_at)= $1 order by created_at desc limit 1`
-// 	err := ctx.repo.Db.QueryRow(query, dbTime).Scan(&noTrx)
-// 	if err != nil {
-// 		return ""
-// 	}
-
-// }
-
-// prefix
-// tgl
-// urutan terakhir
 type autonumberValue struct {
 	Prefix      string `json:"prefix"`
 	Datatype    string `json:"datatype"`
@@ -67,9 +15,8 @@ type autonumberValue struct {
 	LeadingZero int    `json:"leadingzero"`
 }
 
-func (ctx trxNoGenerator) GenerateNo(datatype string, prefix string, leadingZero ...int) (code string, err error) {
+func (ctx trxRepository) GenerateNo(datatype string, prefix string, leadingZero ...int) (code string, err error) {
 	var autonumber autonumberValue
-
 	zeroPadding := 0
 
 	if len(leadingZero) > 0 {
@@ -83,11 +30,10 @@ func (ctx trxNoGenerator) GenerateNo(datatype string, prefix string, leadingZero
 		fmt.Println(err)
 
 		//klo ga ada insert
-		query := `insert into no_generators  (data_type,leadingzero)values($1,$2) returning data_type, leadingzero,prefix, seqvalue`
-		err := ctx.repo.Db.QueryRow(query, datatype, zeroPadding).Scan(&autonumber.Datatype, &autonumber.LeadingZero, &autonumber.Prefix, &autonumber.SeqValue)
+		query := `insert into no_generators  (data_type,leadingzero,seqvalue)values($1,$2,$3) returning data_type, leadingzero,coalesce(prefix,'') prefix, seqvalue`
+		err := ctx.repo.Db.QueryRow(query, datatype, zeroPadding, 1).Scan(&autonumber.Datatype, &autonumber.LeadingZero, &autonumber.Prefix, &autonumber.SeqValue)
 		if err != nil {
 			fmt.Println(err)
-
 			log.Println("ERROR INSERT")
 			return "", err
 		}
@@ -111,7 +57,7 @@ func (ctx trxNoGenerator) GenerateNo(datatype string, prefix string, leadingZero
 	} else {
 		autonumberNo = fmt.Sprintf("%s%s", prefix, strconv.Itoa(autonumber.SeqValue))
 	}
-	return autonumberNo, nil
+	return datatype + "-" + autonumberNo, nil
 }
 func padLeft(v int64, length int) string {
 	abs := math.Abs(float64(v))
