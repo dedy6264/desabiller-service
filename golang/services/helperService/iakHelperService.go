@@ -63,6 +63,12 @@ func IakPrepaidHelperService(providerRequest models.ReqPaymentPrepaidIak, url st
 	} else {
 		statusCode = configs.WORKER_SUCCESS_CODE
 		statusMsg = "SUCCESS"
+		billdesc := models.BillDescPulsa{
+			CustomerId: respProvider.Data.CustomerID,
+			Sn:         respProvider.Data.Sn,
+		}
+		byte, _ := json.Marshal(billdesc)
+		respWorker.BillDesc = string(byte)
 	}
 	respWorker.PaymentStatus = statusCode
 	respWorker.PaymentStatusDesc = statusMsg
@@ -71,5 +77,6 @@ func IakPrepaidHelperService(providerRequest models.ReqPaymentPrepaidIak, url st
 	respWorker.TotalAmount, _ = strconv.ParseFloat(strconv.Itoa(respProvider.Data.Price), 64)
 	respWorker.TrxReferenceNumber = providerRequest.RefId
 	respWorker.TrxProviderReferenceNumber = strconv.Itoa(respProvider.Data.TrID)
+
 	return respWorker, nil
 }

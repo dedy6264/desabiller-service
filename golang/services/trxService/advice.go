@@ -137,6 +137,7 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		respPayment.ProviderStatusCode = respProvider.PaymentStatusDetail
 		respPayment.ProviderStatusMessage = respProvider.PaymentStatusDescDetail
 		respPayment.ProviderStatusDesc = respProvider.PaymentStatusDescDetail
+		respPayment.OtherMsg = respProvider.BillDesc
 		result := helpers.ResponseJSON(configs.TRUE_VALUE, respPayment.StatusCode, respPayment.StatusMessage, respPayment)
 		return ctx.JSON(http.StatusOK, result)
 	}
@@ -191,6 +192,9 @@ func UpdateAndInsertStatusTrx(dataPayment models.RespGetTrx, dataAdvice models.R
 			UpdatedAt: dbTime,
 			UpdatedBy: "sys",
 		},
+	}
+	if statusCode == configs.SUCCESS_CODE {
+		updatePayment.OtherMsg = dataAdvice.BillDesc
 	}
 	err := helpers.DBTransaction(svc.services.RepoDB, func(Tx *sql.Tx) error {
 		err := svc.services.ApiTrx.UpdateTrx(updatePayment, Tx)

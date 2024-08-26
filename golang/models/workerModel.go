@@ -11,6 +11,10 @@ type (
 		TotalAmount                float64 `json:"totalAmount"`
 		BillDesc                   string  `json:"billDesc"`
 	}
+	BillDescPulsa struct {
+		CustomerId string `json:"customerId"`
+		Sn         string `json:"sn"`
+	}
 	// BillDesc struct {
 	// 	Total
 	// }

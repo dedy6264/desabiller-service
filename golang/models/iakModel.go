@@ -19,6 +19,7 @@ type (
 			Balance     int    `json:"balance"`
 			TrID        int    `json:"tr_id"`
 			Rc          string `json:"rc"`
+			Sn          string `json:"sn"`
 		} `json:"data"`
 	}
 )
