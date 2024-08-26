@@ -158,7 +158,7 @@ class DataHierarchySeeder extends Seeder
             'updated_at' => now(),
         ]]);
         DB::table('products')->insert([[
-            'product_provider_id' => 1,
+            'product_provider_id' => 2,
             'product_clan_id' => 2,
             'product_category_id' => 3,
             'product_type_id' => 2,
@@ -167,6 +167,9 @@ class DataHierarchySeeder extends Seeder
             'product_price' => 6000,
             'product_admin_fee' => 0,
             'product_merchant_fee' => 0,
+            'product_nominal' => "5000",
+            'product_details' => "Pulsa Telkomsel Nominal Rp,5.000",
+            'icon_url' => "",
             'created_by' => "sys",
             'updated_by' => "sys",
             'created_at' => now(),
@@ -181,6 +184,9 @@ class DataHierarchySeeder extends Seeder
             'product_price' => 51000,
             'product_admin_fee' => 0,
             'product_merchant_fee' => 0,
+            'product_nominal' => "5000",
+            'product_details' => "Pulsa Telkomsel Nominal Rp,5.000",
+            'icon_url' => "",
             'created_by' => "sys",
             'updated_by' => "sys",
             'created_at' => now(),
