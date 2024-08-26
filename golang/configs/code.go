@@ -66,5 +66,8 @@ var (
 // 	"121",	MONTHLY TOP UP LIMIT EXCEEDED	Failed	This response code applies to OVO products.
 // 	"117",	PAGE NOT FOUND	Failed	The API URL that you want to hit is not found. Try checking your request URL for any typos or try other API URLs.
 // 	"10",	REACH TOP UP LIMIT USING SAME DESTINATION NUMBER IN 1 DAY	Failed	Your current destination number top up request is reaching the limit on that day. Please try again tomorrow.
+// 201	UNDEFINED RESPONSE CODE	Pending	The received response code is undefined yet. Please contact our Customer Service.
+// 05	UNDEFINED ERROR
 
+//other
 // }

@@ -10,19 +10,19 @@ import (
 	"strconv"
 )
 
-func IakHelperServicePayment(providerRequest models.ReqPaymentIak) (respWorker models.ResponseWorkerPayment, err error) {
+func IakPrepaidHelperService(providerRequest models.ReqPaymentPrepaidIak, url string) (respWorker models.ResponseWorkerPayment, err error) {
 
 	var (
 		helperName       = "[IAK]IakHelperServicePayment"
-		respProvider     models.RespPaymentIak
+		respProvider     models.RespPaymentPrepaidIak
 		statusCode       string
 		statusMsg        string
 		statusCodeDetail string
 		statusMsgDetail  string
 	)
-	sign := helpers.SignIakEncrypt("")
+	sign := helpers.SignIakEncrypt(providerRequest.RefId)
 	providerRequest.Sign = sign
-	respByte, _, err := utils.WorkerPostWithBearer(configs.IakDevUrl, "", providerRequest, "json")
+	respByte, _, err := utils.WorkerPostWithBearer(url, "", providerRequest, "json")
 	if err != nil {
 		log.Println("Err ", helperName, err)
 		return respWorker, err
@@ -56,7 +56,7 @@ func IakHelperServicePayment(providerRequest models.ReqPaymentIak) (respWorker m
 			statusCode = configs.WORKER_VALIDATION_ERROR
 			statusMsg = "FAILED"
 		}
-		if ok, _ := helpers.InArray(respProvider.Data.Rc, []string{"12", "204", "17", "110", "202", "207", "121", "117", "10"}); ok {
+		if ok, _ := helpers.InArray(respProvider.Data.Rc, []string{"404", "12", "204", "17", "110", "202", "207", "121", "117", "10"}); ok {
 			statusCode = configs.WORKER_SYSTEM_ERROR
 			statusMsg = "FAILED"
 		}

@@ -196,6 +196,7 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 	}))
 	mm.POST("/inquiry", trxSvc.InquiryBiller)
 	mm.POST("/payment", trxSvc.PaymentBiller)
+	mm.POST("/advice", trxSvc.Advice)
 	// trxSvc := trxservice.NewApiTrxService(service)
 	// // nHierachySvc := nhierarchyservice.NewApiNHierarchyServices(service)
 	// nClientSvc := clientservicego.NewApiNHierarchyClientServices(service)

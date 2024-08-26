@@ -1,6 +1,7 @@
 package trxrepo
 
 import (
+	"database/sql"
 	"desabiller/models"
 )
 
@@ -11,14 +12,22 @@ status_code,
 status_message
 `
 
-func (ctx trxRepository) InsertTrxStatus(req models.ReqGetTrxStatus) (err error) {
+func (ctx trxRepository) InsertTrxStatus(req models.ReqGetTrxStatus, tx *sql.Tx) (err error) {
 	query := ` insert into trx_statuses (` + insertQuery + `) values (
 		$1,$2,$3,$4) `
-	_, err = ctx.repo.Db.Exec(query,
-		req.ReferenceNumber,
-		req.ProviderReferenceNumber,
-		req.StatusCode,
-		req.StatusMessage)
+	if tx != nil {
+		_, err = tx.Exec(query,
+			req.ReferenceNumber,
+			req.ProviderReferenceNumber,
+			req.StatusCode,
+			req.StatusMessage)
+	} else {
+		_, err = ctx.repo.Db.Exec(query,
+			req.ReferenceNumber,
+			req.ProviderReferenceNumber,
+			req.StatusCode,
+			req.StatusMessage)
+	}
 	if err != nil {
 		return err
 	}

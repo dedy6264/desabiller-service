@@ -84,9 +84,9 @@ type TrxRepo interface {
 	GetTrxCount(req models.ReqGetTrx) (result int, err error)
 	GetTrxs(req models.ReqGetTrx) (result []models.RespGetTrx, err error)
 	InsertTrx(req models.ReqGetTrx, tx *sql.Tx) (err error)
-	UpdateTrx(req models.ReqGetTrx, table string) (err error)
+	UpdateTrx(req models.ReqGetTrx, tx *sql.Tx) (err error)
 
-	InsertTrxStatus(req models.ReqGetTrxStatus) (err error)
+	InsertTrxStatus(req models.ReqGetTrxStatus, tx *sql.Tx) (err error)
 
 	GenerateNo(datatype string, prefix string, leadingZero ...int) (code string, err error)
 }

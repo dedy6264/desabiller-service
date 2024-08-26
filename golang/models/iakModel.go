@@ -1,14 +1,14 @@
 package models
 
 type (
-	ReqPaymentIak struct {
+	ReqPaymentPrepaidIak struct {
 		CustomerId  string `json:"customer_id"`
 		ProductCode string `json:"product_code"`
 		RefId       string `json:"ref_id"`
 		Username    string `json:"username"`
 		Sign        string `json:"sign"`
 	}
-	RespPaymentIak struct {
+	RespPaymentPrepaidIak struct {
 		Data struct {
 			RefID       string `json:"ref_id"`
 			Status      int    `json:"status"`

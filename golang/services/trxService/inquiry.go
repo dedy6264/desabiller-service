@@ -97,7 +97,7 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		ProductMerchantFee:         respProduct.ProductMerchantFee,
 		ProductProviderId:          respProduct.ProviderId,
 		ProductProviderName:        respProduct.ProviderName,
-		ProductProviderCode:        respProduct.ProductCode,
+		ProductProviderCode:        respProduct.ProductProviderCode,
 		ProductProviderPrice:       respProduct.ProductProviderPrice,
 		ProductProviderAdminFee:    respProduct.ProductProviderAdminFee,
 		ProductProviderMerchantFee: respProduct.ProductProviderMerchantFee,
@@ -105,7 +105,7 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		StatusMessage:              "INQUIRY " + configs.SUCCESS_MSG,
 		StatusDesc:                 "INQUIRY " + configs.SUCCESS_MSG,
 		ReferenceNumber:            req.ReferenceNumber,
-		ProviderStatusCode:         "",
+		ProviderStatusCode:         "-",
 		ProviderStatusMessage:      "INQUIRY " + configs.SUCCESS_MSG,
 		ProviderStatusDesc:         "INQUIRY " + configs.SUCCESS_MSG,
 		ProviderReferenceNumber:    "-",
@@ -136,12 +136,12 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		ProviderReferenceNumber: recordInq.ProviderReferenceNumber,
 		StatusCode:              recordInq.StatusCode,
 		StatusMessage:           recordInq.StatusMessage,
-	})
+	}, nil)
 	if err != nil {
 		log.Println("Err ", svcName, "InsertTrxStatus", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, configs.SUCCESS_MSG, recordInq)
+	result := helpers.ResponseJSON(configs.TRUE_VALUE, recordInq.StatusCode, recordInq.StatusMessage, recordInq)
 	return ctx.JSON(http.StatusOK, result)
 }
