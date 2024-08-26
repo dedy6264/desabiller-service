@@ -2,9 +2,9 @@ package models
 
 type Response struct {
 	StatusCode       string      `json:"statusCode"`
+	StatusMessage    string      `json:"statusMessage"`
 	ResponseDatetime string      `json:"responseDatetime"`
 	Result           interface{} `json:"result"`
-	StatusMessage    string      `json:"statusMessage"`
 }
 type ResponseList struct {
 	TotalData int         `json:"totalData"`

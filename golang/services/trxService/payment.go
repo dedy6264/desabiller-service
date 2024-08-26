@@ -170,7 +170,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		CreatedAt:               respInqTrx.CreatedAt,
 		UpdatedAt:               updatePayment.Filter.CreatedAt,
 		CustomerId:              updatePayment.CustomerId,
-		OtherMsg:                updatePayment.OtherMsg,
+		BillInfo:                updatePayment.OtherMsg,
 		ProductId:               updatePayment.ProductId,
 		ProductName:             updatePayment.ProductName,
 		ProductCode:             updatePayment.ProductCode,

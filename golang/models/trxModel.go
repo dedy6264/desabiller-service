@@ -129,7 +129,7 @@ type (
 		UpdatedAt               string `json:"updatedAt"`
 
 		CustomerId         string  `json:"customerId"`
-		OtherMsg           string  `json:"otherMsg"`
+		BillInfo           string  `json:"billInfo"`
 		ProductId          int     `json:"productId"`
 		ProductName        string  `json:"productName"`
 		ProductCode        string  `json:"productCode"`
@@ -147,4 +147,7 @@ type (
 		MerchantOutletName     string `json:"merchantOutletName"`
 		MerchantOutletUsername string `json:"merchantOutletUsername"`
 	}
+	// RespTrx struct {
+	// 	BillInfo string
+	// }
 )

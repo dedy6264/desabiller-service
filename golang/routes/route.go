@@ -30,6 +30,17 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 	hierachySvc := hierarchyservicego.ApiHierarchy(service)
 	userAct := useractivityservice.NewApiUserActivityService(service)
 	trxSvc := trxservice.NewApiTrxService(service)
+	callback := e.Group("/callback")
+	callback.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+		log.Println("[Start]")
+		log.Println("EndPoint :", c.Path())
+		log.Println("Header :", c.Request().Header)
+		log.Println("Body :", string(reqBody))
+		log.Println("Response :", string(resBody))
+		log.Println("[End]")
+	}))
+	callback.POST("/iak", trxSvc.IAKCallback)
+
 	aa := e.Group("/client")
 	aa.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
 		log.Println("[Start]")

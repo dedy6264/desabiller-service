@@ -59,7 +59,7 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		CreatedAt:               resp.CreatedAt,
 		UpdatedAt:               resp.UpdatedAt,
 		CustomerId:              resp.CustomerId,
-		OtherMsg:                resp.OtherMsg,
+		BillInfo:                resp.OtherMsg,
 		ProductId:               resp.ProductId,
 		ProductName:             resp.ProductName,
 		ProductCode:             resp.ProductCode,
@@ -137,7 +137,7 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		respPayment.ProviderStatusCode = respProvider.PaymentStatusDetail
 		respPayment.ProviderStatusMessage = respProvider.PaymentStatusDescDetail
 		respPayment.ProviderStatusDesc = respProvider.PaymentStatusDescDetail
-		respPayment.OtherMsg = respProvider.BillDesc
+		respPayment.BillInfo = respProvider.BillDesc
 		result := helpers.ResponseJSON(configs.TRUE_VALUE, respPayment.StatusCode, respPayment.StatusMessage, respPayment)
 		return ctx.JSON(http.StatusOK, result)
 	}
