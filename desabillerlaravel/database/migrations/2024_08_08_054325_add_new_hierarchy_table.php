@@ -134,6 +134,8 @@ class AddNewHierarchyTable extends Migration
             $table->double('product_admin_fee');
             $table->double('product_merchant_fee');
             
+            $table->unsignedInteger('provider_id');
+            $table->string('provider_name');
             $table->unsignedInteger('product_provider_id');
             $table->string('product_provider_name');
             $table->string('product_provider_code');
