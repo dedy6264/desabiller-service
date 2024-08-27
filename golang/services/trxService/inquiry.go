@@ -43,6 +43,17 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "customer id cannot be null", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
+	if req.ClientId == 0 {
+		data := helpers.TokenJWTDecode(ctx)
+		respOutlet, err = svc.services.ApiHierarchy.GetMerchantOutlet(models.ReqGetMerchantOutlet{
+			ID: data.MerchantOutletId,
+		})
+		if err != nil {
+			log.Println("Err ", svcName, "GetMerchantOutlet", err)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+			return ctx.JSON(http.StatusOK, result)
+		}
+	}
 	req.ReferenceNumber, err = svc.services.ApiTrx.GenerateNo("DB-"+dbTime, "", 7)
 	if err != nil {
 		log.Println("Err ", svcName, "GenerateNo", err)
@@ -57,31 +68,6 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	if respProduct.ProductTypeId == 2 { //PREPAID
-		if respProduct.ProductPrice < respProduct.ProductProviderPrice {
-			log.Println("Err ", svcName, "product price invalid", respProduct.ProductPrice, respProduct.ProductProviderPrice)
-			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "product price invalid", nil)
-			return ctx.JSON(http.StatusOK, result)
-		}
-	} else {
-		if respProduct.ProductMerchantFee > respProduct.ProductProviderMerchantFee {
-			log.Println("Err ", svcName, "product merchant fee invalid", respProduct.ProductMerchantFee, respProduct.ProductProviderMerchantFee)
-			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "product merchant fee invalid", nil)
-			return ctx.JSON(http.StatusOK, result)
-		}
-	}
-
-	if req.ClientId == 0 {
-		data := helpers.TokenJWTDecode(ctx)
-		respOutlet, err = svc.services.ApiHierarchy.GetMerchantOutlet(models.ReqGetMerchantOutlet{
-			ID: data.MerchantOutletId,
-		})
-		if err != nil {
-			log.Println("Err ", svcName, "GetMerchantOutlet", err)
-			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
-			return ctx.JSON(http.StatusOK, result)
-		}
-	}
 	recordInq := models.ReqGetTrx{
 		ProductClanId:              respProduct.ProductClanId,
 		ProductClanName:            respProduct.ProductClanName,
@@ -95,8 +81,10 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		ProductPrice:               respProduct.ProductPrice,
 		ProductAdminFee:            respProduct.ProductAdminFee,
 		ProductMerchantFee:         respProduct.ProductMerchantFee,
-		ProductProviderId:          respProduct.ProviderId,
-		ProductProviderName:        respProduct.ProviderName,
+		ProviderId:                 respProduct.ProviderId,
+		ProviderName:               respProduct.ProviderName,
+		ProductProviderId:          respProduct.ProductProviderId,
+		ProductProviderName:        respProduct.ProductProviderName,
 		ProductProviderCode:        respProduct.ProductProviderCode,
 		ProductProviderPrice:       respProduct.ProductProviderPrice,
 		ProductProviderAdminFee:    respProduct.ProductProviderAdminFee,
@@ -124,6 +112,22 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 			CreatedAt: dbTimeTrx,
 		},
 	}
+	if respProduct.ProductTypeId == 2 { //PREPAID
+		if respProduct.ProductPrice < respProduct.ProductProviderPrice {
+			log.Println("Err ", svcName, "product price invalid", respProduct.ProductPrice, respProduct.ProductProviderPrice)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "product price invalid", nil)
+			return ctx.JSON(http.StatusOK, result)
+		}
+	} else { //postpaid
+		if respProduct.ProductMerchantFee > respProduct.ProductProviderMerchantFee {
+			log.Println("Err ", svcName, "product merchant fee invalid", respProduct.ProductMerchantFee, respProduct.ProductProviderMerchantFee)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "product merchant fee invalid", nil)
+			return ctx.JSON(http.StatusOK, result)
+		}
+		//inquiry ke partner
+
+	}
+
 	// byte, status, er := utils.WorkerPostWithBearer())
 	err = svc.services.ApiTrx.InsertTrx(recordInq, nil)
 	if err != nil {

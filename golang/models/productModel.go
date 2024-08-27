@@ -103,6 +103,8 @@ type (
 		ProviderId                 int     `json:"providerId"`
 		ProviderName               string  `json:"providerName"`
 		ProductCode                string  `json:"productCode"`
+		ProductProviderId          int     `json:"productProviderId"`
+		ProductProviderName        string  `json:"productProviderName"`
 		ProductProviderCode        string  `json:"productProviderCode"`
 		ProductProviderAdminFee    float64 `json:"productProviderAdminFee"`
 		ProductProviderPrice       float64 `json:"productProviderPrice"`

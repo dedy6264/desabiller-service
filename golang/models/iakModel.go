@@ -25,6 +25,14 @@ type (
 		Username    string `json:"username"`
 		Sign        string `json:"sign"`
 	}
+	ReqPaymentPostpaidIak struct {
+		Commands string `json:"commands"`
+		Hp       string `json:"hp"`
+		Code     string `json:"code"`
+		RefId    string `json:"ref_id"`
+		Username string `json:"username"`
+		Sign     string `json:"sign"`
+	}
 	RespPaymentPrepaidIak struct {
 		Data struct {
 			RefID       string `json:"ref_id"`

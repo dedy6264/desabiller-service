@@ -24,6 +24,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		providerStatusDesc,
 		providerReferenceNumber,
 		url string
+		respProvider models.ResponseWorkerPayment
 		// respSvc models.ResponseList
 		// respOutlet models.RespGetMerchantOutlet
 	)
@@ -112,20 +113,21 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		if configs.AppEnv == "PROD" {
 			url = configs.IakProdUrlPrepaid + "/api/top-up"
 		}
-		respProvider, err := helperservice.IakPrepaidHelperService(models.ReqPaymentPrepaidIak{
-			CustomerId:  respInqTrx.CustomerId,
-			ProductCode: respInqTrx.ProductProviderCode,
-			RefId:       respInqTrx.ReferenceNumber,
-			Username:    configs.IakUsername,
-			Sign:        helpers.SignIakEncrypt(""),
-		}, url)
-		if err != nil {
-			log.Println("Err ", svcName, "IakPrepaidHelperService", err)
-			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Trx failed", nil)
-			return ctx.JSON(http.StatusOK, result)
+		if respInqTrx.ProviderId == 1 { //IAK
+			respProvider, err = helperservice.IakPrepaidHelperService(models.ReqPaymentPrepaidIak{
+				CustomerId:  respInqTrx.CustomerId,
+				ProductCode: respInqTrx.ProductProviderCode,
+				RefId:       respInqTrx.ReferenceNumber,
+				Username:    configs.IakUsername,
+				Sign:        helpers.SignIakEncrypt(""),
+			}, url)
+			if err != nil {
+				log.Println("Err ", svcName, "IakPrepaidHelperService", err)
+				result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Trx failed", nil)
+				return ctx.JSON(http.StatusOK, result)
+			}
 		}
 		statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus)
-
 		updatePayment.StatusCode = statusCode
 		updatePayment.StatusMessage = "PAYMENT " + respProvider.PaymentStatusDesc
 		updatePayment.StatusDesc = respProvider.PaymentStatusDesc

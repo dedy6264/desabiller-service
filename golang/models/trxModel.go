@@ -18,6 +18,8 @@ type (
 		ProductPrice               float64   `json:"productPrice"`
 		ProductAdminFee            float64   `json:"productAdminFee"`
 		ProductMerchantFee         float64   `json:"productMerchantFee"`
+		ProviderId                 int       `json:"providerId"`
+		ProviderName               string    `json:"providerName"`
 		ProductProviderId          int       `json:"productProviderId"`
 		ProductProviderName        string    `json:"productProviderName"`
 		ProductProviderCode        string    `json:"productProviderCode"`
@@ -66,6 +68,8 @@ type (
 		ProductProviderPrice       float64 `json:"productProviderPrice"`
 		ProductProviderAdminFee    float64 `json:"productProviderAdminFee"`
 		ProductProviderMerchantFee float64 `json:"productProviderMerchantFee"`
+		ProviderId                 int     `json:"providerId"`
+		ProviderName               string  `json:"providerName"`
 		StatusCode                 string  `json:"statusCode"`
 		StatusMessage              string  `json:"statusMessage"`
 		StatusDesc                 string  `json:"statusDesc"`
