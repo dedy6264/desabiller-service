@@ -16,4 +16,7 @@ const (
 	// MONGO_COL_RESEND_EMAIL = "colVerificationEmailAttempts"
 	// KEY         = "MKPRetailDev2022"
 	KEY = "Des@Biller120824"
+
+	ENDPOINT_IAK_PREPAID  = "/api/top-up"
+	ENDPOINT_IAK_POSTPAID = "/api/v1/bill/check"
 )

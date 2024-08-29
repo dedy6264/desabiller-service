@@ -5,7 +5,8 @@ import (
 	"desabiller/configs"
 	"desabiller/helpers"
 	"desabiller/models"
-	helperservice "desabiller/services/helperService"
+	helperservice "desabiller/services/helperIakService"
+	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
@@ -19,10 +20,10 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		svcName = "[IAK]Advice"
 		url, statusCode,
 		statusMessage,
-		statusDesc,
-		providerStatusCode,
-		providerStatusMessage,
-		providerStatusDesc string
+		statusDesc string
+		// providerStatusCode,
+		// providerStatusMessage,
+		// providerStatusDesc string
 		// respSvc models.ResponseList
 	)
 	req := new(models.ReqAviceTrx)
@@ -43,46 +44,46 @@ func (svc trxService) Advice(ctx echo.Context) error {
 	statusCode = resp.StatusCode
 	statusMessage = resp.StatusMessage
 	statusDesc = resp.StatusDesc
-	providerStatusCode = resp.ProviderStatusCode
-	providerStatusMessage = resp.ProviderStatusMessage
-	providerStatusDesc = resp.ProviderStatusDesc
+	// providerStatusCode = resp.ProviderStatusCode
+	// providerStatusMessage = resp.ProviderStatusMessage
+	// providerStatusDesc = resp.ProviderStatusDesc
 	respPayment := models.RespPayment{
-		Id:                      resp.Id,
-		StatusCode:              statusCode,
-		StatusMessage:           statusMessage,
-		StatusDesc:              statusDesc,
-		ReferenceNumber:         resp.ReferenceNumber,
-		ProviderStatusCode:      providerStatusCode,
-		ProviderStatusMessage:   providerStatusMessage,
-		ProviderStatusDesc:      providerStatusDesc,
-		ProviderReferenceNumber: resp.ProviderReferenceNumber,
-		CreatedAt:               resp.CreatedAt,
-		UpdatedAt:               resp.UpdatedAt,
-		CustomerId:              resp.CustomerId,
-		BillInfo:                resp.OtherMsg,
-		ProductId:               resp.ProductId,
-		ProductName:             resp.ProductName,
-		ProductCode:             resp.ProductCode,
-		ProductPrice:            resp.ProductPrice,
-		ProductAdminFee:         resp.ProductAdminFee,
-		ProductMerchantFee:      resp.ProductMerchantFee,
-		ClientId:                resp.ClientId,
-		ClientName:              resp.ClientName,
-		GroupId:                 resp.GroupId,
-		GroupName:               resp.GroupName,
-		MerchantId:              resp.MerchantId,
-		MerchantName:            resp.MerchantName,
-		MerchantOutletId:        resp.MerchantOutletId,
-		MerchantOutletName:      resp.MerchantOutletName,
-		MerchantOutletUsername:  resp.MerchantOutletUsername,
+		Id:              resp.Id,
+		StatusCode:      statusCode,
+		StatusMessage:   statusMessage,
+		StatusDesc:      statusDesc,
+		ReferenceNumber: resp.ReferenceNumber,
+		// ProviderStatusCode:      providerStatusCode,
+		// ProviderStatusMessage:   providerStatusMessage,
+		// ProviderStatusDesc:      providerStatusDesc,
+		// ProviderReferenceNumber: resp.ProviderReferenceNumber,
+		CreatedAt: resp.CreatedAt,
+		// UpdatedAt:               resp.UpdatedAt,
+		CustomerId:         resp.CustomerId,
+		BillInfo:           resp.OtherMsg,
+		ProductId:          resp.ProductId,
+		ProductName:        resp.ProductName,
+		ProductCode:        resp.ProductCode,
+		ProductPrice:       resp.ProductPrice,
+		ProductAdminFee:    resp.ProductAdminFee,
+		ProductMerchantFee: resp.ProductMerchantFee,
+		// ClientId:                resp.ClientId,
+		// ClientName:              resp.ClientName,
+		// GroupId:                 resp.GroupId,
+		// GroupName:               resp.GroupName,
+		// MerchantId:              resp.MerchantId,
+		// MerchantName:            resp.MerchantName,
+		MerchantOutletId:       resp.MerchantOutletId,
+		MerchantOutletName:     resp.MerchantOutletName,
+		MerchantOutletUsername: resp.MerchantOutletUsername,
 	}
 	if resp.StatusCode != configs.PENDING_CODE {
 		respPayment.StatusCode = statusCode
 		respPayment.StatusMessage = statusMessage
 		respPayment.StatusDesc = statusDesc
-		respPayment.ProviderStatusCode = providerStatusCode
-		respPayment.ProviderStatusMessage = providerStatusMessage
-		respPayment.ProviderStatusDesc = providerStatusDesc
+		// respPayment.ProviderStatusCode = providerStatusCode
+		// respPayment.ProviderStatusMessage = providerStatusMessage
+		// respPayment.ProviderStatusDesc = providerStatusDesc
 		result := helpers.ResponseJSON(configs.TRUE_VALUE, resp.StatusCode, resp.StatusMessage, respPayment)
 		return ctx.JSON(http.StatusOK, result)
 	}
@@ -101,13 +102,12 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		if configs.AppEnv == "PROD" {
 			url = configs.IakProdUrlPrepaid + "/api/check-status"
 		}
-		respProvider, err := helperservice.IakPrepaidHelperService(models.ReqPaymentPrepaidIak{
+		respProvider, err := helperservice.IakPulsaWorkerPayment(models.ReqInqIak{
 			// CustomerId:  resp.CustomerId,
 			// ProductCode: resp.ProductProviderCode,
-			RefId:    resp.ReferenceNumber,
-			Username: configs.IakUsername,
-			Sign:     helpers.SignIakEncrypt(""),
-		}, url)
+			RefId: resp.ReferenceNumber,
+			Url:   url,
+		})
 		if err != nil {
 			log.Println("Err ", svcName, "IakPrepaidHelperService", err)
 			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Trx failed", nil)
@@ -120,24 +120,25 @@ func (svc trxService) Advice(ctx echo.Context) error {
 			respPayment.StatusCode = statusCode
 			respPayment.StatusMessage = statusMessage
 			respPayment.StatusDesc = statusDesc
-			respPayment.ProviderStatusCode = providerStatusCode
-			respPayment.ProviderStatusMessage = providerStatusMessage
-			respPayment.ProviderStatusDesc = providerStatusDesc
+			// respPayment.ProviderStatusCode = providerStatusCode
+			// respPayment.ProviderStatusMessage = providerStatusMessage
+			// respPayment.ProviderStatusDesc = providerStatusDesc
 			result := helpers.ResponseJSON(configs.TRUE_VALUE, resp.StatusCode, resp.StatusMessage, respPayment)
 			return ctx.JSON(http.StatusOK, result)
 		}
-		statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus)
+		statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus, "PAY")
 		if statusCode == configs.PENDING_CODE {
 			result := helpers.ResponseJSON(configs.TRUE_VALUE, resp.StatusCode, resp.StatusMessage, respPayment)
 			return ctx.JSON(http.StatusOK, result)
 		}
+		byte, _ := json.Marshal(respProvider.BillInfo)
 		respPayment.StatusCode = statusCode
 		respPayment.StatusMessage = "PAYMENT " + respProvider.PaymentStatusDesc
 		respPayment.StatusDesc = respProvider.PaymentStatusDesc
-		respPayment.ProviderStatusCode = respProvider.PaymentStatusDetail
-		respPayment.ProviderStatusMessage = respProvider.PaymentStatusDescDetail
-		respPayment.ProviderStatusDesc = respProvider.PaymentStatusDescDetail
-		respPayment.BillInfo = respProvider.BillDesc
+		// respPayment.ProviderStatusCode = respProvider.PaymentStatusDetail
+		// respPayment.ProviderStatusMessage = respProvider.PaymentStatusDescDetail
+		// respPayment.ProviderStatusDesc = respProvider.PaymentStatusDescDetail
+		respPayment.BillInfo = string(byte)
 		result := helpers.ResponseJSON(configs.TRUE_VALUE, respPayment.StatusCode, respPayment.StatusMessage, respPayment)
 		return ctx.JSON(http.StatusOK, result)
 	}
@@ -146,7 +147,7 @@ func (svc trxService) Advice(ctx echo.Context) error {
 func UpdateAndInsertStatusTrx(dataPayment models.RespGetTrx, dataAdvice models.ResponseWorkerPayment, svc trxService) error {
 	t := time.Now()
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMPTRX)
-	statusCode := helpers.ErrorCodeGateway(dataAdvice.PaymentStatus)
+	statusCode := helpers.ErrorCodeGateway(dataAdvice.PaymentStatus, "PAY")
 	if statusCode == configs.PENDING_CODE {
 		return errors.New("trx was pending")
 	}
@@ -194,7 +195,8 @@ func UpdateAndInsertStatusTrx(dataPayment models.RespGetTrx, dataAdvice models.R
 		},
 	}
 	if statusCode == configs.SUCCESS_CODE {
-		updatePayment.OtherMsg = dataAdvice.BillDesc
+		byte, _ := json.Marshal(dataAdvice.BillInfo)
+		updatePayment.OtherMsg = string(byte)
 	}
 	err := helpers.DBTransaction(svc.services.RepoDB, func(Tx *sql.Tx) error {
 		err := svc.services.ApiTrx.UpdateTrx(updatePayment, Tx)

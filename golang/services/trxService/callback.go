@@ -67,13 +67,18 @@ func (svc trxService) IAKCallback(ctx echo.Context) error {
 	} else {
 		statusCode = configs.WORKER_SUCCESS_CODE
 		statusMsg = "SUCCESS"
-		billdesc := models.BillDescPulsa{
-			CustomerId: req.Data.CustomerID,
-			Sn:         req.Data.Sn,
+
+		// billdesc := models.BillDescPulsa{
+		// 	CustomerId: req.Data.CustomerID,
+		// 	Sn:         req.Data.Sn,
+		// }
+		billInfo := map[string]interface{}{
+			"customerId": req.Data.CustomerID,
+			"sn":         req.Data.Sn,
 		}
-		respByte, _ = json.Marshal(billdesc)
+		respByte, _ = json.Marshal(billInfo)
 	}
-	statusCode = helpers.ErrorCodeGateway(statusCode)
+	statusCode = helpers.ErrorCodeGateway(statusCode, "PAY")
 	updateTrx := models.ReqGetTrx{
 		Id:                         resp.Id,
 		ProductClanId:              resp.ProductClanId,

@@ -3,7 +3,6 @@ package productrepo
 import (
 	"desabiller/configs"
 	"desabiller/models"
-	"fmt"
 	"log"
 	"strconv"
 	"time"
@@ -14,10 +13,11 @@ func (ctx product) AddProduct(req models.ReqGetProduct) (result models.RespGetPr
 
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	query := ` insert into products (
-		provider_id,
+		product_provider_id,
 		product_clan_id,
 		product_category_id,
 		product_type_id,
+		product_code,
 		product_name,
 		product_price,
 		product_admin_fee,
@@ -27,16 +27,17 @@ func (ctx product) AddProduct(req models.ReqGetProduct) (result models.RespGetPr
 		created_by,
 		updated_by)
 		values(
-			$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12
+			$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13
 		)  `
 	_, err = ctx.repo.Db.Exec(query,
-		req.ProviderId,
+		req.ProductProviderId,
 		req.ProductClanId,
 		req.ProductCategoryId,
 		req.ProductTypeId,
+		req.ProductCode,
 		req.ProductName,
-		req.ProductAdminFee,
 		req.ProductPrice,
+		req.ProductAdminFee,
 		req.ProductMerchantFee,
 		dbTime,
 		dbTime,
@@ -68,6 +69,8 @@ func (ctx product) GetProducts(req models.ReqGetProduct) (result []models.RespGe
 	a.updated_at,
 	a.created_by,
 	a.updated_by,
+	f.id,
+	f.product_provider_name,
 	f.product_provider_code,
 	f.product_provider_price,
 	f.product_provider_admin_fee,
@@ -138,6 +141,8 @@ func (ctx product) GetProducts(req models.ReqGetProduct) (result []models.RespGe
 			&val.UpdatedAt,
 			&val.CreatedBy,
 			&val.UpdatedBy,
+			&val.ProductProviderId,
+			&val.ProductProviderName,
 			&val.ProductProviderCode,
 			&val.ProductProviderPrice,
 			&val.ProductProviderAdminFee,
@@ -225,6 +230,9 @@ func (ctx product) GetProduct(req models.ReqGetProduct) (result models.RespGetPr
 	if req.ProductName != "" {
 		query += ` and a.product_name = '` + req.ProductName + `'`
 	}
+	if req.ProductCode != "" {
+		query += ` and a.product_code = '` + req.ProductCode + `'`
+	}
 	if req.ProductCategoryId != 0 {
 		query += ` and c.id = ` + strconv.Itoa(req.ProductCategoryId)
 	}
@@ -240,7 +248,6 @@ func (ctx product) GetProduct(req models.ReqGetProduct) (result models.RespGetPr
 	if req.ProductProviderId != 0 {
 		query += ` and f.id = ` + strconv.Itoa(req.ProductProviderId)
 	}
-	fmt.Println("==", query)
 	err = ctx.repo.Db.QueryRow(query).Scan(
 		&result.ProviderId,
 		&result.ProviderName,
@@ -276,7 +283,7 @@ func (ctx product) UpdateProduct(req models.ReqGetProduct) (result models.RespGe
 	t := time.Now()
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	query := ` update products set
-	provider_id=$1,
+	product_provider_id=$1,
 	product_clan_id=$2,
 	product_category_id=$3,
 	product_type_id=$4,
@@ -294,8 +301,8 @@ func (ctx product) UpdateProduct(req models.ReqGetProduct) (result models.RespGe
 		req.ProductCategoryId,
 		req.ProductTypeId,
 		req.ProductName,
-		req.ProductAdminFee,
 		req.ProductPrice,
+		req.ProductAdminFee,
 		req.ProductMerchantFee,
 		dbTime,
 		"sys",

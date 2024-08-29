@@ -4,6 +4,9 @@ import (
 	"desabiller/configs"
 	"desabiller/helpers"
 	"desabiller/models"
+	helperIakservice "desabiller/services/helperIakService"
+	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -16,6 +19,7 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		svcName = "InquiryBiller"
 		// respSvc models.ResponseList
 		respOutlet models.RespGetMerchantOutlet
+		url        string
 	)
 	//get product
 	//check price-provider price
@@ -61,7 +65,8 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	respProduct, err := svc.services.ApiProduct.GetProduct(models.ReqGetProduct{
-		ID: req.ProductId,
+		// ID: req.ProductId,
+		ProductCode: req.ProductCode,
 	})
 	if err != nil {
 		log.Println("Err ", svcName, "GetProduct", err)
@@ -113,39 +118,114 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		},
 	}
 	if respProduct.ProductTypeId == 2 { //PREPAID
+		// if configs.AppEnv == "DEV" {
+		// 	url = configs.IakDevUrlPrepaid + configs.ENDPOINT_IAK_PREPAID
+		// }
+		// if configs.AppEnv == "PROD" {
+		// 	url = configs.IakProdUrlPrepaid + configs.ENDPOINT_IAK_PREPAID
+		// }
 		if respProduct.ProductPrice < respProduct.ProductProviderPrice {
 			log.Println("Err ", svcName, "product price invalid", respProduct.ProductPrice, respProduct.ProductProviderPrice)
 			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "product price invalid", nil)
 			return ctx.JSON(http.StatusOK, result)
 		}
+		err = svc.services.ApiTrx.InsertTrx(recordInq, nil)
+		if err != nil {
+			log.Println("Err ", svcName, "InsertTrx", err)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+			return ctx.JSON(http.StatusOK, result)
+		}
+		err = svc.services.ApiTrx.InsertTrxStatus(models.ReqGetTrxStatus{
+			ReferenceNumber:         recordInq.ReferenceNumber,
+			ProviderReferenceNumber: recordInq.ProviderReferenceNumber,
+			StatusCode:              recordInq.StatusCode,
+			StatusMessage:           recordInq.StatusMessage,
+		}, nil)
+		if err != nil {
+			log.Println("Err ", svcName, "InsertTrxStatus", err)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+			return ctx.JSON(http.StatusOK, result)
+		}
 	} else { //postpaid
+		if configs.AppEnv == "DEV" {
+			url = configs.IakDevUrlPostpaid + configs.ENDPOINT_IAK_POSTPAID
+		}
+		if configs.AppEnv == "PROD" {
+			url = configs.IakProdUrlPostpaid + configs.ENDPOINT_IAK_POSTPAID
+		}
 		if respProduct.ProductMerchantFee > respProduct.ProductProviderMerchantFee {
 			log.Println("Err ", svcName, "product merchant fee invalid", respProduct.ProductMerchantFee, respProduct.ProductProviderMerchantFee)
 			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "product merchant fee invalid", nil)
 			return ctx.JSON(http.StatusOK, result)
 		}
 		//inquiry ke partner
+		respWorker, err := helperIakservice.IakPLNPostpaidWorkerInquiry(models.ReqInqIak{
+			ProductCode: respProduct.ProductProviderCode,
+			CustomerId:  req.CustomerId,
+			RefId:       req.ReferenceNumber,
+			Url:         url,
+		})
+		if err != nil {
+			log.Println("Err ", svcName, "IakPLNPrepaidWorkerInquiry", err)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Trx failed", nil)
+			return ctx.JSON(http.StatusOK, result)
+		}
+		byte, _ := json.Marshal(respWorker.BillInfo)
+		statusCode := helpers.ErrorCodeGateway(respWorker.InquiryStatus, "INQ")
+		recordInq.StatusCode = statusCode
+		recordInq.StatusMessage = "INQUIRY " + respWorker.InquiryStatusDesc
+		recordInq.StatusDesc = respWorker.InquiryStatusDesc
+		recordInq.ReferenceNumber = req.ReferenceNumber
+		recordInq.ProviderStatusCode = respWorker.InquiryStatusDetail
+		recordInq.ProviderStatusMessage = respWorker.InquiryStatusDescDetail
+		recordInq.ProviderStatusDesc = respWorker.InquiryStatusDescDetail
+		recordInq.ProviderReferenceNumber = respWorker.TrxProviderReferenceNumber
+		recordInq.OtherMsg = string(byte)
+		recordInq.Filter = models.FilterReq{
+			CreatedAt: dbTime,
+		}
+		fmt.Println("=", string(byte))
+		fmt.Println("=", respWorker.BillInfo)
 
+		// byte, status, er := utils.WorkerPostWithBearer())
+		err = svc.services.ApiTrx.InsertTrx(recordInq, nil)
+		if err != nil {
+			log.Println("Err ", svcName, "UpdateTrx", err)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+			return ctx.JSON(http.StatusOK, result)
+		}
+		err = svc.services.ApiTrx.InsertTrxStatus(models.ReqGetTrxStatus{
+			ReferenceNumber:         recordInq.ReferenceNumber,
+			ProviderReferenceNumber: recordInq.ProviderReferenceNumber,
+			StatusCode:              recordInq.StatusCode,
+			StatusMessage:           recordInq.StatusMessage,
+		}, nil)
+		if err != nil {
+			log.Println("Err ", svcName, "InsertTrxStatus", err)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+			return ctx.JSON(http.StatusOK, result)
+		}
 	}
 
 	// byte, status, er := utils.WorkerPostWithBearer())
-	err = svc.services.ApiTrx.InsertTrx(recordInq, nil)
-	if err != nil {
-		log.Println("Err ", svcName, "InsertTrx", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
-		return ctx.JSON(http.StatusOK, result)
+	respInquiry := models.RespInquiry{
+		StatusCode:             recordInq.StatusCode,
+		StatusMessage:          recordInq.StatusMessage,
+		StatusDesc:             recordInq.StatusDesc,
+		ReferenceNumber:        recordInq.ReferenceNumber,
+		CreatedAt:              recordInq.Filter.CreatedAt,
+		CustomerId:             recordInq.CustomerId,
+		BillInfo:               recordInq.OtherMsg,
+		ProductId:              recordInq.ProductId,
+		ProductName:            recordInq.ProductName,
+		ProductCode:            recordInq.ProductCode,
+		ProductPrice:           recordInq.ProductPrice,
+		ProductAdminFee:        recordInq.ProductAdminFee,
+		ProductMerchantFee:     recordInq.ProductMerchantFee,
+		MerchantOutletId:       recordInq.MerchantOutletId,
+		MerchantOutletName:     recordInq.MerchantOutletName,
+		MerchantOutletUsername: recordInq.MerchantOutletUsername,
 	}
-	err = svc.services.ApiTrx.InsertTrxStatus(models.ReqGetTrxStatus{
-		ReferenceNumber:         recordInq.ReferenceNumber,
-		ProviderReferenceNumber: recordInq.ProviderReferenceNumber,
-		StatusCode:              recordInq.StatusCode,
-		StatusMessage:           recordInq.StatusMessage,
-	}, nil)
-	if err != nil {
-		log.Println("Err ", svcName, "InsertTrxStatus", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
-	result := helpers.ResponseJSON(configs.TRUE_VALUE, recordInq.StatusCode, recordInq.StatusMessage, recordInq)
+	result := helpers.ResponseJSON(configs.TRUE_VALUE, recordInq.StatusCode, recordInq.StatusMessage, respInquiry)
 	return ctx.JSON(http.StatusOK, result)
 }

@@ -4,7 +4,7 @@ import (
 	"desabiller/configs"
 	"desabiller/helpers"
 	"desabiller/models"
-	helperservice "desabiller/services/helperService"
+	helperservice "desabiller/services/helperIakService"
 	"log"
 	"net/http"
 	"time"
@@ -100,34 +100,34 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 	}
 	if respInqTrx.ProductTypeId == 1 {
 		if configs.AppEnv == "DEV" {
-			url = configs.IakDevUrlPostpaid + "/api/v1/bill/check"
+			url = configs.IakDevUrlPostpaid + configs.ENDPOINT_IAK_POSTPAID
 		}
 		if configs.AppEnv == "PROD" {
-			url = configs.IakProdUrlPostpaid + "/api/v1/bill/check"
+			url = configs.IakProdUrlPostpaid + configs.ENDPOINT_IAK_POSTPAID
 		}
+
 	}
 	if respInqTrx.ProductTypeId == 2 {
 		if configs.AppEnv == "DEV" {
-			url = configs.IakDevUrlPrepaid + "/api/top-up"
+			url = configs.IakDevUrlPrepaid + configs.ENDPOINT_IAK_PREPAID
 		}
 		if configs.AppEnv == "PROD" {
-			url = configs.IakProdUrlPrepaid + "/api/top-up"
+			url = configs.IakProdUrlPrepaid + configs.ENDPOINT_IAK_PREPAID
 		}
 		if respInqTrx.ProviderId == 1 { //IAK
-			respProvider, err = helperservice.IakPrepaidHelperService(models.ReqPaymentPrepaidIak{
+			respProvider, err = helperservice.IakPulsaWorkerPayment(models.ReqInqIak{
 				CustomerId:  respInqTrx.CustomerId,
 				ProductCode: respInqTrx.ProductProviderCode,
 				RefId:       respInqTrx.ReferenceNumber,
-				Username:    configs.IakUsername,
-				Sign:        helpers.SignIakEncrypt(""),
-			}, url)
+				Url:         url,
+			})
 			if err != nil {
-				log.Println("Err ", svcName, "IakPrepaidHelperService", err)
+				log.Println("Err ", svcName, "IakPulsaWorkerPayment", err)
 				result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Trx failed", nil)
 				return ctx.JSON(http.StatusOK, result)
 			}
 		}
-		statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus)
+		statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus, "PAY")
 		updatePayment.StatusCode = statusCode
 		updatePayment.StatusMessage = "PAYMENT " + respProvider.PaymentStatusDesc
 		updatePayment.StatusDesc = respProvider.PaymentStatusDesc
@@ -160,34 +160,34 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		}
 	}
 	respPayment := models.RespPayment{
-		Id:                      respInqTrx.Id,
-		StatusCode:              updatePayment.StatusCode,
-		StatusMessage:           updatePayment.StatusMessage,
-		StatusDesc:              updatePayment.StatusDesc,
-		ReferenceNumber:         updatePayment.ReferenceNumber,
-		ProviderStatusCode:      updatePayment.ProviderStatusCode,
-		ProviderStatusMessage:   updatePayment.ProviderStatusMessage,
-		ProviderStatusDesc:      updatePayment.ProviderStatusDesc,
-		ProviderReferenceNumber: updatePayment.ProviderReferenceNumber,
-		CreatedAt:               respInqTrx.CreatedAt,
-		UpdatedAt:               updatePayment.Filter.CreatedAt,
-		CustomerId:              updatePayment.CustomerId,
-		BillInfo:                updatePayment.OtherMsg,
-		ProductId:               updatePayment.ProductId,
-		ProductName:             updatePayment.ProductName,
-		ProductCode:             updatePayment.ProductCode,
-		ProductPrice:            updatePayment.ProductPrice,
-		ProductAdminFee:         updatePayment.ProductAdminFee,
-		ProductMerchantFee:      updatePayment.ProductMerchantFee,
-		ClientId:                updatePayment.ClientId,
-		ClientName:              updatePayment.ClientName,
-		GroupId:                 updatePayment.GroupId,
-		GroupName:               updatePayment.GroupName,
-		MerchantId:              updatePayment.MerchantId,
-		MerchantName:            updatePayment.MerchantName,
-		MerchantOutletId:        updatePayment.MerchantOutletId,
-		MerchantOutletName:      updatePayment.MerchantOutletName,
-		MerchantOutletUsername:  updatePayment.MerchantOutletUsername,
+		Id:              respInqTrx.Id,
+		StatusCode:      updatePayment.StatusCode,
+		StatusMessage:   updatePayment.StatusMessage,
+		StatusDesc:      updatePayment.StatusDesc,
+		ReferenceNumber: updatePayment.ReferenceNumber,
+		// ProviderStatusCode:      updatePayment.ProviderStatusCode,
+		// ProviderStatusMessage:   updatePayment.ProviderStatusMessage,
+		// ProviderStatusDesc:      updatePayment.ProviderStatusDesc,
+		// ProviderReferenceNumber: updatePayment.ProviderReferenceNumber,
+		CreatedAt: respInqTrx.CreatedAt,
+		// UpdatedAt:               updatePayment.Filter.CreatedAt,
+		CustomerId:         updatePayment.CustomerId,
+		BillInfo:           updatePayment.OtherMsg,
+		ProductId:          updatePayment.ProductId,
+		ProductName:        updatePayment.ProductName,
+		ProductCode:        updatePayment.ProductCode,
+		ProductPrice:       updatePayment.ProductPrice,
+		ProductAdminFee:    updatePayment.ProductAdminFee,
+		ProductMerchantFee: updatePayment.ProductMerchantFee,
+		// ClientId:                updatePayment.ClientId,
+		// ClientName:              updatePayment.ClientName,
+		// GroupId:                 updatePayment.GroupId,
+		// GroupName:               updatePayment.GroupName,
+		// MerchantId:              updatePayment.MerchantId,
+		// MerchantName:            updatePayment.MerchantName,
+		MerchantOutletId:       updatePayment.MerchantOutletId,
+		MerchantOutletName:     updatePayment.MerchantOutletName,
+		MerchantOutletUsername: updatePayment.MerchantOutletUsername,
 	}
 	result := helpers.ResponseJSON(configs.TRUE_VALUE, updatePayment.StatusCode, updatePayment.StatusMessage, respPayment)
 	return ctx.JSON(http.StatusOK, result)

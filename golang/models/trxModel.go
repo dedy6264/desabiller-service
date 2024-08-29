@@ -120,20 +120,21 @@ type (
 		ProviderReferenceNumber string `json:"providerReferenceNumber"`
 	}
 	RespPayment struct {
-		Id                      int    `json:"id"`
-		StatusCode              string `json:"statusCode"`
-		StatusMessage           string `json:"statusMessage"`
-		StatusDesc              string `json:"statusDesc"`
-		ReferenceNumber         string `json:"referenceNumber"`
-		ProviderStatusCode      string `json:"providerStatusCode"`
-		ProviderStatusMessage   string `json:"providerStatusMessage"`
-		ProviderStatusDesc      string `json:"providerStatusDesc"`
-		ProviderReferenceNumber string `json:"providerReferenceNumber"`
-		CreatedAt               string `json:"createdAt"`
-		UpdatedAt               string `json:"updatedAt"`
+		Id              int    `json:"id"`
+		StatusCode      string `json:"statusCode"`
+		StatusMessage   string `json:"statusMessage"`
+		StatusDesc      string `json:"statusDesc"`
+		ReferenceNumber string `json:"referenceNumber"`
+		// ProviderStatusCode      string `json:"providerStatusCode"`
+		// ProviderStatusMessage   string `json:"providerStatusMessage"`
+		// ProviderStatusDesc      string `json:"providerStatusDesc"`
+		// ProviderReferenceNumber string `json:"providerReferenceNumber"`
+		CreatedAt string `json:"createdAt"`
+		// UpdatedAt string `json:"updatedAt"`
 
-		CustomerId         string  `json:"customerId"`
-		BillInfo           string  `json:"billInfo"`
+		CustomerId string      `json:"customerId"`
+		BillInfo   interface{} `json:"billInfo"`
+
 		ProductId          int     `json:"productId"`
 		ProductName        string  `json:"productName"`
 		ProductCode        string  `json:"productCode"`
@@ -141,17 +142,47 @@ type (
 		ProductAdminFee    float64 `json:"productAdminFee"`
 		ProductMerchantFee float64 `json:"productMerchantFee"`
 
-		ClientId               int    `json:"clientId"`
-		ClientName             string `json:"clientName"`
-		GroupId                int    `json:"groupId"`
-		GroupName              string `json:"groupName"`
-		MerchantId             int    `json:"merchantId"`
-		MerchantName           string `json:"merchantName"`
+		// ClientId               int    `json:"clientId"`
+		// ClientName             string `json:"clientName"`
+		// GroupId                int    `json:"groupId"`
+		// GroupName              string `json:"groupName"`
+		// MerchantId             int    `json:"merchantId"`
+		// MerchantName           string `json:"merchantName"`
 		MerchantOutletId       int    `json:"merchantOutletId"`
 		MerchantOutletName     string `json:"merchantOutletName"`
 		MerchantOutletUsername string `json:"merchantOutletUsername"`
 	}
-	// RespTrx struct {
-	// 	BillInfo string
-	// }
+	RespInquiry struct {
+		Id              int    `json:"id"`
+		StatusCode      string `json:"statusCode"`
+		StatusMessage   string `json:"statusMessage"`
+		StatusDesc      string `json:"statusDesc"`
+		ReferenceNumber string `json:"referenceNumber"`
+		// ProviderStatusCode      string `json:"providerStatusCode"`
+		// ProviderStatusMessage   string `json:"providerStatusMessage"`
+		// ProviderStatusDesc      string `json:"providerStatusDesc"`
+		// ProviderReferenceNumber string `json:"providerReferenceNumber"`
+		CreatedAt string `json:"createdAt"`
+		// UpdatedAt string `json:"updatedAt"`
+
+		CustomerId string      `json:"customerId"`
+		BillInfo   interface{} `json:"billInfo"`
+
+		ProductId          int     `json:"productId"`
+		ProductName        string  `json:"productName"`
+		ProductCode        string  `json:"productCode"`
+		ProductPrice       float64 `json:"productPrice"`
+		ProductAdminFee    float64 `json:"productAdminFee"`
+		ProductMerchantFee float64 `json:"productMerchantFee"`
+
+		// ClientId               int    `json:"clientId"`
+		// ClientName             string `json:"clientName"`
+		// GroupId                int    `json:"groupId"`
+		// GroupName              string `json:"groupName"`
+		// MerchantId             int    `json:"merchantId"`
+		// MerchantName           string `json:"merchantName"`
+		MerchantOutletId       int    `json:"merchantOutletId"`
+		MerchantOutletName     string `json:"merchantOutletName"`
+		MerchantOutletUsername string `json:"merchantOutletUsername"`
+	}
 )
