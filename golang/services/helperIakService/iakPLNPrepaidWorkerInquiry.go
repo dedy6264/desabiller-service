@@ -101,9 +101,9 @@ func IakPLNPostpaidWorkerInquiry(req models.ReqInqIak) (respWorker models.Respon
 			LembarTagihan: lemTag,
 			Detail:        details,
 		}
-		byte, _ := json.Marshal(billdesc)
+		// byte, _ := json.Marshal(billdesc)
 		respWorker.BillInfo = map[string]interface{}{
-			"billDesc": string(byte),
+			"billDesc": billdesc,
 		}
 		// respWorker.BillInfo = string(byte)
 	}

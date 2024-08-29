@@ -48,6 +48,7 @@ merchant_outlet_name,
 merchant_outlet_username,
 customer_id,
 other_msg,
+total_trx_amount,
 created_at,
 updated_at,
 created_by,
@@ -94,6 +95,7 @@ merchant_outlet_name,
 merchant_outlet_username,
 customer_id,
 other_msg,
+total_trx_amount,
 created_at,
 updated_at,
 created_by,
@@ -173,6 +175,7 @@ func (ctx trxRepository) GetTrx(req models.ReqGetTrx) (result models.RespGetTrx,
 		&result.MerchantOutletUsername,
 		&result.CustomerId,
 		&result.OtherMsg,
+		&result.TotalTrxAmount,
 		&result.CreatedAt,
 		&result.CreatedBy,
 		&result.UpdatedAt,
@@ -314,6 +317,7 @@ func (ctx trxRepository) GetTrxs(req models.ReqGetTrx) (result []models.RespGetT
 			&val.MerchantOutletUsername,
 			&val.CustomerId,
 			&val.OtherMsg,
+			&val.TotalTrxAmount,
 			&val.CreatedAt,
 			&val.CreatedBy,
 			&val.UpdatedAt,
@@ -334,7 +338,7 @@ func (ctx trxRepository) InsertTrx(req models.ReqGetTrx, tx *sql.Tx) (err error)
 		$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,
 		$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,
 		$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,
-		$41,$42,$43
+		$41,$42,$43,$44
 ) returning id`
 	if tx != nil {
 		_, err = tx.Exec(query,
@@ -377,6 +381,7 @@ func (ctx trxRepository) InsertTrx(req models.ReqGetTrx, tx *sql.Tx) (err error)
 			req.MerchantOutletUsername,
 			req.CustomerId,
 			req.OtherMsg,
+			req.TotalTrxAmount,
 			req.Filter.CreatedAt,
 			req.Filter.CreatedAt,
 			req.MerchantOutletUsername,
@@ -426,6 +431,7 @@ func (ctx trxRepository) InsertTrx(req models.ReqGetTrx, tx *sql.Tx) (err error)
 			req.MerchantOutletUsername,
 			req.CustomerId,
 			req.OtherMsg,
+			req.TotalTrxAmount,
 			req.Filter.CreatedAt,
 			req.Filter.CreatedAt,
 			req.MerchantOutletUsername,
@@ -479,8 +485,9 @@ func (ctx trxRepository) UpdateTrx(req models.ReqGetTrx, tx *sql.Tx) (err error)
 			customer_id=$36,
 			other_msg=$37,
 			updated_at=$38,
-			updated_by=$39
-			where reference_number=$40
+			updated_by=$39,
+			trx_total_amount=$40
+			where reference_number=$41
 	`
 	if tx != nil {
 		_, err = tx.Exec(query,
@@ -523,6 +530,7 @@ func (ctx trxRepository) UpdateTrx(req models.ReqGetTrx, tx *sql.Tx) (err error)
 			req.OtherMsg,
 			dbTime,
 			req.MerchantOutletUsername,
+			req.TotalTrxAmount,
 			req.ReferenceNumber,
 		)
 	} else {
@@ -566,6 +574,7 @@ func (ctx trxRepository) UpdateTrx(req models.ReqGetTrx, tx *sql.Tx) (err error)
 			req.OtherMsg,
 			dbTime,
 			req.MerchantOutletUsername,
+			req.TotalTrxAmount,
 			req.ReferenceNumber,
 		)
 	}

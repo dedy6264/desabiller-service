@@ -8,6 +8,7 @@ import (
 	helperservice "desabiller/services/helperIakService"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -19,8 +20,8 @@ func (svc trxService) Advice(ctx echo.Context) error {
 	var (
 		svcName = "[IAK]Advice"
 		url, statusCode,
-		statusMessage,
-		statusDesc string
+		statusMessage string
+		// statusDesc string
 		// providerStatusCode,
 		// providerStatusMessage,
 		// providerStatusDesc string
@@ -43,15 +44,20 @@ func (svc trxService) Advice(ctx echo.Context) error {
 	}
 	statusCode = resp.StatusCode
 	statusMessage = resp.StatusMessage
-	statusDesc = resp.StatusDesc
+	// statusDesc = resp.StatusDesc
 	// providerStatusCode = resp.ProviderStatusCode
 	// providerStatusMessage = resp.ProviderStatusMessage
 	// providerStatusDesc = resp.ProviderStatusDesc
+	var billdesc map[string]interface{}
+	err = json.Unmarshal([]byte(resp.OtherMsg), &billdesc)
+	if err != nil {
+		fmt.Println("Error decoding JSON:", err)
+	}
 	respPayment := models.RespPayment{
-		Id:              resp.Id,
-		StatusCode:      statusCode,
-		StatusMessage:   statusMessage,
-		StatusDesc:      statusDesc,
+		Id: resp.Id,
+		// StatusCode:      statusCode,
+		// StatusMessage:   statusMessage,
+		// StatusDesc:      statusDesc,
 		ReferenceNumber: resp.ReferenceNumber,
 		// ProviderStatusCode:      providerStatusCode,
 		// ProviderStatusMessage:   providerStatusMessage,
@@ -59,9 +65,9 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		// ProviderReferenceNumber: resp.ProviderReferenceNumber,
 		CreatedAt: resp.CreatedAt,
 		// UpdatedAt:               resp.UpdatedAt,
-		CustomerId:         resp.CustomerId,
-		BillInfo:           resp.OtherMsg,
-		ProductId:          resp.ProductId,
+		CustomerId: resp.CustomerId,
+		BillInfo:   billdesc,
+		// ProductId:          resp.ProductId,
 		ProductName:        resp.ProductName,
 		ProductCode:        resp.ProductCode,
 		ProductPrice:       resp.ProductPrice,
@@ -78,13 +84,13 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		MerchantOutletUsername: resp.MerchantOutletUsername,
 	}
 	if resp.StatusCode != configs.PENDING_CODE {
-		respPayment.StatusCode = statusCode
-		respPayment.StatusMessage = statusMessage
-		respPayment.StatusDesc = statusDesc
+		// respPayment.StatusCode = statusCode
+		// respPayment.StatusMessage = statusMessage
+		// respPayment.StatusDesc = statusDesc
 		// respPayment.ProviderStatusCode = providerStatusCode
 		// respPayment.ProviderStatusMessage = providerStatusMessage
 		// respPayment.ProviderStatusDesc = providerStatusDesc
-		result := helpers.ResponseJSON(configs.TRUE_VALUE, resp.StatusCode, resp.StatusMessage, respPayment)
+		result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, respPayment)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	if resp.ProductTypeId == 1 {
@@ -117,29 +123,30 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		err = UpdateAndInsertStatusTrx(resp, respProvider, svc)
 		if err != nil {
 			log.Println("Err UpdateAndInsertStatusTrx", svcName, err)
-			respPayment.StatusCode = statusCode
-			respPayment.StatusMessage = statusMessage
-			respPayment.StatusDesc = statusDesc
+			// respPayment.StatusCode = statusCode
+			// respPayment.StatusMessage = statusMessage
+			// respPayment.StatusDesc = statusDesc
 			// respPayment.ProviderStatusCode = providerStatusCode
 			// respPayment.ProviderStatusMessage = providerStatusMessage
 			// respPayment.ProviderStatusDesc = providerStatusDesc
-			result := helpers.ResponseJSON(configs.TRUE_VALUE, resp.StatusCode, resp.StatusMessage, respPayment)
+			result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, respPayment)
 			return ctx.JSON(http.StatusOK, result)
 		}
 		statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus, "PAY")
 		if statusCode == configs.PENDING_CODE {
-			result := helpers.ResponseJSON(configs.TRUE_VALUE, resp.StatusCode, resp.StatusMessage, respPayment)
+			result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, respPayment)
 			return ctx.JSON(http.StatusOK, result)
 		}
 		byte, _ := json.Marshal(respProvider.BillInfo)
-		respPayment.StatusCode = statusCode
-		respPayment.StatusMessage = "PAYMENT " + respProvider.PaymentStatusDesc
-		respPayment.StatusDesc = respProvider.PaymentStatusDesc
+		// respPayment.StatusCode = statusCode
+		// respPayment.StatusMessage
+		statusMessage = "PAYMENT " + respProvider.PaymentStatusDesc
+		// respPayment.StatusDesc = respProvider.PaymentStatusDesc
 		// respPayment.ProviderStatusCode = respProvider.PaymentStatusDetail
 		// respPayment.ProviderStatusMessage = respProvider.PaymentStatusDescDetail
 		// respPayment.ProviderStatusDesc = respProvider.PaymentStatusDescDetail
 		respPayment.BillInfo = string(byte)
-		result := helpers.ResponseJSON(configs.TRUE_VALUE, respPayment.StatusCode, respPayment.StatusMessage, respPayment)
+		result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, respPayment)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	return nil

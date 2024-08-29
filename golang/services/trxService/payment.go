@@ -5,6 +5,7 @@ import (
 	"desabiller/helpers"
 	"desabiller/models"
 	helperservice "desabiller/services/helperIakService"
+	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -24,6 +25,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		providerStatusDesc,
 		providerReferenceNumber,
 		url string
+		billInfo     map[string]interface{}
 		respProvider models.ResponseWorkerPayment
 		// respSvc models.ResponseList
 		// respOutlet models.RespGetMerchantOutlet
@@ -127,6 +129,8 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 				return ctx.JSON(http.StatusOK, result)
 			}
 		}
+		billInfo = respProvider.BillInfo
+		byte, _ := json.Marshal(billInfo)
 		statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus, "PAY")
 		updatePayment.StatusCode = statusCode
 		updatePayment.StatusMessage = "PAYMENT " + respProvider.PaymentStatusDesc
@@ -136,6 +140,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		updatePayment.ProviderStatusMessage = respProvider.PaymentStatusDescDetail
 		updatePayment.ProviderStatusDesc = respProvider.PaymentStatusDescDetail
 		updatePayment.ProviderReferenceNumber = respProvider.TrxProviderReferenceNumber
+		updatePayment.OtherMsg = string(byte)
 		updatePayment.Filter = models.FilterReq{
 			CreatedAt: dbTime,
 		}
@@ -160,10 +165,10 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		}
 	}
 	respPayment := models.RespPayment{
-		Id:              respInqTrx.Id,
-		StatusCode:      updatePayment.StatusCode,
-		StatusMessage:   updatePayment.StatusMessage,
-		StatusDesc:      updatePayment.StatusDesc,
+		Id: respInqTrx.Id,
+		// StatusCode:      updatePayment.StatusCode,
+		// StatusMessage:   updatePayment.StatusMessage,
+		// StatusDesc:      updatePayment.StatusDesc,
 		ReferenceNumber: updatePayment.ReferenceNumber,
 		// ProviderStatusCode:      updatePayment.ProviderStatusCode,
 		// ProviderStatusMessage:   updatePayment.ProviderStatusMessage,
@@ -171,14 +176,14 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		// ProviderReferenceNumber: updatePayment.ProviderReferenceNumber,
 		CreatedAt: respInqTrx.CreatedAt,
 		// UpdatedAt:               updatePayment.Filter.CreatedAt,
-		CustomerId:         updatePayment.CustomerId,
-		BillInfo:           updatePayment.OtherMsg,
-		ProductId:          updatePayment.ProductId,
-		ProductName:        updatePayment.ProductName,
-		ProductCode:        updatePayment.ProductCode,
-		ProductPrice:       updatePayment.ProductPrice,
-		ProductAdminFee:    updatePayment.ProductAdminFee,
-		ProductMerchantFee: updatePayment.ProductMerchantFee,
+		CustomerId: updatePayment.CustomerId,
+		BillInfo:   billInfo,
+		// ProductId:          updatePayment.ProductId,
+		ProductName:     updatePayment.ProductName,
+		ProductCode:     updatePayment.ProductCode,
+		ProductPrice:    updatePayment.ProductPrice,
+		ProductAdminFee: updatePayment.ProductAdminFee,
+		// ProductMerchantFee: updatePayment.ProductMerchantFee,
 		// ClientId:                updatePayment.ClientId,
 		// ClientName:              updatePayment.ClientName,
 		// GroupId:                 updatePayment.GroupId,

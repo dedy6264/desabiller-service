@@ -20,6 +20,7 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		// respSvc models.ResponseList
 		respOutlet models.RespGetMerchantOutlet
 		url        string
+		billInfo   map[string]interface{}
 	)
 	//get product
 	//check price-provider price
@@ -112,6 +113,7 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		MerchantOutletName:         respOutlet.MerchantOutletName,
 		MerchantOutletUsername:     respOutlet.MerchantOutletUsername,
 		CustomerId:                 req.CustomerId,
+		TotalTrxAmount:             respProduct.ProductPrice,
 		OtherMsg:                   "-",
 		Filter: models.FilterReq{
 			CreatedAt: dbTimeTrx,
@@ -170,7 +172,8 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Trx failed", nil)
 			return ctx.JSON(http.StatusOK, result)
 		}
-		byte, _ := json.Marshal(respWorker.BillInfo)
+		billInfo = respWorker.BillInfo
+		byte, _ := json.Marshal(billInfo)
 		statusCode := helpers.ErrorCodeGateway(respWorker.InquiryStatus, "INQ")
 		recordInq.StatusCode = statusCode
 		recordInq.StatusMessage = "INQUIRY " + respWorker.InquiryStatusDesc
@@ -181,6 +184,7 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		recordInq.ProviderStatusDesc = respWorker.InquiryStatusDescDetail
 		recordInq.ProviderReferenceNumber = respWorker.TrxProviderReferenceNumber
 		recordInq.OtherMsg = string(byte)
+		recordInq.TotalTrxAmount = respWorker.TotalTrxAmount
 		recordInq.Filter = models.FilterReq{
 			CreatedAt: dbTime,
 		}
@@ -209,19 +213,20 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 
 	// byte, status, er := utils.WorkerPostWithBearer())
 	respInquiry := models.RespInquiry{
-		StatusCode:             recordInq.StatusCode,
-		StatusMessage:          recordInq.StatusMessage,
-		StatusDesc:             recordInq.StatusDesc,
-		ReferenceNumber:        recordInq.ReferenceNumber,
-		CreatedAt:              recordInq.Filter.CreatedAt,
-		CustomerId:             recordInq.CustomerId,
-		BillInfo:               recordInq.OtherMsg,
-		ProductId:              recordInq.ProductId,
-		ProductName:            recordInq.ProductName,
-		ProductCode:            recordInq.ProductCode,
-		ProductPrice:           recordInq.ProductPrice,
-		ProductAdminFee:        recordInq.ProductAdminFee,
-		ProductMerchantFee:     recordInq.ProductMerchantFee,
+		// StatusCode:             recordInq.StatusCode,
+		// StatusMessage:          recordInq.StatusMessage,
+		// StatusDesc:             recordInq.StatusDesc,
+		ReferenceNumber: recordInq.ReferenceNumber,
+		CreatedAt:       recordInq.Filter.CreatedAt,
+		CustomerId:      recordInq.CustomerId,
+		BillInfo:        billInfo,
+		TotalTrxAmount:  recordInq.TotalTrxAmount,
+		// ProductId:              recordInq.ProductId,
+		ProductName:     recordInq.ProductName,
+		ProductCode:     recordInq.ProductCode,
+		ProductPrice:    recordInq.ProductPrice,
+		ProductAdminFee: recordInq.ProductAdminFee,
+		// ProductMerchantFee:     recordInq.ProductMerchantFee,
 		MerchantOutletId:       recordInq.MerchantOutletId,
 		MerchantOutletName:     recordInq.MerchantOutletName,
 		MerchantOutletUsername: recordInq.MerchantOutletUsername,
