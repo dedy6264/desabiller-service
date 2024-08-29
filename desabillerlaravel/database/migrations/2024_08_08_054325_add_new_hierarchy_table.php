@@ -165,6 +165,7 @@ class AddNewHierarchyTable extends Migration
             
             $table->string('customer_id');
             $table->string('other_msg');
+            $table->double('total_trx_amount');
             
             $table->string('created_by');
             $table->string('updated_by');
