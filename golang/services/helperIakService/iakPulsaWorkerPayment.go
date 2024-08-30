@@ -6,6 +6,7 @@ import (
 	"desabiller/models"
 	"desabiller/utils"
 	"encoding/json"
+	"fmt"
 	"log"
 	"strconv"
 )
@@ -21,6 +22,7 @@ func IakPulsaWorkerPayment(req models.ReqInqIak) (respWorker models.ResponseWork
 		statusMsgDetail  string
 		respUndefined    models.RespWorkerUndefined
 		respUndefinedI   models.RespWorkerUndefinedI
+		respUndefinedII  models.RespWorkerUndefinedII
 	)
 	providerRequest := models.ReqPaymentPrepaidIak{
 		CustomerId:  req.CustomerId,
@@ -52,14 +54,27 @@ func IakPulsaWorkerPayment(req models.ReqInqIak) (respWorker models.ResponseWork
 				log.Println("Err ", helperName, err)
 				return respWorker, err
 			}
-			respProvider.Data.Rc = respUndefinedI.Data.ResponseCode
-			respProvider.Data.Message = respUndefinedI.Data.Message
+			if respUndefinedI.Data.ResponseCode == "" {
+				err = json.Unmarshal(respByte, &respUndefinedII)
+				if err != nil {
+					log.Println("Err ", helperName, err)
+					return respWorker, err
+				}
+				respProvider.Data.Rc = respUndefinedII.Data.Rc
+				respProvider.Data.Message = respUndefinedII.Data.Message
+			} else {
+				respProvider.Data.Rc = respUndefinedI.Data.ResponseCode
+				respProvider.Data.Message = respUndefinedI.Data.Message
+			}
 		} else {
 			respProvider.Data.Rc = respUndefined.ResponseCode
 			respProvider.Data.Message = respUndefined.Message
 		}
 	}
+	byte, _ := json.Marshal(respProvider)
+
 	statusCodeDetail = respProvider.Data.Rc
+	fmt.Println("===", respProvider, string(byte), "=====", statusCodeDetail)
 	statusMsgDetail = respProvider.Data.Message
 	if ok, _ := helpers.InArray(respProvider.Data.Rc, []string{"201", "39", "05", "02"}); ok {
 		statusCode = configs.WORKER_PENDING_CODE
@@ -100,6 +115,7 @@ func IakPulsaWorkerPayment(req models.ReqInqIak) (respWorker models.ResponseWork
 		}
 		// respWorker.BillInfo = string(byte)
 	}
+	fmt.Println("++++", statusCode, statusMsg)
 	respWorker.PaymentStatus = statusCode
 	respWorker.PaymentStatusDesc = statusMsg
 	respWorker.PaymentStatusDetail = statusCodeDetail

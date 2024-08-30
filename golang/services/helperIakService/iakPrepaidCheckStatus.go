@@ -10,11 +10,10 @@ import (
 	"strconv"
 )
 
-func IakPostpaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.ResponseWorkerPayment, err error) {
-
+func IakPrepaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.ResponseWorkerPayment, err error) {
 	var (
-		helperName       = "[IAK][WKR]IakPostpaidWorkerCheckStatus"
-		respProvider     models.RespCheckStatusPostpaidIak
+		helperName       = "[IAK][WKR]IakPrepaidWorkerCheckStatus"
+		respProvider     models.RespCheckStatusPrepaidIak
 		statusCode       string
 		statusMsg        string
 		statusCodeDetail string
@@ -23,11 +22,12 @@ func IakPostpaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.Respo
 		respUndefined    models.RespWorkerUndefined
 		respUndefinedI   models.RespWorkerUndefinedI
 	)
-	providerRequest := models.ReqCheckStatusPostpaidIak{
-		Commands: req.Commands,
-		Username: configs.IakUsername,
-		RefId:    req.RefId,
-		Sign:     helpers.SignIakEncrypt("cs"),
+	providerRequest := models.ReqPaymentPrepaidIak{
+		CustomerId:  req.CustomerId,
+		ProductCode: req.ProductCode,
+		RefId:       req.RefId,
+		Username:    configs.IakUsername,
+		Sign:        helpers.SignIakEncrypt(req.RefId),
 	}
 	respByte, _, err := utils.WorkerPostWithBearer(req.Url, "", providerRequest, "json")
 	if err != nil {
@@ -52,21 +52,21 @@ func IakPostpaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.Respo
 				log.Println("Err ", helperName, err)
 				return respWorker, err
 			}
-			respProvider.Data.ResponseCode = respUndefinedI.Data.ResponseCode
+			respProvider.Data.Rc = respUndefinedI.Data.ResponseCode
 			respProvider.Data.Message = respUndefinedI.Data.Message
 		} else {
-			respProvider.Data.ResponseCode = respUndefined.ResponseCode
+			respProvider.Data.Rc = respUndefined.ResponseCode
 			respProvider.Data.Message = respUndefined.Message
 		}
 	}
-	statusCodeDetail = respProvider.Data.ResponseCode
+	statusCodeDetail = respProvider.Data.Rc
 	statusMsgDetail = respProvider.Data.Message
-	if ok, _ := helpers.InArray(respProvider.Data.ResponseCode, []string{"201", "39", "05", "02"}); ok {
+	if ok, _ := helpers.InArray(respProvider.Data.Rc, []string{"201", "39", "05", "02"}); ok {
 		statusCode = configs.WORKER_PENDING_CODE
 		statusMsg = "PENDING"
 	}
-	if respProvider.Data.ResponseCode != "00" {
-		switch respProvider.Data.ResponseCode {
+	if respProvider.Data.Rc != "00" {
+		switch respProvider.Data.Rc {
 		case "07":
 			statusCode = configs.WORKER_FAILED_CODE
 			statusMsg = "FAILED"
@@ -82,6 +82,9 @@ func IakPostpaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.Respo
 	respWorker.PaymentStatusDescDetail = statusMsgDetail
 	respWorker.TotalTrxAmount, _ = strconv.ParseFloat(strconv.Itoa(respProvider.Data.Price), 64)
 	respWorker.TrxProviderReferenceNumber = strconv.Itoa(respProvider.Data.TrID)
+	respWorker.BillInfo = map[string]interface{}{
+		"sn": respProvider.Data.Sn,
+	}
 
 	return respWorker, nil
 }

@@ -148,6 +148,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 	billInfo = respProvider.BillInfo
 	byte, _ := json.Marshal(billInfo)
 	statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus, "PAY")
+	fmt.Println("P STATUS", statusCode, respProvider.PaymentStatus)
 	updatePayment.StatusCode = statusCode
 	updatePayment.StatusMessage = "PAYMENT " + respProvider.PaymentStatusDesc
 	updatePayment.StatusDesc = respProvider.PaymentStatusDesc
@@ -161,8 +162,9 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		CreatedAt: dbTime,
 	}
 	updatePayment.TotalTrxAmount = respProvider.TotalTrxAmount
-	if configs.TrxPaymentPending == "YES" {
+	if configs.TrxPaymentPending == "YES" && statusCode == configs.SUCCESS_CODE {
 		updatePayment.StatusCode = configs.PENDING_CODE
+		updatePayment.StatusMessage = "PAYMENT PENDING"
 	}
 	// byte, status, er := utils.WorkerPostWithBearer())
 	err = svc.services.ApiTrx.UpdateTrx(updatePayment, nil)

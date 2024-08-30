@@ -11,6 +11,13 @@ type (
 			Message      string `json:"message"`
 		} `json:"data"`
 	}
+	RespWorkerUndefinedII struct {
+		Data struct {
+			Rc      string `json:"rc"`
+			Message string `json:"message"`
+			Status  int    `json:"status"`
+		} `json:"data"`
+	}
 	IakCallback struct {
 		Data struct {
 			RefID       string `json:"ref_id"`
@@ -183,5 +190,19 @@ type (
 			} `json:"desc"`
 		} `json:"data"`
 		Meta []interface{} `json:"meta"`
+	}
+	RespCheckStatusPrepaidIak struct {
+		Data struct {
+			RefID       string `json:"ref_id"`
+			Status      int    `json:"status"`
+			ProductCode string `json:"product_code"`
+			CustomerID  string `json:"customer_id"`
+			Price       int    `json:"price"`
+			Message     string `json:"message"`
+			Sn          string `json:"sn"`
+			Balance     int    `json:"balance"`
+			TrID        int    `json:"tr_id"`
+			Rc          string `json:"rc"`
+		} `json:"data"`
 	}
 )
