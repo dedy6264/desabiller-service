@@ -6,7 +6,6 @@ import (
 	"desabiller/models"
 	helperIakservice "desabiller/services/helperIakService"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -188,10 +187,10 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		recordInq.Filter = models.FilterReq{
 			CreatedAt: dbTime,
 		}
-		fmt.Println("=", string(byte))
-		fmt.Println("=", respWorker.BillInfo)
-
-		// byte, status, er := utils.WorkerPostWithBearer())
+		var dd models.BillDescPLN
+		byte, _ = json.Marshal(billInfo["billDesc"])
+		_ = json.Unmarshal(byte, &dd)
+		recordInq.ProductAdminFee = recordInq.ProductAdminFee * float64(dd.LembarTagihan)
 		err = svc.services.ApiTrx.InsertTrx(recordInq, nil)
 		if err != nil {
 			log.Println("Err ", svcName, "UpdateTrx", err)
