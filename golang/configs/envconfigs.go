@@ -29,6 +29,7 @@ var (
 	IakDevUrlPostpaid  = GetEnv("IAK_DEV_URL_POSTPAID")
 	IakDevUrlPrepaid   = GetEnv("IAK_DEV_URL_PREPAID")
 	IakUsername        = GetEnv("IAK_USERNAME")
+	TrxPaymentPending  = GetEnv("TRX_PAYMENT_PENDING")
 )
 
 func GetEnv(key string, value ...string) string {

@@ -486,7 +486,7 @@ func (ctx trxRepository) UpdateTrx(req models.ReqGetTrx, tx *sql.Tx) (err error)
 			other_msg=$37,
 			updated_at=$38,
 			updated_by=$39,
-			trx_total_amount=$40
+			total_trx_amount=$40
 			where reference_number=$41
 	`
 	if tx != nil {

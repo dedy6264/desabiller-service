@@ -6,6 +6,7 @@ import (
 	"desabiller/models"
 	helperservice "desabiller/services/helperIakService"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -107,7 +108,20 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		if configs.AppEnv == "PROD" {
 			url = configs.IakProdUrlPostpaid + configs.ENDPOINT_IAK_POSTPAID
 		}
-
+		if respInqTrx.ProviderId == 1 { //IAK
+			respProvider, err = helperservice.IakPLNPostpaidWorkerPayment(models.ReqInqIak{
+				CustomerId:  respInqTrx.CustomerId,
+				ProductCode: respInqTrx.ProductProviderCode,
+				RefId:       respInqTrx.ProviderReferenceNumber,
+				Url:         url,
+				Commands:    "pay-pasca",
+			})
+			if err != nil {
+				log.Println("Err ", svcName, "IakPulsaWorkerPayment", err)
+				result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Trx failed", nil)
+				return ctx.JSON(http.StatusOK, result)
+			}
+		}
 	}
 	if respInqTrx.ProductTypeId == 2 {
 		if configs.AppEnv == "DEV" {
@@ -129,40 +143,44 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 				return ctx.JSON(http.StatusOK, result)
 			}
 		}
-		billInfo = respProvider.BillInfo
-		byte, _ := json.Marshal(billInfo)
-		statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus, "PAY")
-		updatePayment.StatusCode = statusCode
-		updatePayment.StatusMessage = "PAYMENT " + respProvider.PaymentStatusDesc
-		updatePayment.StatusDesc = respProvider.PaymentStatusDesc
-		updatePayment.ReferenceNumber = respInqTrx.ReferenceNumber
-		updatePayment.ProviderStatusCode = respProvider.PaymentStatusDetail
-		updatePayment.ProviderStatusMessage = respProvider.PaymentStatusDescDetail
-		updatePayment.ProviderStatusDesc = respProvider.PaymentStatusDescDetail
-		updatePayment.ProviderReferenceNumber = respProvider.TrxProviderReferenceNumber
-		updatePayment.OtherMsg = string(byte)
-		updatePayment.Filter = models.FilterReq{
-			CreatedAt: dbTime,
-		}
-
-		// byte, status, er := utils.WorkerPostWithBearer())
-		err = svc.services.ApiTrx.UpdateTrx(updatePayment, nil)
-		if err != nil {
-			log.Println("Err ", svcName, "UpdateTrx", err)
-			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
-			return ctx.JSON(http.StatusOK, result)
-		}
-		err = svc.services.ApiTrx.InsertTrxStatus(models.ReqGetTrxStatus{
-			ReferenceNumber:         updatePayment.ReferenceNumber,
-			ProviderReferenceNumber: updatePayment.ProviderReferenceNumber,
-			StatusCode:              updatePayment.StatusCode,
-			StatusMessage:           updatePayment.StatusMessage,
-		}, nil)
-		if err != nil {
-			log.Println("Err ", svcName, "InsertTrxStatus", err)
-			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
-			return ctx.JSON(http.StatusOK, result)
-		}
+	}
+	fmt.Println("PY RESP==", respProvider)
+	billInfo = respProvider.BillInfo
+	byte, _ := json.Marshal(billInfo)
+	statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus, "PAY")
+	updatePayment.StatusCode = statusCode
+	updatePayment.StatusMessage = "PAYMENT " + respProvider.PaymentStatusDesc
+	updatePayment.StatusDesc = respProvider.PaymentStatusDesc
+	updatePayment.ReferenceNumber = respInqTrx.ReferenceNumber
+	updatePayment.ProviderStatusCode = respProvider.PaymentStatusDetail
+	updatePayment.ProviderStatusMessage = respProvider.PaymentStatusDescDetail
+	updatePayment.ProviderStatusDesc = respProvider.PaymentStatusDescDetail
+	updatePayment.ProviderReferenceNumber = respProvider.TrxProviderReferenceNumber
+	updatePayment.OtherMsg = string(byte)
+	updatePayment.Filter = models.FilterReq{
+		CreatedAt: dbTime,
+	}
+	updatePayment.TotalTrxAmount = respProvider.TotalTrxAmount
+	if configs.TrxPaymentPending == "YES" {
+		updatePayment.StatusCode = configs.PENDING_CODE
+	}
+	// byte, status, er := utils.WorkerPostWithBearer())
+	err = svc.services.ApiTrx.UpdateTrx(updatePayment, nil)
+	if err != nil {
+		log.Println("Err ", svcName, "UpdateTrx", err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
+	err = svc.services.ApiTrx.InsertTrxStatus(models.ReqGetTrxStatus{
+		ReferenceNumber:         updatePayment.ReferenceNumber,
+		ProviderReferenceNumber: updatePayment.ProviderReferenceNumber,
+		StatusCode:              updatePayment.StatusCode,
+		StatusMessage:           updatePayment.StatusMessage,
+	}, nil)
+	if err != nil {
+		log.Println("Err ", svcName, "InsertTrxStatus", err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		return ctx.JSON(http.StatusOK, result)
 	}
 	respPayment := models.RespPayment{
 		Id: respInqTrx.Id,
@@ -193,6 +211,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		MerchantOutletId:       updatePayment.MerchantOutletId,
 		MerchantOutletName:     updatePayment.MerchantOutletName,
 		MerchantOutletUsername: updatePayment.MerchantOutletUsername,
+		TotalTrxAmount:         updatePayment.TotalTrxAmount,
 	}
 	result := helpers.ResponseJSON(configs.TRUE_VALUE, updatePayment.StatusCode, updatePayment.StatusMessage, respPayment)
 	return ctx.JSON(http.StatusOK, result)

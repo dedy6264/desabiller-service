@@ -10,28 +10,25 @@ import (
 	"strconv"
 )
 
-func IakPLNPostpaidWorkerInquiry(req models.ReqInqIak) (respWorker models.ResponseWorkerInquiry, err error) {
+func IakPostpaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.ResponseWorkerPayment, err error) {
 
 	var (
-		helperName       = "[IAK][WKR]IakPLNPostpaidWorkerInquiry"
-		respProvider     models.RespInquiryPLNPostpaidIak
+		helperName       = "[IAK][WKR]IakPostpaidWorkerCheckStatus"
+		respProvider     models.RespCheckStatusPostpaidIak
 		statusCode       string
 		statusMsg        string
 		statusCodeDetail string
 		statusMsgDetail  string
-		inquiryDetail    models.InquiryDetail
+		paymentDetail    models.PaymentDetails
 		respUndefined    models.RespWorkerUndefined
 		respUndefinedI   models.RespWorkerUndefinedI
 	)
-	providerRequest := models.ReqInquiryPostpaidIak{
-		Commands: "inq-pasca",
-		Hp:       req.CustomerId,
-		Code:     req.ProductCode,
-		RefId:    req.RefId,
+	providerRequest := models.ReqCheckStatusPostpaidIak{
+		Commands: req.Commands,
 		Username: configs.IakUsername,
-		Sign:     helpers.SignIakEncrypt(req.RefId),
+		RefId:    req.RefId,
+		Sign:     helpers.SignIakEncrypt("cs"),
 	}
-
 	respByte, _, err := utils.WorkerPostWithBearer(req.Url, "", providerRequest, "json")
 	if err != nil {
 		log.Println("Err ", helperName, err)
@@ -94,7 +91,7 @@ func IakPLNPostpaidWorkerInquiry(req models.ReqInqIak) (respWorker models.Respon
 			detail  models.DetailBillDescPLN
 			details []models.DetailBillDescPLN
 		)
-		inquiryDetail = models.InquiryDetail{
+		paymentDetail = models.PaymentDetails{
 			Price:    float64(respProvider.Data.Nominal),
 			AdminFee: float64(respProvider.Data.Admin),
 		}
@@ -108,10 +105,12 @@ func IakPLNPostpaidWorkerInquiry(req models.ReqInqIak) (respWorker models.Respon
 				denda, _ := strconv.ParseFloat(data.Denda, 64)
 				tagihan, _ := strconv.ParseFloat(data.NilaiTagihan, 64)
 				detail = models.DetailBillDescPLN{
-					Periode: data.Periode,
-					Admin:   admin,
-					Denda:   denda,
-					Tagihan: tagihan,
+					Periode:    data.Periode,
+					Admin:      admin,
+					Denda:      denda,
+					Tagihan:    tagihan,
+					MeterAwal:  data.MeterAwal,
+					MeterAkhir: data.MeterAkhir,
 				}
 				details = append(details, detail)
 			}
@@ -129,13 +128,13 @@ func IakPLNPostpaidWorkerInquiry(req models.ReqInqIak) (respWorker models.Respon
 		}
 		// respWorker.BillInfo = string(byte)
 	}
-	respWorker.InquiryDetail = inquiryDetail
-	respWorker.InquiryStatus = statusCode
-	respWorker.InquiryStatusDesc = statusMsg
-	respWorker.InquiryStatusDetail = statusCodeDetail
-	respWorker.InquiryStatusDescDetail = statusMsgDetail
+	respWorker.PaymentDetail = paymentDetail
+	respWorker.PaymentStatus = statusCode
+	respWorker.PaymentStatusDesc = statusMsg
+	respWorker.PaymentStatusDetail = statusCodeDetail
+	respWorker.PaymentStatusDescDetail = statusMsgDetail
 	respWorker.TotalTrxAmount, _ = strconv.ParseFloat(strconv.Itoa(respProvider.Data.Price), 64)
-	respWorker.TrxReferenceNumber = providerRequest.RefId
+	respWorker.TrxReferenceNumber = providerRequest.TrID
 	respWorker.TrxProviderReferenceNumber = strconv.Itoa(respProvider.Data.TrID)
 
 	return respWorker, nil

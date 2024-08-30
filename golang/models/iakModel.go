@@ -1,6 +1,16 @@
 package models
 
 type (
+	RespWorkerUndefined struct {
+		ResponseCode string `json:"response_code"`
+		Message      string `json:"message"`
+	}
+	RespWorkerUndefinedI struct {
+		Data struct {
+			ResponseCode string `json:"response_code"`
+			Message      string `json:"message"`
+		} `json:"data"`
+	}
 	IakCallback struct {
 		Data struct {
 			RefID       string `json:"ref_id"`
@@ -26,6 +36,7 @@ type (
 		Sign        string `json:"sign"`
 	}
 	ReqInqIak struct {
+		Commands    string `json:"commands"`
 		ProductCode string `json:"product_code"`
 		CustomerId  string `json:"customer_id"`
 		RefId       string `json:"ref_id"`
@@ -36,12 +47,24 @@ type (
 		CustomerId  string `json:"customer_id"`
 		RefId       string `json:"ref_id"`
 	}
+	ReqCheckStatusPostpaidIak struct {
+		Commands string `json:"commands"`
+		Username string `json:"username"`
+		Sign     string `json:"sign"`
+		RefId    string `json:"ref_id"`
+	}
 	ReqInquiryPostpaidIak struct {
 		Commands string `json:"commands"`
 		Hp       string `json:"hp"`
 		Code     string `json:"code"`
 		RefId    string `json:"ref_id"`
 		Username string `json:"username"`
+		Sign     string `json:"sign"`
+	}
+	ReqPaymentPostpaidIak struct {
+		Commands string `json:"commands"`
+		Username string `json:"username"`
+		TrID     string `json:"tr_id"`
 		Sign     string `json:"sign"`
 	}
 	RespPaymentPrepaidIak struct {
@@ -82,6 +105,78 @@ type (
 						NilaiTagihan string `json:"nilai_tagihan"`
 						Admin        string `json:"admin"`
 						Denda        string `json:"denda"`
+						Total        int    `json:"total"`
+					} `json:"detail"`
+				} `json:"tagihan"`
+			} `json:"desc"`
+		} `json:"data"`
+		Meta []interface{} `json:"meta"`
+	}
+	RespPaymentPLNPostpaidIak struct {
+		Data struct {
+			TrID         int    `json:"tr_id"`
+			Code         string `json:"code"`
+			Datetime     string `json:"datetime"`
+			Hp           string `json:"hp"`
+			TrName       string `json:"tr_name"`
+			Period       string `json:"period"`
+			Nominal      int    `json:"nominal"`
+			Admin        int    `json:"admin"`
+			ResponseCode string `json:"response_code"`
+			Message      string `json:"message"`
+			Price        int    `json:"price"`
+			SellingPrice int    `json:"selling_price"`
+			Balance      int    `json:"balance"`
+			Noref        string `json:"noref"`
+			RefID        string `json:"ref_id"`
+			Desc         struct {
+				Tarif             string `json:"tarif"`
+				Daya              int    `json:"daya"`
+				LembarTagihan     string `json:"lembar_tagihan"`
+				LembarTagihanSisa int    `json:"lembar_tagihan_sisa"`
+				Tagihan           struct {
+					Detail []struct {
+						MeterAwal    string `json:"meter_awal"`
+						MeterAkhir   string `json:"meter_akhir"`
+						Periode      string `json:"periode"`
+						NilaiTagihan string `json:"nilai_tagihan"`
+						Admin        string `json:"admin"`
+						Denda        string `json:"denda"`
+						Total        int    `json:"total"`
+					} `json:"detail"`
+				} `json:"tagihan"`
+			} `json:"desc"`
+		} `json:"data"`
+		Meta []interface{} `json:"meta"`
+	}
+	RespCheckStatusPostpaidIak struct {
+		Data struct {
+			TrID         int    `json:"tr_id"`
+			Code         string `json:"code"`
+			Datetime     string `json:"datetime"`
+			Hp           string `json:"hp"`
+			TrName       string `json:"tr_name"`
+			Period       string `json:"period"`
+			Nominal      int    `json:"nominal"`
+			Admin        int    `json:"admin"`
+			Status       int    `json:"status"`
+			ResponseCode string `json:"response_code"`
+			Message      string `json:"message"`
+			Price        int    `json:"price"`
+			SellingPrice int    `json:"selling_price"`
+			Balance      int    `json:"balance"`
+			Noref        string `json:"noref"`
+			RefID        string `json:"ref_id"`
+			Desc         struct {
+				KodeArea      string `json:"kode_area"`
+				Divre         string `json:"divre"`
+				Datel         string `json:"datel"`
+				JumlahTagihan int    `json:"jumlah_tagihan"`
+				Tagihan       struct {
+					Detail []struct {
+						Periode      string `json:"periode"`
+						NilaiTagihan string `json:"nilai_tagihan"`
+						Admin        string `json:"admin"`
 						Total        int    `json:"total"`
 					} `json:"detail"`
 				} `json:"tagihan"`

@@ -100,35 +100,20 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		if configs.AppEnv == "PROD" {
 			url = configs.IakProdUrlPostpaid + "/api/v1/bill/check"
 		}
-	}
-	if resp.ProductTypeId == 2 {
-		if configs.AppEnv == "DEV" {
-			url = configs.IakDevUrlPrepaid + "/api/check-status"
-		}
-		if configs.AppEnv == "PROD" {
-			url = configs.IakProdUrlPrepaid + "/api/check-status"
-		}
-		respProvider, err := helperservice.IakPulsaWorkerPayment(models.ReqInqIak{
-			// CustomerId:  resp.CustomerId,
-			// ProductCode: resp.ProductProviderCode,
-			RefId: resp.ReferenceNumber,
-			Url:   url,
+		respProvider, err := helperservice.IakPLNPostpaidWorkerPayment(models.ReqInqIak{
+			CustomerId: resp.CustomerId,
+			RefId:      resp.ProviderReferenceNumber,
+			Commands:   "checkstatus",
+			Url:        url,
 		})
 		if err != nil {
 			log.Println("Err ", svcName, "IakPrepaidHelperService", err)
 			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Trx failed", nil)
 			return ctx.JSON(http.StatusOK, result)
 		}
-
 		err = UpdateAndInsertStatusTrx(resp, respProvider, svc)
 		if err != nil {
 			log.Println("Err UpdateAndInsertStatusTrx", svcName, err)
-			// respPayment.StatusCode = statusCode
-			// respPayment.StatusMessage = statusMessage
-			// respPayment.StatusDesc = statusDesc
-			// respPayment.ProviderStatusCode = providerStatusCode
-			// respPayment.ProviderStatusMessage = providerStatusMessage
-			// respPayment.ProviderStatusDesc = providerStatusDesc
 			result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, respPayment)
 			return ctx.JSON(http.StatusOK, result)
 		}
@@ -138,13 +123,40 @@ func (svc trxService) Advice(ctx echo.Context) error {
 			return ctx.JSON(http.StatusOK, result)
 		}
 		byte, _ := json.Marshal(respProvider.BillInfo)
-		// respPayment.StatusCode = statusCode
-		// respPayment.StatusMessage
 		statusMessage = "PAYMENT " + respProvider.PaymentStatusDesc
-		// respPayment.StatusDesc = respProvider.PaymentStatusDesc
-		// respPayment.ProviderStatusCode = respProvider.PaymentStatusDetail
-		// respPayment.ProviderStatusMessage = respProvider.PaymentStatusDescDetail
-		// respPayment.ProviderStatusDesc = respProvider.PaymentStatusDescDetail
+		respPayment.BillInfo = string(byte)
+		result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, respPayment)
+		return ctx.JSON(http.StatusOK, result)
+	}
+	if resp.ProductTypeId == 2 {
+		if configs.AppEnv == "DEV" {
+			url = configs.IakDevUrlPrepaid + "/api/check-status"
+		}
+		if configs.AppEnv == "PROD" {
+			url = configs.IakProdUrlPrepaid + "/api/check-status"
+		}
+		respProvider, err := helperservice.IakPulsaWorkerPayment(models.ReqInqIak{
+			RefId: resp.ReferenceNumber,
+			Url:   url,
+		})
+		if err != nil {
+			log.Println("Err ", svcName, "IakPrepaidHelperService", err)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Trx failed", nil)
+			return ctx.JSON(http.StatusOK, result)
+		}
+		err = UpdateAndInsertStatusTrx(resp, respProvider, svc)
+		if err != nil {
+			log.Println("Err UpdateAndInsertStatusTrx", svcName, err)
+			result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, respPayment)
+			return ctx.JSON(http.StatusOK, result)
+		}
+		statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus, "PAY")
+		if statusCode == configs.PENDING_CODE {
+			result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, respPayment)
+			return ctx.JSON(http.StatusOK, result)
+		}
+		byte, _ := json.Marshal(respProvider.BillInfo)
+		statusMessage = "PAYMENT " + respProvider.PaymentStatusDesc
 		respPayment.BillInfo = string(byte)
 		result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, respPayment)
 		return ctx.JSON(http.StatusOK, result)
@@ -196,6 +208,7 @@ func UpdateAndInsertStatusTrx(dataPayment models.RespGetTrx, dataAdvice models.R
 		MerchantOutletUsername:     dataPayment.MerchantOutletUsername,
 		CustomerId:                 dataPayment.CustomerId,
 		OtherMsg:                   dataPayment.OtherMsg,
+		TotalTrxAmount:             dataPayment.TotalTrxAmount,
 		Filter: models.FilterReq{
 			UpdatedAt: dbTime,
 			UpdatedBy: "sys",

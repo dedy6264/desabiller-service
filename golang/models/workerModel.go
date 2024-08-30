@@ -45,15 +45,17 @@ type (
 	}
 	BillDescPLN struct {
 		CustomerId    string              `json:"customerId"`
-		Tarif         float64             `json:"tarif"`
+		Tarif         string              `json:"tarif"`
 		Daya          string              `json:"daya"`
-		LembarTagihan int                 `json:"lembar_tagihan"`
+		LembarTagihan int                 `json:"lembarTagihan"`
 		Detail        []DetailBillDescPLN `json:"detail"`
 	}
 	DetailBillDescPLN struct {
-		Periode string  `json:"periode"`
-		Admin   float64 `json:"admin"`
-		Denda   float64 `json:"denda"`
-		Tagihan float64 `json:"tagihan"`
+		Periode    string  `json:"periode"`
+		Admin      float64 `json:"admin"`
+		Denda      float64 `json:"denda"`
+		Tagihan    float64 `json:"tagihan"`
+		MeterAwal  string  `json:"meterAwal"`
+		MeterAkhir string  `json:"meterAkhir"`
 	}
 )

@@ -224,9 +224,9 @@ func (ctx product) GetProduct(req models.ReqGetProduct) (result models.RespGetPr
 	join providers as e on f.provider_id=e.id
 	where true
 	`
-	if req.ID != 0 {
-		query += ` and a.id = ` + strconv.Itoa(req.ID)
-	}
+	// if req.ID != 0 {
+	// 	query += ` and a.id = ` + strconv.Itoa(req.ID)
+	// }
 	if req.ProductName != "" {
 		query += ` and a.product_name = '` + req.ProductName + `'`
 	}
