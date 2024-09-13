@@ -72,7 +72,8 @@ func (svc providerServices) GetProductTypes(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	respSvc.Data = resp
-	respSvc.TotalData = count
+	respSvc.RecordsTotal = count
+	respSvc.RecordsFiltered = count
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
 		configs.SUCCESS_CODE,
 		"Success",

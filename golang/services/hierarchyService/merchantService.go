@@ -40,7 +40,8 @@ func (svc HierarcyService) GetMerchants(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Data :: empty", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	respSvc.TotalData = count
+	respSvc.RecordsTotal = count
+	respSvc.RecordsFiltered = count
 	respSvc.Data = resMerchant
 	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, "SUCCESS", respSvc)
 	return ctx.JSON(http.StatusOK, result)

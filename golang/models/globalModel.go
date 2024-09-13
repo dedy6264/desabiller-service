@@ -7,7 +7,8 @@ type Response struct {
 	Result           interface{} `json:"result"`
 }
 type ResponseList struct {
-	TotalData int         `json:"totalData"`
-	TotalRow  int         `json:"totalRow"`
-	Data      interface{} `json:"result"`
+	Draw            int         `json:"draw"`
+	RecordsTotal    int         `json:"recordsTotal"`
+	RecordsFiltered int         `json:"recordsFiltered"`
+	Data            interface{} `json:"data"`
 }
