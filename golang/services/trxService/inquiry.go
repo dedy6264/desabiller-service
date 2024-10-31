@@ -17,9 +17,9 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 	var (
 		svcName = "InquiryBiller"
 		// respSvc models.ResponseList
-		respOutlet models.RespGetMerchantOutlet
-		url        string
-		billInfo   map[string]interface{}
+		respOutlet                                                                                          models.RespGetMerchantOutlet
+		url, statusCode, statusMessage, statusDesc, statusCodeDetail, statusMessageDetail, statusDescDetail string
+		billInfo                                                                                            map[string]interface{}
 	)
 	//get product
 	//check price-provider price
@@ -73,6 +73,12 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
+	statusCode = configs.INQUIRY_SUCCESS_CODE
+	statusDesc = "INQUIRY " + configs.SUCCESS_MSG
+	statusMessage = "INQUIRY " + configs.SUCCESS_MSG
+	statusCodeDetail = "-"
+	statusMessageDetail = "INQUIRY " + configs.SUCCESS_MSG
+	statusDescDetail = "INQUIRY " + configs.SUCCESS_MSG
 	recordInq := models.ReqGetTrx{
 		ProductClanId:              respProduct.ProductClanId,
 		ProductClanName:            respProduct.ProductClanName,
@@ -94,13 +100,13 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		ProductProviderPrice:       respProduct.ProductProviderPrice,
 		ProductProviderAdminFee:    respProduct.ProductProviderAdminFee,
 		ProductProviderMerchantFee: respProduct.ProductProviderMerchantFee,
-		StatusCode:                 configs.INQUIRY_SUCCESS_CODE,
-		StatusMessage:              "INQUIRY " + configs.SUCCESS_MSG,
-		StatusDesc:                 "INQUIRY " + configs.SUCCESS_MSG,
+		StatusCode:                 statusCode,
+		StatusMessage:              statusMessage,
+		StatusDesc:                 statusDesc,
 		ReferenceNumber:            req.ReferenceNumber,
-		ProviderStatusCode:         "-",
-		ProviderStatusMessage:      "INQUIRY " + configs.SUCCESS_MSG,
-		ProviderStatusDesc:         "INQUIRY " + configs.SUCCESS_MSG,
+		ProviderStatusCode:         statusCodeDetail,
+		ProviderStatusMessage:      statusMessageDetail,
+		ProviderStatusDesc:         statusDescDetail,
 		ProviderReferenceNumber:    "-",
 		ClientId:                   respOutlet.ClientId,
 		ClientName:                 respOutlet.ClientName,
@@ -173,7 +179,7 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		}
 		billInfo = respWorker.BillInfo
 		byte, _ := json.Marshal(billInfo)
-		statusCode := helpers.ErrorCodeGateway(respWorker.InquiryStatus, "INQ")
+		statusCode = helpers.ErrorCodeGateway(respWorker.InquiryStatus, "INQ")
 		recordInq.StatusCode = statusCode
 		recordInq.StatusMessage = "INQUIRY " + respWorker.InquiryStatusDesc
 		recordInq.StatusDesc = respWorker.InquiryStatusDesc
@@ -230,6 +236,6 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		MerchantOutletName:     recordInq.MerchantOutletName,
 		MerchantOutletUsername: recordInq.MerchantOutletUsername,
 	}
-	result := helpers.ResponseJSON(configs.TRUE_VALUE, recordInq.StatusCode, recordInq.StatusMessage, respInquiry)
+	result := helpers.ResponseJSON(configs.TRUE_VALUE, recordInq.StatusCode, respWorker.InquiryStatusDescDetail, respInquiry)
 	return ctx.JSON(http.StatusOK, result)
 }
