@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class MainController extends Controller
 {
@@ -13,14 +14,47 @@ class MainController extends Controller
      */
     public function index()
     {
-        return view("dashboard.content");
-    }
+        $response = Http::post('http://localhost:10036/category/gets', [
+            'id' => 0,
+            'clientName' => "",
+            'limit' => 0,
+            'offset' => 0,
+            'orderBy' => "",
+            'startDate' => "",
+            'endDate' => "",
+            'username' => "",
+        ])->json();
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+        // dd($response);
+         // Mengambil data dari API
+        //  dd($response);
+         if (!is_array($response) || !isset($response['result']) || !is_array($response['result'])) {
+            return response()->json(['error' => 'Invalid API response format or data type'], 500);
+        }
+        // Ambil data 'result'
+        $response = $response['result'];
+        $dataRes = $response['data'] ?? [];
+        // dd($dataRes[1]['productCategoryName']);
+        return view("dashboard.content",compact('dataRes'));
+    }
+    public function all(Request $request)
+    {
+        $response = Http::post('https://8c47-125-166-235-226.ngrok-free.app/product/gets', [
+            'productCategoryId' => (int)$request->id,
+        ])->json();
+        // dd($response);
+         // Mengambil data dari API
+        //  dd($response);
+         if (!is_array($response) || !isset($response['result']) || !is_array($response['result'])) {
+            return response()->json(['error' => 'Invalid API response format or data type'], 500);
+        }
+        // Ambil data 'result'
+        $response = $response['result'];
+        $dataRes = $response['data'] ?? [];
+        // dd($dataRes);
+        return view("dashboard.content",compact('dataRes'));
+  
+    }
     public function create()
     {
         //

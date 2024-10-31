@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\MainController;
+use App\Http\Controllers\InquiryController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -18,5 +19,8 @@ use Illuminate\Support\Facades\Route;
 //     return view('welcome');
 // });
 Route::get('/', [MainController::class, 'index'])->name('home'); //proses logout
+Route::get('/pulsa', [InquiryController::class, 'pulsaIndex'])->name('pulsa'); //proses logout
+Route::get('/pulsa/checkSimProv', [InquiryController::class, 'pulsaCheckSimProvider'])->name('pulsa.checkSimProv'); //proses logout
+
 
 // Route::resource('dashboard',MainController::class);

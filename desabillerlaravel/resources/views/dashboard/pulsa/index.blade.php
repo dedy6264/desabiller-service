@@ -1,7 +1,7 @@
 @extends('dashboard.app')
 @section('activeMenu')
 @php
-    $activeMenu="product";
+    $activeMenu="pulsa";
 @endphp
 @endsection
 @section('customLink')
@@ -76,33 +76,10 @@
 
 @section('pageheading')
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Product</h1>
+    <h1 class="h3 mb-0 text-gray-800">Pulsa</h1>
     <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
             class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
 </div>
-@endsection
-
-@section('script')
-<script>
-    var datatable=$('#dataTable').DataTable( {
-        ajax:{
-            url:'{!!url()->current()!!}',
-        },
-        columnDefs: [{
-                            targets: [5],
-                            render: $.fn.dataTable.render.number( '.', ',', 2)
-                        }],
-        columns:[
-            { data: 'DT_RowIndex', orderable: false, searchable: false },
-            {data:'action', name:'action', orderable:false, searchable:false},
-            {data:'product_name', name:'product_name'},
-            {data:'product_code', name:'product_code'},
-            {data:'product_desc', name:'product_desc'},
-            {data:'product_price', name:'product_price'},
-            {data:'created_by', name:'created_by'},
-        ],
-    } );
-</script>
 @endsection
 
 @section('content')
@@ -110,57 +87,79 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             {{-- <h6 class="m-0 font-weight-bold text-primary ">DataTables Example</h6> --}}
-            <a href="{{route('product.create')}}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                class="fas fa-plus fa-sm text-white-50"></i> Add Product</a>
+            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                class="fas fa-plus fa-sm text-white-50"></i> Check Sim Provider</a>
         </div>
         @if (Session::get('fail'))
         {{Session::get('fail')}}
     @endif
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Action</th>
-                            <th>Product Name</th>
-                            <th>Product Code</th>
-                            <th>Product Desc</th>
-                            <th>Price</th>
-                            <th>Created By</th>
-                        </tr>
-                    </thead>
-                    {{-- <tfoot>
-                        <tr>
-                            <th>Name</th>
-                            <th>Position</th>
-                            <th>Office</th>
-                            <th>Age</th>
-                            <th>Start date</th>
-                            <th>Salary</th>
-                        </tr>
-                    </tfoot> --}}
-                    <tbody>
-                        {{-- <tr>
-                            <td>Tiger Nixon</td>
-                            <td>System Architect</td>
-                            <td>Edinburgh</td>
-                            <td>61</td>
-                            <td>2011/04/25</td>
-                            <td>$320,800</td>
-                        </tr>
-                        <tr>
-                            <td>Garrett Winters</td>
-                            <td>Accountant</td>
-                            <td>Tokyo</td>
-                            <td>63</td>
-                            <td>2011/07/25</td>
-                            <td>$170,750</td>
-                        </tr> --}}
-                    </tbody>
-                </table>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <!-- Div untuk Vue App -->
+                        <div id="app">
+                            <example-component></example-component> <!-- Komponen Vue akan di-render di sini -->
+                            <!-- Menampilkan pesan error atau sukses -->
+                            <div v-if="errorMessage" class="alert alert-danger">
+                                @{{ errorMessage }}
+                            </div>
+                            
+                            <div v-if="successMessage" class="alert alert-success">
+                                @{{ successMessage }}
+                            </div>
+                            
+                            <!-- Form yang dikelola oleh Vue -->
+                            <form @submit.prevent="submitForm">
+                                <div class="form-group">
+                                    <label for="id_customer">No HP</label>
+                                    <input type="text" v-model="id_customer" class="form-control" placeholder="Id Customer" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Check Sim Provider</button>
+                            </form>
+                        </div>
+                        <script src="{{ mix('js/app.js') }}"></script>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
 @endsection
 
+
+<!-- Bagian ini untuk menyertakan Vue dan Axios -->
+@section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            id_customer: '',      // Input nomor HP dari pengguna
+            successMessage: 'weweew',   // Untuk menampilkan pesan sukses
+            errorMessage: ''      // Untuk menampilkan pesan error
+        },
+        methods: {
+            submitForm() {
+                console.log("ppppp")
+                // Gunakan axios untuk mengirim data ke Laravel
+                axios.post('/pulsa/checkSimProv', {
+                    id_customer: this.id_customer
+                })
+                .then(response => {
+                    console.log("000000");
+                    this.successMessage = response.data.message;
+                    this.errorMessage = '';  // Reset error jika ada
+                })
+                .catch(error => {
+                    if (error.response) {
+                        this.errorMessage = error.response.data.message;
+                        this.successMessage = '';  // Reset success jika ada
+                    }
+                });
+            }
+        }
+    });
+</script>
+@endsection
