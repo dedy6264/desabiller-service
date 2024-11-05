@@ -20,6 +20,7 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		respOutlet                                                                                          models.RespGetMerchantOutlet
 		url, statusCode, statusMessage, statusDesc, statusCodeDetail, statusMessageDetail, statusDescDetail string
 		billInfo                                                                                            map[string]interface{}
+		respWorker                                                                                          models.ResponseWorkerInquiry
 	)
 	//get product
 	//check price-provider price
@@ -166,7 +167,7 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 			return ctx.JSON(http.StatusOK, result)
 		}
 		//inquiry ke partner
-		respWorker, err := helperIakservice.IakPLNPostpaidWorkerInquiry(models.ReqInqIak{
+		respWorker, err = helperIakservice.IakPLNPostpaidWorkerInquiry(models.ReqInqIak{
 			ProductCode: respProduct.ProductProviderCode,
 			CustomerId:  req.CustomerId,
 			RefId:       req.ReferenceNumber,
