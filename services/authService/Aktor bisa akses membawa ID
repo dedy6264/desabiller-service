@@ -1,0 +1,13 @@
+Aktor           bisa akses              membawa ID
+userOutlet->    productCategory         (jwt(merchantOutletID))
+                product
+                trx
+
+
+Menu Dashboard
+1. Product Category
+2. Product
+3. Transaksi Report
+4. Home-> Kasir
+    -> get all product order by category
+    -> 

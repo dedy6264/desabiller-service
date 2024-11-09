@@ -38,9 +38,9 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	if req.ProductId == 0 {
-		log.Println("Err ", svcName, "product id cannot be null")
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "product id cannot be null", nil)
+	if req.ProductCode == "" {
+		log.Println("Err ", svcName, "product code cannot be null")
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "product code cannot be null", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	if req.CustomerId == "" {
