@@ -60,6 +60,7 @@ type (
 	ReqGetProductProvider struct {
 		ID                         int       `json:"id"`
 		ProviderName               string    `json:"providerName"`
+		ProductProviderId          int       `json:"productProviderId"`
 		ProductProviderName        string    `json:"productProviderName"`
 		ProductProviderCode        string    `json:"productProviderCode"`
 		ProviderId                 int       `json:"providerId"`

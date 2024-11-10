@@ -48,6 +48,7 @@ type (
 		CustomerId  string `json:"customer_id"`
 		RefId       string `json:"ref_id"`
 		Url         string `json:"url"`
+		Month       string `json:"month"`
 	}
 	ReqPaymentIak struct {
 		ProductCode string `json:"product_code"`

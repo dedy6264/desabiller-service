@@ -14,9 +14,9 @@ import (
 	"github.com/labstack/echo"
 )
 
-func (svc trxService) PaymentBiller(ctx echo.Context) error {
+func (svc trxService) TrxBillerReport(ctx echo.Context) error {
 	var (
-		svcName = "PaymentBiller"
+		svcName = "TrxBillerReport"
 		statusCode,
 		statusMessage,
 		statusDesc,

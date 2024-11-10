@@ -8,6 +8,7 @@ import (
 	hierarchyservicego "desabiller/services/hierarchyService"
 	trxservice "desabiller/services/trxService"
 	useractivityservice "desabiller/services/userActivityService"
+	"fmt"
 	"log"
 
 	// nfeatureassignmentsservice "desabiller/services/nFeaturesService/featureAssignmentService"
@@ -31,7 +32,10 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 	hierachySvc := hierarchyservicego.ApiHierarchy(service)
 	userAct := useractivityservice.NewApiUserActivityService(service)
 	trxSvc := trxservice.NewApiTrxService(service)
-
+	e.GET("/", func(ctx echo.Context) error {
+		fmt.Println("OK YA")
+		return nil
+	})
 	{ //dashboard
 
 		aa := e.Group("/client")

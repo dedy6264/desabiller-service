@@ -46,6 +46,7 @@ func (ctx product) AddProductProvider(req models.ReqGetProductProvider) (result 
 func (ctx product) GetProductProviders(req models.ReqGetProductProvider) (result []models.RespGetProductProvider, err error) {
 	query := `select
 a.id,
+b.id,
 b.provider_name,
 a.product_provider_name,
 a.product_provider_code,
@@ -90,6 +91,7 @@ where true
 	for rows.Next() {
 		err := rows.Scan(
 			&val.ID,
+			&val.ProviderId,
 			&val.ProviderName,
 			&val.ProductProviderName,
 			&val.ProductProviderCode,

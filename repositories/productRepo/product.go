@@ -3,6 +3,8 @@ package productrepo
 import (
 	"desabiller/configs"
 	"desabiller/models"
+	"encoding/json"
+	"fmt"
 	"log"
 	"strconv"
 	"time"
@@ -292,11 +294,16 @@ func (ctx product) UpdateProduct(req models.ReqGetProduct) (result models.RespGe
 	product_admin_fee=$7,
 	product_merchant_fee=$8,
 	updated_at=$9,
-	updated_by=$10
-	where id = $11 
+	updated_by=$10,
+	product_code=$11
+	where id = $12 
 	`
+	aa, _ := json.Marshal(req)
+
+	fmt.Println("sssss ", string(aa))
+	fmt.Println("query ", query)
 	_, err = ctx.repo.Db.Exec(query,
-		req.ProviderId,
+		req.ProductProviderId,
 		req.ProductClanId,
 		req.ProductCategoryId,
 		req.ProductTypeId,
@@ -306,6 +313,7 @@ func (ctx product) UpdateProduct(req models.ReqGetProduct) (result models.RespGe
 		req.ProductMerchantFee,
 		dbTime,
 		"sys",
+		req.ProductCode,
 		req.ID)
 	if err != nil {
 		return result, err

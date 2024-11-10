@@ -1,6 +1,16 @@
 package models
 
 type (
+	ProviderInqRequest struct {
+		ProviderId       int    `json:"providerId"`
+		ProductClan      string `json:"productClan"`
+		ProductCode      string `json:"productCode"`
+		SubscriberNumber string `json:"subscriberNumber"`
+		SubscriberName   string `json:"subscriberName"`
+		ReferenceNumber  string `json:"referenceNumber"`
+		Url              string `json:"url"`
+		Periode          int    `json:"periode"`
+	}
 	ReqAviceTrx struct {
 		ReferenceNumber string `json:"referenceNumber" validate:"required"`
 	}
@@ -153,6 +163,15 @@ type (
 		// MerchantId             int    `json:"merchantId"`
 		// MerchantName           string `json:"merchantName"`
 
+	}
+	ReqInquiry struct {
+		ProductCode     string          `json:"productCode"`
+		AdditionalField AdditionalField `json:"additionalField"`
+	}
+	AdditionalField struct {
+		Periode          int    `json:"periode"`
+		SubscriberNumber string `json:"SubscriberNumber"`
+		SubscriberName   string `json:"SubscriberName"`
 	}
 	RespInquiry struct {
 		Id                     int         `json:"id"`

@@ -1,7 +1,7 @@
 version: '3'
 services:
   server:
-    image: "desabiller"
+    image: ${REPO_DOCKER}/${APP_NAME}:${APP_VERSION}
     build: ./
       # context: .
       # target: final
