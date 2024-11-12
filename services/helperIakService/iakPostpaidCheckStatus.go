@@ -6,6 +6,7 @@ import (
 	"desabiller/models"
 	"desabiller/utils"
 	"encoding/json"
+	"fmt"
 	"log"
 	"strconv"
 )
@@ -40,7 +41,7 @@ func IakPostpaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.Respo
 		log.Println("Err ", helperName, err)
 		return respWorker, err
 	}
-	if respProvider.Data.RefID == "" {
+	if respProvider.Data.RefID == "" { // pasti response error
 		err = json.Unmarshal(respByte, &respUndefined)
 		if err != nil {
 			log.Println("Err ", helperName, err)
@@ -59,20 +60,80 @@ func IakPostpaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.Respo
 			respProvider.Data.Message = respUndefined.Message
 		}
 	}
+
 	statusCodeDetail = respProvider.Data.ResponseCode
 	statusMsgDetail = respProvider.Data.Message
-	if ok, _ := helpers.InArray(respProvider.Data.ResponseCode, []string{"201", "39", "05", "02"}); ok {
+	if respProvider.Data.ResponseCode == "00" {
+		statusCode = configs.WORKER_SUCCESS_CODE
+		statusMsg = "SUCCESS"
+	} else if respProvider.Data.ResponseCode == "07" {
+		statusCode = configs.WORKER_FAILED_CODE
+		statusMsg = "FAILED"
+	} else {
 		statusCode = configs.WORKER_PENDING_CODE
 		statusMsg = "PENDING"
 	}
-	if respProvider.Data.ResponseCode != "00" {
-		switch respProvider.Data.ResponseCode {
-		case "07":
-			statusCode = configs.WORKER_FAILED_CODE
-			statusMsg = "FAILED"
+	fmt.Println(statusCode, statusMsg)
+	if statusCode == configs.WORKER_SUCCESS_CODE || statusCode == configs.WORKER_PENDING_CODE {
+		if req.ProductClan == "" {
+			log.Println("Err ", helperName, "Invalid Product Clan", err)
+			return
+		}
+		switch req.ProductClan {
+		case "PLN POST":
+			fmt.Println("udah bener")
+			if respProvider.Data.Desc == "" {
+			}
+			var respProvider models.RespPaymentPLNPostpaidIak
+			err := json.Unmarshal(respByte, &respProvider)
+			if err != nil {
+				log.Println("Err ", helperName, err)
+				return respWorker, err
+			}
+			var (
+				detail  models.DetailBillDescPLN
+				details []models.DetailBillDescPLN
+			)
+			paymentDetail = models.PaymentDetails{
+				Price:    float64(respProvider.Data.Nominal),
+				AdminFee: float64(respProvider.Data.Admin),
+			}
+			// tarif, _ := strconv.ParseFloat(respProvider.Data.Desc.Tarif, 64)
+			lemTag, _ := strconv.Atoi(respProvider.Data.Desc.LembarTagihan)
+			if len(respProvider.Data.Desc.Tagihan.Detail) != 0 {
+				for _, data := range respProvider.Data.Desc.Tagihan.Detail {
+					admin, _ := strconv.ParseFloat(data.Admin, 64)
+					denda, _ := strconv.ParseFloat(data.Denda, 64)
+					tagihan, _ := strconv.ParseFloat(data.NilaiTagihan, 64)
+					detail = models.DetailBillDescPLN{
+						Periode:    data.Periode,
+						Admin:      admin,
+						Denda:      denda,
+						Tagihan:    tagihan,
+						MeterAwal:  data.MeterAwal,
+						MeterAkhir: data.MeterAkhir,
+					}
+					details = append(details, detail)
+				}
+			}
+			billdesc := models.BillDescPLN{
+				CustomerId:    strconv.Itoa(respProvider.Data.TrID),
+				Tarif:         respProvider.Data.Desc.Tarif,
+				Daya:          strconv.Itoa(respProvider.Data.Desc.Daya),
+				LembarTagihan: lemTag,
+				Detail:        details,
+			}
+			// byte, _ := json.Marshal(billdesc)
+			respWorker.BillInfo = map[string]interface{}{
+				"billDesc": billdesc,
+			}
+			respWorker.TotalTrxAmount, _ = strconv.ParseFloat(strconv.Itoa(respProvider.Data.Price), 64)
+			respWorker.TrxProviderReferenceNumber = strconv.Itoa(respProvider.Data.TrID)
 		default:
-			statusCode = configs.WORKER_PENDING_CODE
-			statusMsg = "PENDING"
+			fmt.Println("nyasar kene")
+			respWorker.PaymentStatus = configs.WORKER_PENDING_CODE
+			respWorker.PaymentStatusDesc = "PENDING"
+			return respWorker, nil
 		}
 	}
 	respWorker.PaymentDetail = paymentDetail
@@ -80,8 +141,6 @@ func IakPostpaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.Respo
 	respWorker.PaymentStatusDesc = statusMsg
 	respWorker.PaymentStatusDetail = statusCodeDetail
 	respWorker.PaymentStatusDescDetail = statusMsgDetail
-	respWorker.TotalTrxAmount, _ = strconv.ParseFloat(strconv.Itoa(respProvider.Data.Price), 64)
-	respWorker.TrxProviderReferenceNumber = strconv.Itoa(respProvider.Data.TrID)
 
 	return respWorker, nil
 }

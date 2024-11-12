@@ -11,6 +11,11 @@ type (
 		Url              string `json:"url"`
 		Periode          int    `json:"periode"`
 	}
+	ProviderPayRequest struct {
+		ReferenceId string `json:"referenceId"`
+		Url         string `json:"url"`
+		ProductClan string `json:"productClan"`
+	}
 	ReqAviceTrx struct {
 		ReferenceNumber string `json:"referenceNumber" validate:"required"`
 	}

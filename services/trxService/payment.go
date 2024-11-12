@@ -108,20 +108,25 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		if configs.AppEnv == "PROD" {
 			url = configs.IakProdUrlPostpaid + configs.ENDPOINT_IAK_POSTPAID
 		}
-		if respInqTrx.ProviderId == 1 { //IAK
-			respProvider, err = helperservice.IakPLNPostpaidWorkerPayment(models.ReqInqIak{
-				CustomerId:  respInqTrx.CustomerId,
-				ProductCode: respInqTrx.ProductProviderCode,
-				RefId:       respInqTrx.ProviderReferenceNumber,
-				Url:         url,
-				Commands:    "pay-pasca",
-			})
-			if err != nil {
-				log.Println("Err ", svcName, "IakPulsaWorkerPayment", err)
-				result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.PENDING_CODE, configs.PENDING_MSG, nil)
-				return ctx.JSON(http.StatusOK, result)
-			}
+		respProvider, err = svc.PayProviderSwitcher(models.ProviderPayRequest{
+			ReferenceId: respInqTrx.ProviderReferenceNumber,
+			Url:         url,
+			ProductClan: respInqTrx.ProductClanName,
+		})
+		// if respInqTrx.ProviderId == 1 { //IAK
+		// 	respProvider, err = helperservice.IakPLNPostpaidWorkerPayment(models.ReqInqIak{
+		// 		CustomerId:  respInqTrx.CustomerId,
+		// 		ProductCode: respInqTrx.ProductProviderCode,
+		// 		RefId:       respInqTrx.ProviderReferenceNumber,
+		// 		Url:         url,
+		// 		// Commands:    "pay-pasca",
+		// 	})
+		if err != nil {
+			log.Println("Err ", svcName, err)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.PENDING_CODE, configs.PENDING_MSG, nil)
+			return ctx.JSON(http.StatusOK, result)
 		}
+		// }
 	}
 	if respInqTrx.ProductTypeId == 2 {
 		if configs.AppEnv == "DEV" {

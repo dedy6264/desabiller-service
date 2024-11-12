@@ -114,7 +114,6 @@ func (svc trxService) TrxBillerReport(ctx echo.Context) error {
 				ProductCode: respInqTrx.ProductProviderCode,
 				RefId:       respInqTrx.ProviderReferenceNumber,
 				Url:         url,
-				Commands:    "pay-pasca",
 			})
 			if err != nil {
 				log.Println("Err ", svcName, "IakPulsaWorkerPayment", err)

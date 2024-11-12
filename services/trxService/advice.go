@@ -86,10 +86,11 @@ func (svc trxService) Advice(ctx echo.Context) error {
 			url = configs.IakProdUrlPostpaid + "/api/v1/bill/check"
 		}
 		respProvider, err := helperservice.IakPostpaidWorkerCheckStatus(models.ReqInqIak{
-			CustomerId: resp.CustomerId,
-			RefId:      resp.ReferenceNumber,
-			Commands:   "checkstatus",
-			Url:        url,
+			CustomerId:  resp.CustomerId,
+			RefId:       resp.ReferenceNumber,
+			Commands:    "checkstatus",
+			Url:         url,
+			ProductClan: resp.ProductClanName,
 		})
 		if err != nil {
 			log.Println("Err ", svcName, "IakPrepaidHelperService", err)

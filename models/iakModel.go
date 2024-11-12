@@ -49,6 +49,7 @@ type (
 		RefId       string `json:"ref_id"`
 		Url         string `json:"url"`
 		Month       string `json:"month"`
+		ProductClan string `json:"productClan"`
 	}
 	ReqPaymentIak struct {
 		ProductCode string `json:"product_code"`
@@ -68,6 +69,7 @@ type (
 		RefId    string `json:"ref_id"`
 		Username string `json:"username"`
 		Sign     string `json:"sign"`
+		Month    string `json:"month"`
 	}
 	ReqPaymentPostpaidIak struct {
 		Commands string `json:"commands"`
@@ -159,36 +161,23 @@ type (
 	}
 	RespCheckStatusPostpaidIak struct {
 		Data struct {
-			TrID         int    `json:"tr_id"`
-			Code         string `json:"code"`
-			Datetime     string `json:"datetime"`
-			Hp           string `json:"hp"`
-			TrName       string `json:"tr_name"`
-			Period       string `json:"period"`
-			Nominal      int    `json:"nominal"`
-			Admin        int    `json:"admin"`
-			Status       int    `json:"status"`
-			ResponseCode string `json:"response_code"`
-			Message      string `json:"message"`
-			Price        int    `json:"price"`
-			SellingPrice int    `json:"selling_price"`
-			Balance      int    `json:"balance"`
-			Noref        string `json:"noref"`
-			RefID        string `json:"ref_id"`
-			Desc         struct {
-				KodeArea      string `json:"kode_area"`
-				Divre         string `json:"divre"`
-				Datel         string `json:"datel"`
-				JumlahTagihan int    `json:"jumlah_tagihan"`
-				Tagihan       struct {
-					Detail []struct {
-						Periode      string `json:"periode"`
-						NilaiTagihan string `json:"nilai_tagihan"`
-						Admin        string `json:"admin"`
-						Total        int    `json:"total"`
-					} `json:"detail"`
-				} `json:"tagihan"`
-			} `json:"desc"`
+			TrID         int         `json:"tr_id"`
+			Code         string      `json:"code"`
+			Datetime     string      `json:"datetime"`
+			Hp           string      `json:"hp"`
+			TrName       string      `json:"tr_name"`
+			Period       string      `json:"period"`
+			Nominal      int         `json:"nominal"`
+			Admin        int         `json:"admin"`
+			Status       int         `json:"status"`
+			ResponseCode string      `json:"response_code"`
+			Message      string      `json:"message"`
+			Price        int         `json:"price"`
+			SellingPrice int         `json:"selling_price"`
+			Balance      int         `json:"balance"`
+			Noref        string      `json:"noref"`
+			RefID        string      `json:"ref_id"`
+			Desc         interface{} `json:"desc"`
 		} `json:"data"`
 		Meta []interface{} `json:"meta"`
 	}
@@ -205,5 +194,56 @@ type (
 			TrID        int    `json:"tr_id"`
 			Rc          string `json:"rc"`
 		} `json:"data"`
+	}
+
+	//bpjs
+	RespInquiryBPJSIak struct {
+		Data struct {
+			TrID         int    `json:"tr_id"`
+			Code         string `json:"code"`
+			Hp           string `json:"hp"`
+			TrName       string `json:"tr_name"`
+			Period       string `json:"period"`
+			Nominal      int    `json:"nominal"`
+			Admin        int    `json:"admin"`
+			RefID        string `json:"ref_id"`
+			ResponseCode string `json:"response_code"`
+			Message      string `json:"message"`
+			Price        int    `json:"price"`
+			SellingPrice int    `json:"selling_price"`
+			Desc         struct {
+				KodeCabang     string `json:"kode_cabang"`
+				NamaCabang     string `json:"nama_cabang"`
+				SisaPembayaran string `json:"sisa_pembayaran"`
+				JumlahPeserta  string `json:"jumlah_peserta"`
+			} `json:"desc"`
+		} `json:"data"`
+		Meta []interface{} `json:"meta"`
+	}
+	RespPaymentBPJSIak struct {
+		Data struct {
+			TrID         int    `json:"tr_id"`
+			Code         string `json:"code"`
+			Datetime     string `json:"datetime"`
+			Hp           string `json:"hp"`
+			TrName       string `json:"tr_name"`
+			Period       string `json:"period"`
+			Nominal      int    `json:"nominal"`
+			Admin        int    `json:"admin"`
+			ResponseCode string `json:"response_code"`
+			Message      string `json:"message"`
+			Price        int    `json:"price"`
+			SellingPrice int    `json:"selling_price"`
+			Balance      int    `json:"balance"`
+			Noref        string `json:"noref"`
+			RefID        string `json:"ref_id"`
+			Desc         struct {
+				KodeCabang     string `json:"kode_cabang"`
+				NamaCabang     string `json:"nama_cabang"`
+				SisaPembayaran string `json:"sisa_pembayaran"`
+				JumlahPeserta  string `json:"jumlah_peserta"`
+			} `json:"desc"`
+		} `json:"data"`
+		Meta []interface{} `json:"meta"`
 	}
 )
