@@ -5,7 +5,7 @@ import (
 	"desabiller/configs"
 	"desabiller/helpers"
 	"desabiller/models"
-	helperservice "desabiller/services/helperIakService"
+	iakworkerservice "desabiller/services/IAKWorkerService"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -21,11 +21,6 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		svcName = "[IAK]Advice"
 		url, statusCode,
 		statusMessage string
-		// statusDesc string
-		// providerStatusCode,
-		// providerStatusMessage,
-		// providerStatusDesc string
-		// respSvc models.ResponseList
 	)
 	req := new(models.ReqAviceTrx)
 	_, err := helpers.BindValidate(req, ctx)
@@ -54,17 +49,15 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		fmt.Println("Error decoding JSON:", err)
 	}
 	respPayment := models.RespPayment{
-		Id:                     resp.Id,
 		ReferenceNumber:        resp.ReferenceNumber,
 		CreatedAt:              resp.CreatedAt,
-		CustomerId:             resp.CustomerId,
+		SubscriberNumber:       resp.CustomerId,
 		BillInfo:               billdesc,
 		ProductName:            resp.ProductName,
 		ProductCode:            resp.ProductCode,
 		ProductPrice:           resp.ProductPrice,
 		ProductAdminFee:        resp.ProductAdminFee,
 		ProductMerchantFee:     resp.ProductMerchantFee,
-		MerchantOutletId:       resp.MerchantOutletId,
 		MerchantOutletName:     resp.MerchantOutletName,
 		MerchantOutletUsername: resp.MerchantOutletUsername,
 	}
@@ -85,15 +78,14 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		if configs.AppEnv == "PROD" {
 			url = configs.IakProdUrlPostpaid + "/api/v1/bill/check"
 		}
-		respProvider, err := helperservice.IakPostpaidWorkerCheckStatus(models.ReqInqIak{
-			CustomerId:  resp.CustomerId,
-			RefId:       resp.ReferenceNumber,
-			Commands:    "checkstatus",
-			Url:         url,
-			ProductClan: resp.ProductClanName,
+		respProvider, err := svc.CheckStatusProviderSwitcher(models.ProviderInqRequest{
+			ReferenceNumber: resp.ReferenceNumber,
+			Url:             url,
+			ProviderName:    resp.ProviderName,
+			ProductClan:     resp.ProductClanName,
 		})
 		if err != nil {
-			log.Println("Err ", svcName, "IakPrepaidHelperService", err)
+			log.Println("Err ", svcName, "CheckStatusProviderSwitcher", err)
 			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Trx failed", nil)
 			return ctx.JSON(http.StatusOK, result)
 		}
@@ -108,20 +100,22 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		respProvider.TrxProviderReferenceNumber = resp.ProviderReferenceNumber
 		respProvider.TotalTrxAmount = resp.TotalTrxAmount
 		respProvider.BillInfo = billInfo
-		respProvider.PaymentDetail.AdminFee = resp.ProductProviderAdminFee
-		respProvider.PaymentDetail.MerchantFee = resp.ProductProviderMerchantFee
-		respProvider.PaymentDetail.Price = resp.ProductProviderPrice
+		// respProvider.PaymentDetail.AdminFee = resp.ProductProviderAdminFee
+		// respProvider.PaymentDetail.MerchantFee = resp.ProductProviderMerchantFee
+		// respProvider.PaymentDetail.Price = resp.ProductProviderPrice
+		statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus, "PAY")
+		if statusCode == configs.PENDING_CODE {
+
+			result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, respPayment)
+			return ctx.JSON(http.StatusOK, result)
+		}
 		err = UpdateAndInsertStatusTrx(resp, respProvider, svc)
 		if err != nil {
 			log.Println("Err UpdateAndInsertStatusTrx", svcName, err)
 			result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, respPayment)
 			return ctx.JSON(http.StatusOK, result)
 		}
-		statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus, "PAY")
-		if statusCode == configs.PENDING_CODE {
-			result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, respPayment)
-			return ctx.JSON(http.StatusOK, result)
-		}
+
 		byte, _ := json.Marshal(respProvider.BillInfo)
 		statusMessage = "PAYMENT " + respProvider.PaymentStatusDesc
 		respPayment.BillInfo = string(byte)
@@ -135,21 +129,21 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		if configs.AppEnv == "PROD" {
 			url = configs.IakProdUrlPrepaid + "/api/check-status"
 		}
-		respProvider, err := helperservice.IakPrepaidWorkerCheckStatus(models.ReqInqIak{
+		respProvider, err := iakworkerservice.IakPrepaidWorkerCheckStatus(models.ReqInqIak{
 			RefId: resp.ReferenceNumber,
 			Url:   url,
 		})
 		if err != nil {
-			log.Println("Err ", svcName, "IakPrepaidHelperService", err)
+			log.Println("Err ", svcName, "IakPrepaidiakworkerservice", err)
 			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Trx failed", nil)
 			return ctx.JSON(http.StatusOK, result)
 		}
 		respProvider.TrxReferenceNumber = resp.ReferenceNumber
 		respProvider.TrxProviderReferenceNumber = resp.ProviderReferenceNumber
 		respProvider.TotalTrxAmount = resp.TotalTrxAmount
-		respProvider.PaymentDetail.AdminFee = resp.ProductProviderAdminFee
-		respProvider.PaymentDetail.MerchantFee = resp.ProductProviderMerchantFee
-		respProvider.PaymentDetail.Price = resp.ProductProviderPrice
+		// respProvider.PaymentDetail.AdminFee = resp.ProductProviderAdminFee
+		// respProvider.PaymentDetail.MerchantFee = resp.ProductProviderMerchantFee
+		// respProvider.PaymentDetail.Price = resp.ProductProviderPrice
 		err = UpdateAndInsertStatusTrx(resp, respProvider, svc)
 		if err != nil {
 			log.Println("Err UpdateAndInsertStatusTrx", svcName, err)

@@ -1,4 +1,4 @@
-package helperIakservice
+package iakworkerservice
 
 import (
 	"desabiller/configs"
@@ -10,16 +10,15 @@ import (
 	"strconv"
 )
 
-func IakBPJSWorkerInquiry(req models.ReqInqIak) (respWorker models.ResponseWorkerInquiry, err error) {
+func IakPLNPostpaidWorkerInquiry(req models.ReqInqIak) (respWorker models.ResponseWorkerInquiry, err error) {
 
 	var (
-		helperName       = "[IAK][WKR]IakBPJSWorkerInquiry"
-		respProvider     models.RespInquiryBPJSIak
+		helperName       = "[IAK][WKR]IakPLNPostpaidWorkerInquiry"
+		respProvider     models.RespInquiryPLNPostpaidIak
 		statusCode       string
 		statusMsg        string
 		statusCodeDetail string
 		statusMsgDetail  string
-		inquiryDetail    models.InquiryDetail
 		respUndefined    models.RespWorkerUndefined
 		respUndefinedI   models.RespWorkerUndefinedI
 	)
@@ -30,7 +29,6 @@ func IakBPJSWorkerInquiry(req models.ReqInqIak) (respWorker models.ResponseWorke
 		RefId:    req.RefId,
 		Username: configs.IakUsername,
 		Sign:     helpers.SignIakEncrypt(req.RefId),
-		Month:    req.Month,
 	}
 
 	respByte, _, err := utils.WorkerPostWithBearer(req.Url, "", providerRequest, "json")
@@ -71,10 +69,10 @@ func IakBPJSWorkerInquiry(req models.ReqInqIak) (respWorker models.ResponseWorke
 			detail  models.DetailBillDescPLN
 			details []models.DetailBillDescPLN
 		)
-		inquiryDetail = models.InquiryDetail{
-			Price:    float64(respProvider.Data.Nominal),
-			AdminFee: float64(respProvider.Data.Admin),
-		}
+		// inquiryDetail = models.InquiryDetail{
+		// 	Price:    float64(respProvider.Data.Nominal),
+		// 	AdminFee: float64(respProvider.Data.Admin),
+		// }
 		// tarif, _ := strconv.ParseFloat(respProvider.Data.Desc.Tarif, 64)
 		lemTag, _ := strconv.Atoi(respProvider.Data.Desc.LembarTagihan)
 
@@ -104,7 +102,6 @@ func IakBPJSWorkerInquiry(req models.ReqInqIak) (respWorker models.ResponseWorke
 			"billDesc": billdesc,
 		}
 	}
-	respWorker.InquiryDetail = inquiryDetail
 	respWorker.InquiryStatus = statusCode
 	respWorker.InquiryStatusDesc = statusMsg
 	respWorker.InquiryStatusDetail = statusCodeDetail

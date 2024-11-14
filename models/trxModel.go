@@ -3,6 +3,7 @@ package models
 type (
 	ProviderInqRequest struct {
 		ProviderId       int    `json:"providerId"`
+		ProviderName     string `json:"providerName"`
 		ProductClan      string `json:"productClan"`
 		ProductCode      string `json:"productCode"`
 		SubscriberNumber string `json:"subscriberNumber"`
@@ -12,9 +13,10 @@ type (
 		Periode          int    `json:"periode"`
 	}
 	ProviderPayRequest struct {
-		ReferenceId string `json:"referenceId"`
-		Url         string `json:"url"`
-		ProductClan string `json:"productClan"`
+		ProviderName            string `json:"providerName"`
+		ProviderReferenceNumber string `json:"ProviderReferenceNumber"`
+		Url                     string `json:"url"`
+		ProductClan             string `json:"productClan"`
 	}
 	ReqAviceTrx struct {
 		ReferenceNumber string `json:"referenceNumber" validate:"required"`
@@ -137,37 +139,33 @@ type (
 		ProviderReferenceNumber string `json:"providerReferenceNumber"`
 	}
 	RespPayment struct { //jelasin produknya
-		Id                     int         `json:"id"`
-		CustomerId             string      `json:"customerId"`
+		CreatedAt              string      `json:"createdAt"`
+		MerchantOutletName     string      `json:"merchantOutletName"`
+		MerchantOutletUsername string      `json:"merchantOutletUsername"`
+		ReferenceNumber        string      `json:"referenceNumber"`
 		ProductName            string      `json:"productName"`
 		ProductCode            string      `json:"productCode"`
+		SubscriberNumber       string      `json:"subscriberNumber"`
 		ProductPrice           float64     `json:"productPrice"`
 		ProductAdminFee        float64     `json:"productAdminFee"`
 		ProductMerchantFee     float64     `json:"productMerchantFee"`
 		TotalTrxAmount         float64     `json:"totalTrxAmount"`
-		MerchantOutletId       int         `json:"merchantOutletId"`
+		BillInfo               interface{} `json:"billInfo"` //jelasin tagihan/detil produk
+
+	}
+	RespInquiry struct {
+		CreatedAt              string      `json:"createdAt"`
 		MerchantOutletName     string      `json:"merchantOutletName"`
 		MerchantOutletUsername string      `json:"merchantOutletUsername"`
 		ReferenceNumber        string      `json:"referenceNumber"`
-		CreatedAt              string      `json:"createdAt"`
+		ProductName            string      `json:"productName"`
+		ProductCode            string      `json:"productCode"`
+		SubscriberNumber       string      `json:"subscriberNumber"`
+		ProductPrice           float64     `json:"productPrice"`
+		ProductAdminFee        float64     `json:"productAdminFee"`
+		ProductMerchantFee     float64     `json:"productMerchantFee"`
+		TotalTrxAmount         float64     `json:"totalTrxAmount"`
 		BillInfo               interface{} `json:"billInfo"` //jelasin tagihan/detil produk
-		// ProductId          int     `json:"productId"`
-		// StatusCode      string `json:"statusCode"`
-		// StatusMessage   string `json:"statusMessage"`
-		// StatusDesc      string `json:"statusDesc"`
-		// ProviderStatusCode      string `json:"providerStatusCode"`
-		// ProviderStatusMessage   string `json:"providerStatusMessage"`
-		// ProviderStatusDesc      string `json:"providerStatusDesc"`
-		// ProviderReferenceNumber string `json:"providerReferenceNumber"`
-		// UpdatedAt string `json:"updatedAt"`
-
-		// ClientId               int    `json:"clientId"`
-		// ClientName             string `json:"clientName"`
-		// GroupId                int    `json:"groupId"`
-		// GroupName              string `json:"groupName"`
-		// MerchantId             int    `json:"merchantId"`
-		// MerchantName           string `json:"merchantName"`
-
 	}
 	ReqInquiry struct {
 		ProductCode     string          `json:"productCode"`
@@ -178,20 +176,33 @@ type (
 		SubscriberNumber string `json:"SubscriberNumber"`
 		SubscriberName   string `json:"SubscriberName"`
 	}
-	RespInquiry struct {
-		Id                     int         `json:"id"`
-		CustomerId             string      `json:"customerId"`
-		ProductName            string      `json:"productName"`
-		ProductCode            string      `json:"productCode"`
-		ProductPrice           float64     `json:"productPrice"`
-		ProductAdminFee        float64     `json:"productAdminFee"`
-		ProductMerchantFee     float64     `json:"productMerchantFee"`
-		TotalTrxAmount         float64     `json:"totalTrxAmount"`
-		MerchantOutletId       int         `json:"merchantOutletId"`
-		MerchantOutletName     string      `json:"merchantOutletName"`
-		MerchantOutletUsername string      `json:"merchantOutletUsername"`
-		ReferenceNumber        string      `json:"referenceNumber"`
-		CreatedAt              string      `json:"createdAt"`
-		BillInfo               interface{} `json:"billInfo"` //jelasin tagihan/detil produk
+
+	BillInfoBPJS struct {
+		BillDesc struct {
+			CustomerID   string `json:"customerId"`
+			CustomerName string `json:"customerName"`
+			Detail       []struct {
+				Periode    string `json:"periode"`
+				Admin      int    `json:"admin"`
+				Denda      int    `json:"denda"`
+				Tagihan    int    `json:"tagihan"`
+				JmlPeserta string `json:"jmlPeserta"`
+			} `json:"detail"`
+		} `json:"billDesc"`
+		Sn string `json:"sn"`
 	}
+	// BillInfoBPJS struct {
+	// 	BillDesc struct {
+	// 		CustomerID   string `json:"customerId"`
+	// 		CustomerName string `json:"customerName"`
+	// 		Detail       []struct {
+	// 			Periode    string `json:"periode"`
+	// 			Admin      int    `json:"admin"`
+	// 			Denda      int    `json:"denda"`
+	// 			Tagihan    int    `json:"tagihan"`
+	// 			JmlPeserta string `json:"jmlPeserta"`
+	// 		} `json:"detail"`
+	// 	} `json:"billDesc"`
+	// 	Sn string `json:"sn"`
+	// }
 )

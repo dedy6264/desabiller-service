@@ -2,7 +2,10 @@ package helpers
 
 import (
 	"desabiller/models"
+	"errors"
+	"fmt"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -27,4 +30,31 @@ func InArray(v interface{}, in interface{}) (ok bool, i int) {
 		}
 	}
 	return
+}
+func JsonDescape(str string) string {
+
+	stringifiedData := strings.ReplaceAll(str, `\n`, ``)
+	stringifiedData = strings.ReplaceAll(stringifiedData, `\\"`, `\"`)
+	return stringifiedData
+}
+func SetField(obj interface{}, name string, value interface{}) error {
+	structValue := reflect.ValueOf(obj).Elem()
+	structFieldValue := structValue.FieldByName(name)
+
+	if !structFieldValue.IsValid() {
+		return fmt.Errorf("No such field: %s in obj", name)
+	}
+
+	if !structFieldValue.CanSet() {
+		return fmt.Errorf("Cannot set %s field value", name)
+	}
+
+	structFieldType := structFieldValue.Type()
+	val := reflect.ValueOf(value)
+	if structFieldType != val.Type() {
+		return errors.New("Provided value type didn't match obj field type")
+	}
+
+	structFieldValue.Set(val)
+	return nil
 }

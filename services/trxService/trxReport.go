@@ -4,7 +4,7 @@ import (
 	"desabiller/configs"
 	"desabiller/helpers"
 	"desabiller/models"
-	helperservice "desabiller/services/helperIakService"
+	iakworkerservice "desabiller/services/IAKWorkerService"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -109,7 +109,7 @@ func (svc trxService) TrxBillerReport(ctx echo.Context) error {
 			url = configs.IakProdUrlPostpaid + configs.ENDPOINT_IAK_POSTPAID
 		}
 		if respInqTrx.ProviderId == 1 { //IAK
-			respProvider, err = helperservice.IakPLNPostpaidWorkerPayment(models.ReqInqIak{
+			respProvider, err = iakworkerservice.IakPLNPostpaidWorkerPayment(models.ReqInqIak{
 				CustomerId:  respInqTrx.CustomerId,
 				ProductCode: respInqTrx.ProductProviderCode,
 				RefId:       respInqTrx.ProviderReferenceNumber,
@@ -130,7 +130,7 @@ func (svc trxService) TrxBillerReport(ctx echo.Context) error {
 			url = configs.IakProdUrlPrepaid + configs.ENDPOINT_IAK_PREPAID
 		}
 		if respInqTrx.ProviderId == 1 { //IAK
-			respProvider, err = helperservice.IakPulsaWorkerPayment(models.ReqInqIak{
+			respProvider, err = iakworkerservice.IakPulsaWorkerPayment(models.ReqInqIak{
 				CustomerId:  respInqTrx.CustomerId,
 				ProductCode: respInqTrx.ProductProviderCode,
 				RefId:       respInqTrx.ReferenceNumber,
@@ -184,7 +184,7 @@ func (svc trxService) TrxBillerReport(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	respPayment := models.RespPayment{
-		Id: respInqTrx.Id,
+
 		// StatusCode:      updatePayment.StatusCode,
 		// StatusMessage:   updatePayment.StatusMessage,
 		// StatusDesc:      updatePayment.StatusDesc,
@@ -195,8 +195,8 @@ func (svc trxService) TrxBillerReport(ctx echo.Context) error {
 		// ProviderReferenceNumber: updatePayment.ProviderReferenceNumber,
 		CreatedAt: respInqTrx.CreatedAt,
 		// UpdatedAt:               updatePayment.Filter.CreatedAt,
-		CustomerId: updatePayment.CustomerId,
-		BillInfo:   billInfo,
+		SubscriberNumber: updatePayment.CustomerId,
+		BillInfo:         billInfo,
 		// ProductId:          updatePayment.ProductId,
 		ProductName:     updatePayment.ProductName,
 		ProductCode:     updatePayment.ProductCode,
@@ -209,7 +209,6 @@ func (svc trxService) TrxBillerReport(ctx echo.Context) error {
 		// GroupName:               updatePayment.GroupName,
 		// MerchantId:              updatePayment.MerchantId,
 		// MerchantName:            updatePayment.MerchantName,
-		MerchantOutletId:       updatePayment.MerchantOutletId,
 		MerchantOutletName:     updatePayment.MerchantOutletName,
 		MerchantOutletUsername: updatePayment.MerchantOutletUsername,
 		TotalTrxAmount:         updatePayment.TotalTrxAmount,

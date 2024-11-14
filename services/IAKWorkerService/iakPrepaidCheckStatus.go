@@ -1,4 +1,4 @@
-package helperIakservice
+package iakworkerservice
 
 import (
 	"desabiller/configs"
@@ -18,9 +18,9 @@ func IakPrepaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.Respon
 		statusMsg        string
 		statusCodeDetail string
 		statusMsgDetail  string
-		paymentDetail    models.PaymentDetails
-		respUndefined    models.RespWorkerUndefined
-		respUndefinedI   models.RespWorkerUndefinedI
+		// paymentDetail    models.PaymentDetails
+		respUndefined  models.RespWorkerUndefined
+		respUndefinedI models.RespWorkerUndefinedI
 	)
 	providerRequest := models.ReqPaymentPrepaidIak{
 		CustomerId:  req.CustomerId,
@@ -75,7 +75,7 @@ func IakPrepaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.Respon
 			statusMsg = "PENDING"
 		}
 	}
-	respWorker.PaymentDetail = paymentDetail
+	// respWorker.PaymentDetail = paymentDetail
 	respWorker.PaymentStatus = statusCode
 	respWorker.PaymentStatusDesc = statusMsg
 	respWorker.PaymentStatusDetail = statusCodeDetail

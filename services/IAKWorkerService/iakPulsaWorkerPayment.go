@@ -1,4 +1,4 @@
-package helperIakservice
+package iakworkerservice
 
 import (
 	"desabiller/configs"

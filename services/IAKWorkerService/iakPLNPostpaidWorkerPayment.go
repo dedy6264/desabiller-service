@@ -1,4 +1,4 @@
-package helperIakservice
+package iakworkerservice
 
 import (
 	"desabiller/configs"
@@ -19,9 +19,9 @@ func IakPLNPostpaidWorkerPayment(req models.ReqInqIak) (respWorker models.Respon
 		statusMsg        string
 		statusCodeDetail string
 		statusMsgDetail  string
-		paymentDetail    models.PaymentDetails
-		respUndefined    models.RespWorkerUndefined
-		respUndefinedI   models.RespWorkerUndefinedI
+		// paymentDetail    models.PaymentDetails
+		respUndefined  models.RespWorkerUndefined
+		respUndefinedI models.RespWorkerUndefinedI
 	)
 	providerRequest := models.ReqPaymentPostpaidIak{
 		Commands: "pay-pasca",
@@ -67,10 +67,10 @@ func IakPLNPostpaidWorkerPayment(req models.ReqInqIak) (respWorker models.Respon
 			detail  models.DetailBillDescPLN
 			details []models.DetailBillDescPLN
 		)
-		paymentDetail = models.PaymentDetails{
-			Price:    float64(respProvider.Data.Nominal),
-			AdminFee: float64(respProvider.Data.Admin),
-		}
+		// paymentDetail = models.PaymentDetails{
+		// 	Price:    float64(respProvider.Data.Nominal),
+		// 	AdminFee: float64(respProvider.Data.Admin),
+		// }
 		// tarif, _ := strconv.ParseFloat(respProvider.Data.Desc.Tarif, 64)
 		lemTag, _ := strconv.Atoi(respProvider.Data.Desc.LembarTagihan)
 		if len(respProvider.Data.Desc.Tagihan.Detail) != 0 {
@@ -102,7 +102,7 @@ func IakPLNPostpaidWorkerPayment(req models.ReqInqIak) (respWorker models.Respon
 		}
 		// respWorker.BillInfo = string(byte)
 	}
-	respWorker.PaymentDetail = paymentDetail
+	// respWorker.PaymentDetail = paymentDetail
 	respWorker.PaymentStatus = statusCode
 	respWorker.PaymentStatusDesc = statusMsg
 	respWorker.PaymentStatusDetail = statusCodeDetail

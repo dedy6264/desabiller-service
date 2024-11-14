@@ -1,4 +1,4 @@
-package helperIakservice
+package iakworkerservice
 
 import (
 	"desabiller/configs"
@@ -20,9 +20,9 @@ func IakPostpaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.Respo
 		statusMsg        string
 		statusCodeDetail string
 		statusMsgDetail  string
-		paymentDetail    models.PaymentDetails
-		respUndefined    models.RespWorkerUndefined
-		respUndefinedI   models.RespWorkerUndefinedI
+		// paymentDetail    models.PaymentDetails
+		respUndefined  models.RespWorkerUndefined
+		respUndefinedI models.RespWorkerUndefinedI
 	)
 	providerRequest := models.ReqCheckStatusPostpaidIak{
 		Commands: req.Commands,
@@ -80,55 +80,69 @@ func IakPostpaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.Respo
 			return
 		}
 		switch req.ProductClan {
-		case "PLN POST":
+		case "BPJSKS":
 			fmt.Println("udah bener")
 			if respProvider.Data.Desc == "" {
-			}
-			var respProvider models.RespPaymentPLNPostpaidIak
-			err := json.Unmarshal(respByte, &respProvider)
-			if err != nil {
-				log.Println("Err ", helperName, err)
-				return respWorker, err
-			}
-			var (
-				detail  models.DetailBillDescPLN
-				details []models.DetailBillDescPLN
-			)
-			paymentDetail = models.PaymentDetails{
-				Price:    float64(respProvider.Data.Nominal),
-				AdminFee: float64(respProvider.Data.Admin),
-			}
-			// tarif, _ := strconv.ParseFloat(respProvider.Data.Desc.Tarif, 64)
-			lemTag, _ := strconv.Atoi(respProvider.Data.Desc.LembarTagihan)
-			if len(respProvider.Data.Desc.Tagihan.Detail) != 0 {
-				for _, data := range respProvider.Data.Desc.Tagihan.Detail {
-					admin, _ := strconv.ParseFloat(data.Admin, 64)
-					denda, _ := strconv.ParseFloat(data.Denda, 64)
-					tagihan, _ := strconv.ParseFloat(data.NilaiTagihan, 64)
-					detail = models.DetailBillDescPLN{
-						Periode:    data.Periode,
-						Admin:      admin,
-						Denda:      denda,
-						Tagihan:    tagihan,
-						MeterAwal:  data.MeterAwal,
-						MeterAkhir: data.MeterAkhir,
-					}
-					details = append(details, detail)
+				var respProvider models.RespPaymentBPJSIak
+				err := json.Unmarshal(respByte, &respProvider)
+				if err != nil {
+					log.Println("Err ", helperName, err)
+					return respWorker, err
 				}
+				respWorker.BillInfo = map[string]interface{}{
+					"sn": respProvider.Data.Noref,
+				}
+				respWorker.TotalTrxAmount, _ = strconv.ParseFloat(strconv.Itoa(respProvider.Data.Price), 64)
+				respWorker.TrxProviderReferenceNumber = strconv.Itoa(respProvider.Data.TrID)
 			}
-			billdesc := models.BillDescPLN{
-				CustomerId:    strconv.Itoa(respProvider.Data.TrID),
-				Tarif:         respProvider.Data.Desc.Tarif,
-				Daya:          strconv.Itoa(respProvider.Data.Desc.Daya),
-				LembarTagihan: lemTag,
-				Detail:        details,
+		case "PLN POST":
+			if respProvider.Data.Desc == "" {
+				var respProvider models.RespPaymentPLNPostpaidIak
+				err := json.Unmarshal(respByte, &respProvider)
+				if err != nil {
+					log.Println("Err ", helperName, err)
+					return respWorker, err
+				}
+				var (
+					detail  models.DetailBillDescPLN
+					details []models.DetailBillDescPLN
+				)
+				// paymentDetail = models.PaymentDetails{
+				// 	Price:    float64(respProvider.Data.Nominal),
+				// 	AdminFee: float64(respProvider.Data.Admin),
+				// }
+				// tarif, _ := strconv.ParseFloat(respProvider.Data.Desc.Tarif, 64)
+				lemTag, _ := strconv.Atoi(respProvider.Data.Desc.LembarTagihan)
+				if len(respProvider.Data.Desc.Tagihan.Detail) != 0 {
+					for _, data := range respProvider.Data.Desc.Tagihan.Detail {
+						admin, _ := strconv.ParseFloat(data.Admin, 64)
+						denda, _ := strconv.ParseFloat(data.Denda, 64)
+						tagihan, _ := strconv.ParseFloat(data.NilaiTagihan, 64)
+						detail = models.DetailBillDescPLN{
+							Periode:    data.Periode,
+							Admin:      admin,
+							Denda:      denda,
+							Tagihan:    tagihan,
+							MeterAwal:  data.MeterAwal,
+							MeterAkhir: data.MeterAkhir,
+						}
+						details = append(details, detail)
+					}
+				}
+				billdesc := models.BillDescPLN{
+					CustomerId:    strconv.Itoa(respProvider.Data.TrID),
+					Tarif:         respProvider.Data.Desc.Tarif,
+					Daya:          strconv.Itoa(respProvider.Data.Desc.Daya),
+					LembarTagihan: lemTag,
+					Detail:        details,
+				}
+				// byte, _ := json.Marshal(billdesc)
+				respWorker.BillInfo = map[string]interface{}{
+					"billDesc": billdesc,
+				}
+				respWorker.TotalTrxAmount, _ = strconv.ParseFloat(strconv.Itoa(respProvider.Data.Price), 64)
+				respWorker.TrxProviderReferenceNumber = strconv.Itoa(respProvider.Data.TrID)
 			}
-			// byte, _ := json.Marshal(billdesc)
-			respWorker.BillInfo = map[string]interface{}{
-				"billDesc": billdesc,
-			}
-			respWorker.TotalTrxAmount, _ = strconv.ParseFloat(strconv.Itoa(respProvider.Data.Price), 64)
-			respWorker.TrxProviderReferenceNumber = strconv.Itoa(respProvider.Data.TrID)
 		default:
 			fmt.Println("nyasar kene")
 			respWorker.PaymentStatus = configs.WORKER_PENDING_CODE
@@ -136,7 +150,7 @@ func IakPostpaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.Respo
 			return respWorker, nil
 		}
 	}
-	respWorker.PaymentDetail = paymentDetail
+	// respWorker.PaymentDetail = paymentDetail
 	respWorker.PaymentStatus = statusCode
 	respWorker.PaymentStatusDesc = statusMsg
 	respWorker.PaymentStatusDetail = statusCodeDetail

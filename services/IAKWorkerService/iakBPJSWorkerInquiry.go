@@ -1,4 +1,4 @@
-package helperIakservice
+package iakworkerservice
 
 import (
 	"desabiller/configs"
@@ -6,23 +6,28 @@ import (
 	"desabiller/models"
 	"desabiller/utils"
 	"encoding/json"
+	"errors"
 	"log"
 	"strconv"
 )
 
-func IakPLNPostpaidWorkerInquiry(req models.ReqInqIak) (respWorker models.ResponseWorkerInquiry, err error) {
+func IakBPJSWorkerInquiry(req models.ReqInqIak) (respWorker models.ResponseWorkerInquiry, err error) {
 
 	var (
-		helperName       = "[IAK][WKR]IakPLNPostpaidWorkerInquiry"
-		respProvider     models.RespInquiryPLNPostpaidIak
+		helperName       = "[IAK][WKR]IakBPJSWorkerInquiry"
+		respProvider     models.RespInquiryBPJSIak
 		statusCode       string
 		statusMsg        string
 		statusCodeDetail string
 		statusMsgDetail  string
-		inquiryDetail    models.InquiryDetail
 		respUndefined    models.RespWorkerUndefined
 		respUndefinedI   models.RespWorkerUndefinedI
 	)
+	if req.Month == "" || req.Month == "0" {
+		err = errors.New("BPJSKSValidate :: Month/Period can be null")
+		log.Println("Err ", helperName, err)
+		return respWorker, err
+	}
 	providerRequest := models.ReqInquiryPostpaidIak{
 		Commands: "inq-pasca",
 		Hp:       req.CustomerId,
@@ -30,6 +35,7 @@ func IakPLNPostpaidWorkerInquiry(req models.ReqInqIak) (respWorker models.Respon
 		RefId:    req.RefId,
 		Username: configs.IakUsername,
 		Sign:     helpers.SignIakEncrypt(req.RefId),
+		Month:    req.Month,
 	}
 
 	respByte, _, err := utils.WorkerPostWithBearer(req.Url, "", providerRequest, "json")
@@ -65,50 +71,41 @@ func IakPLNPostpaidWorkerInquiry(req models.ReqInqIak) (respWorker models.Respon
 	statusCodeDetail = respProvider.Data.ResponseCode
 	statusMsgDetail = respProvider.Data.Message
 	statusCode, statusMsg = helpers.IakInqResponseConverter(respProvider.Data.ResponseCode)
-	if statusCode == configs.WORKER_SUCCESS_CODE {
+	if statusCode == configs.WORKER_SUCCESS_CODE || statusCode == configs.WORKER_PENDING_CODE {
 		var (
-			detail  models.DetailBillDescPLN
-			details []models.DetailBillDescPLN
+			detail  models.DetailBillDescBPJS
+			details []models.DetailBillDescBPJS
 		)
-		inquiryDetail = models.InquiryDetail{
-			Price:    float64(respProvider.Data.Nominal),
-			AdminFee: float64(respProvider.Data.Admin),
+		admin, _ := strconv.ParseFloat(strconv.Itoa(respProvider.Data.Admin), 64)
+		tagihan, _ := strconv.ParseFloat(strconv.Itoa(respProvider.Data.Nominal), 64)
+		detail = models.DetailBillDescBPJS{
+			Periode:    respProvider.Data.Period,
+			Admin:      admin,
+			Denda:      0,
+			Tagihan:    tagihan, //tagihan/productPrice
+			JmlPeserta: respProvider.Data.Desc.JumlahPeserta,
 		}
-		// tarif, _ := strconv.ParseFloat(respProvider.Data.Desc.Tarif, 64)
-		lemTag, _ := strconv.Atoi(respProvider.Data.Desc.LembarTagihan)
-
-		if len(respProvider.Data.Desc.Tagihan.Detail) != 0 {
-			for _, data := range respProvider.Data.Desc.Tagihan.Detail {
-				admin, _ := strconv.ParseFloat(data.Admin, 64)
-				denda, _ := strconv.ParseFloat(data.Denda, 64)
-				tagihan, _ := strconv.ParseFloat(data.NilaiTagihan, 64)
-				detail = models.DetailBillDescPLN{
-					Periode: data.Periode,
-					Admin:   admin,
-					Denda:   denda,
-					Tagihan: tagihan,
-				}
-				details = append(details, detail)
-			}
-		}
-		billdesc := models.BillDescPLN{
-			CustomerId:    strconv.Itoa(respProvider.Data.TrID),
-			Tarif:         respProvider.Data.Desc.Tarif,
-			Daya:          strconv.Itoa(respProvider.Data.Desc.Daya),
-			LembarTagihan: lemTag,
-			Detail:        details,
+		details = append(details, detail)
+		billdesc := models.BillDescBPJS{
+			CustomerId:   respProvider.Data.Hp,
+			CustomerName: respProvider.Data.TrName,
+			Detail:       details,
 		}
 		// byte, _ := json.Marshal(billdesc)
 		respWorker.BillInfo = map[string]interface{}{
 			"billDesc": billdesc,
 		}
+		respWorker.TotalTrxAmount, _ = strconv.ParseFloat(strconv.Itoa(respProvider.Data.Price), 64)   //totaltrx
+		respWorker.AdminFee, _ = strconv.ParseFloat(strconv.Itoa(respProvider.Data.Admin), 64)         //adminFee
+		respWorker.TrxAmount, _ = strconv.ParseFloat(strconv.Itoa(respProvider.Data.SellingPrice), 64) //productProviderPrice
 	}
-	respWorker.InquiryDetail = inquiryDetail
+	respWorker.SubscriberNumber = respProvider.Data.Hp
+	respWorker.SubscriberName = respProvider.Data.TrName
 	respWorker.InquiryStatus = statusCode
 	respWorker.InquiryStatusDesc = statusMsg
 	respWorker.InquiryStatusDetail = statusCodeDetail
 	respWorker.InquiryStatusDescDetail = statusMsgDetail
-	respWorker.TotalTrxAmount, _ = strconv.ParseFloat(strconv.Itoa(respProvider.Data.Price), 64)
+
 	respWorker.TrxReferenceNumber = providerRequest.RefId
 	respWorker.TrxProviderReferenceNumber = strconv.Itoa(respProvider.Data.TrID)
 

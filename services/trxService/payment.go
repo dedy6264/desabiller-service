@@ -4,7 +4,7 @@ import (
 	"desabiller/configs"
 	"desabiller/helpers"
 	"desabiller/models"
-	helperservice "desabiller/services/helperIakService"
+	iakworkerservice "desabiller/services/IAKWorkerService"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -26,7 +26,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		providerStatusDesc,
 		providerReferenceNumber,
 		url string
-		billInfo     map[string]interface{}
+		// billInfo     map[string]interface{}
 		respProvider models.ResponseWorkerPayment
 		// respSvc models.ResponseList
 		// respOutlet models.RespGetMerchantOutlet
@@ -59,6 +59,62 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "Transaction invalid", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
+	fmt.Println("SINI 1")
+	billDescInq := models.BillInfoBPJS{}
+	// billDescPay := BillInfoBPJS{}
+	switch respInqTrx.ProductTypeId {
+	case 1:
+		if configs.AppEnv == "DEV" {
+			url = configs.IakDevUrlPostpaid + configs.ENDPOINT_IAK_POSTPAID
+		}
+		if configs.AppEnv == "PROD" {
+			url = configs.IakProdUrlPostpaid + configs.ENDPOINT_IAK_POSTPAID
+		}
+		fmt.Println("SINI 2")
+
+		respProvider, err = svc.PayProviderSwitcher(models.ProviderPayRequest{
+			ProviderReferenceNumber: respInqTrx.ProviderReferenceNumber,
+			Url:                     url,
+			ProductClan:             respInqTrx.ProductClanName,
+			ProviderName:            respInqTrx.ProviderName,
+		})
+		if err != nil {
+			log.Println("Err ", svcName, err)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.PENDING_CODE, configs.PENDING_MSG, nil)
+			return ctx.JSON(http.StatusOK, result)
+		}
+		switch respInqTrx.ProductClanName {
+		case "BPJSKS":
+			otherMsgInq := helpers.JsonDescape(respInqTrx.OtherMsg)
+			_ = json.Unmarshal([]byte(otherMsgInq), &billDescInq)
+			if len(respProvider.BillInfo) != 0 {
+				snVal, _ := respProvider.BillInfo["sn"].(string)
+				billDescInq.Sn = snVal
+			}
+		}
+	case 2:
+		if configs.AppEnv == "DEV" {
+			url = configs.IakDevUrlPrepaid + configs.ENDPOINT_IAK_PREPAID
+		}
+		if configs.AppEnv == "PROD" {
+			url = configs.IakProdUrlPrepaid + configs.ENDPOINT_IAK_PREPAID
+		}
+		if respInqTrx.ProviderId == 1 { //IAK
+			respProvider, err = iakworkerservice.IakPulsaWorkerPayment(models.ReqInqIak{
+				CustomerId:  respInqTrx.CustomerId,
+				ProductCode: respInqTrx.ProductProviderCode,
+				RefId:       respInqTrx.ReferenceNumber,
+				Url:         url,
+			})
+			if err != nil {
+				log.Println("Err ", svcName, "IakPulsaWorkerPayment", err)
+				result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.PENDING_CODE, configs.PENDING_MSG, nil)
+				return ctx.JSON(http.StatusOK, result)
+			}
+		}
+	}
+
+	byte, _ := json.Marshal(billDescInq)
 	updatePayment := models.ReqGetTrx{
 		ProductClanId:              respInqTrx.ProductClanId,
 		ProductClanName:            respInqTrx.ProductClanName,
@@ -101,59 +157,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 			CreatedAt: dbTime,
 		},
 	}
-	if respInqTrx.ProductTypeId == 1 {
-		if configs.AppEnv == "DEV" {
-			url = configs.IakDevUrlPostpaid + configs.ENDPOINT_IAK_POSTPAID
-		}
-		if configs.AppEnv == "PROD" {
-			url = configs.IakProdUrlPostpaid + configs.ENDPOINT_IAK_POSTPAID
-		}
-		respProvider, err = svc.PayProviderSwitcher(models.ProviderPayRequest{
-			ReferenceId: respInqTrx.ProviderReferenceNumber,
-			Url:         url,
-			ProductClan: respInqTrx.ProductClanName,
-		})
-		// if respInqTrx.ProviderId == 1 { //IAK
-		// 	respProvider, err = helperservice.IakPLNPostpaidWorkerPayment(models.ReqInqIak{
-		// 		CustomerId:  respInqTrx.CustomerId,
-		// 		ProductCode: respInqTrx.ProductProviderCode,
-		// 		RefId:       respInqTrx.ProviderReferenceNumber,
-		// 		Url:         url,
-		// 		// Commands:    "pay-pasca",
-		// 	})
-		if err != nil {
-			log.Println("Err ", svcName, err)
-			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.PENDING_CODE, configs.PENDING_MSG, nil)
-			return ctx.JSON(http.StatusOK, result)
-		}
-		// }
-	}
-	if respInqTrx.ProductTypeId == 2 {
-		if configs.AppEnv == "DEV" {
-			url = configs.IakDevUrlPrepaid + configs.ENDPOINT_IAK_PREPAID
-		}
-		if configs.AppEnv == "PROD" {
-			url = configs.IakProdUrlPrepaid + configs.ENDPOINT_IAK_PREPAID
-		}
-		if respInqTrx.ProviderId == 1 { //IAK
-			respProvider, err = helperservice.IakPulsaWorkerPayment(models.ReqInqIak{
-				CustomerId:  respInqTrx.CustomerId,
-				ProductCode: respInqTrx.ProductProviderCode,
-				RefId:       respInqTrx.ReferenceNumber,
-				Url:         url,
-			})
-			if err != nil {
-				log.Println("Err ", svcName, "IakPulsaWorkerPayment", err)
-				result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.PENDING_CODE, configs.PENDING_MSG, nil)
-				return ctx.JSON(http.StatusOK, result)
-			}
-		}
-	}
-	fmt.Println("PY RESP==", respProvider)
-	billInfo = respProvider.BillInfo
-	byte, _ := json.Marshal(billInfo)
 	statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus, "PAY")
-	fmt.Println("P STATUS", statusCode, respProvider.PaymentStatus)
 	updatePayment.StatusCode = statusCode
 	updatePayment.StatusMessage = "PAYMENT " + respProvider.PaymentStatusDesc
 	updatePayment.StatusDesc = respProvider.PaymentStatusDesc
@@ -171,7 +175,6 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		updatePayment.StatusCode = configs.PENDING_CODE
 		updatePayment.StatusMessage = "PAYMENT PENDING"
 	}
-	// byte, status, er := utils.WorkerPostWithBearer())
 	err = svc.services.ApiTrx.UpdateTrx(updatePayment, nil)
 	if err != nil {
 		log.Println("Err ", svcName, "UpdateTrx", err)
@@ -189,37 +192,23 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.PENDING_CODE, configs.PENDING_MSG, nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	respPayment := models.RespPayment{
-		Id: respInqTrx.Id,
-		// StatusCode:      updatePayment.StatusCode,
-		// StatusMessage:   updatePayment.StatusMessage,
-		// StatusDesc:      updatePayment.StatusDesc,
-		ReferenceNumber: updatePayment.ReferenceNumber,
-		// ProviderStatusCode:      updatePayment.ProviderStatusCode,
-		// ProviderStatusMessage:   updatePayment.ProviderStatusMessage,
-		// ProviderStatusDesc:      updatePayment.ProviderStatusDesc,
-		// ProviderReferenceNumber: updatePayment.ProviderReferenceNumber,
-		CreatedAt: respInqTrx.CreatedAt,
-		// UpdatedAt:               updatePayment.Filter.CreatedAt,
-		CustomerId: updatePayment.CustomerId,
-		BillInfo:   billInfo,
-		// ProductId:          updatePayment.ProductId,
-		ProductName:     updatePayment.ProductName,
-		ProductCode:     updatePayment.ProductCode,
-		ProductPrice:    updatePayment.ProductPrice,
-		ProductAdminFee: updatePayment.ProductAdminFee,
-		// ProductMerchantFee: updatePayment.ProductMerchantFee,
-		// ClientId:                updatePayment.ClientId,
-		// ClientName:              updatePayment.ClientName,
-		// GroupId:                 updatePayment.GroupId,
-		// GroupName:               updatePayment.GroupName,
-		// MerchantId:              updatePayment.MerchantId,
-		// MerchantName:            updatePayment.MerchantName,
-		MerchantOutletId:       updatePayment.MerchantOutletId,
+	if updatePayment.StatusCode == configs.FAILED_CODE {
+		result := helpers.ResponseJSON(configs.TRUE_VALUE, updatePayment.StatusCode, updatePayment.StatusMessage, nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
+	responsePayment := models.RespPayment{
+		ReferenceNumber:        updatePayment.ReferenceNumber,
+		CreatedAt:              respInqTrx.CreatedAt,
+		SubscriberNumber:       updatePayment.CustomerId,
+		BillInfo:               billDescInq,
+		ProductName:            updatePayment.ProductName,
+		ProductCode:            updatePayment.ProductCode,
+		ProductPrice:           updatePayment.ProductPrice,
+		ProductAdminFee:        updatePayment.ProductAdminFee,
 		MerchantOutletName:     updatePayment.MerchantOutletName,
 		MerchantOutletUsername: updatePayment.MerchantOutletUsername,
-		TotalTrxAmount:         updatePayment.TotalTrxAmount,
+		TotalTrxAmount:         updatePayment.ProductPrice + updatePayment.ProductAdminFee,
 	}
-	result := helpers.ResponseJSON(configs.TRUE_VALUE, updatePayment.StatusCode, updatePayment.StatusMessage, respPayment)
+	result := helpers.ResponseJSON(configs.TRUE_VALUE, updatePayment.StatusCode, updatePayment.StatusMessage, responsePayment)
 	return ctx.JSON(http.StatusOK, result)
 }

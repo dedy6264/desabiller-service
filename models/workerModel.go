@@ -10,7 +10,7 @@ type (
 		TrxProviderReferenceNumber string                 `json:"trxProviderReferenceNumber"`
 		TotalTrxAmount             float64                `json:"totalTrxAmount"`
 		BillInfo                   map[string]interface{} `json:"billInfo"`
-		PaymentDetail              PaymentDetails         `json:"paymentDetail"`
+		// PaymentDetail              PaymentDetails         `json:"paymentDetail"`
 	}
 	ResponseWorkerInquiry struct {
 		InquiryStatus              string                 `json:"inquiryStatus"`
@@ -20,14 +20,18 @@ type (
 		TrxReferenceNumber         string                 `json:"trxReferenceNumber"`
 		TrxProviderReferenceNumber string                 `json:"trxProviderReferenceNumber"`
 		TotalTrxAmount             float64                `json:"totalTrxAmount"`
+		TrxAmount                  float64                `json:"trxAmount"`
+		SubscriberName             string                 `json:"subscriberName"`
+		SubscriberNumber           string                 `json:"subscriberNumber"`
+		AdminFee                   float64                `json:"adminFee"`
 		BillInfo                   map[string]interface{} `json:"billInfo"`
-		InquiryDetail              InquiryDetail          `json:"inquiryDetail"`
+		// InquiryDetail              InquiryDetail          `json:"inquiryDetail"`
 	}
-	PaymentDetails struct {
-		Price       float64 `json:"price"`
-		AdminFee    float64 `json:"adminFee"`
-		MerchantFee float64 `json:"merchantFee"`
-	}
+	// PaymentDetails struct {
+	// 	Price       float64 `json:"price"`
+	// 	AdminFee    float64 `json:"adminFee"`
+	// 	MerchantFee float64 `json:"merchantFee"`
+	// }
 
 	// BillDescPulsa struct {
 	// 	CustomerId string `json:"customerId"`
@@ -38,11 +42,11 @@ type (
 	// 	Total
 	// }
 
-	InquiryDetail struct {
-		Price       float64 `json:"price"`
-		AdminFee    float64 `json:"adminFee"`
-		MerchantFee float64 `json:"merchantFee"`
-	}
+	// InquiryDetail struct {
+	// 	Price       float64 `json:"price"`
+	// 	AdminFee    float64 `json:"adminFee"`
+	// 	MerchantFee float64 `json:"merchantFee"`
+	// }
 	BillDescPLN struct {
 		CustomerId    string              `json:"customerId"`
 		Tarif         string              `json:"tarif"`
@@ -57,5 +61,18 @@ type (
 		Tagihan    float64 `json:"tagihan"`
 		MeterAwal  string  `json:"meterAwal"`
 		MeterAkhir string  `json:"meterAkhir"`
+	}
+	//bpjs
+	BillDescBPJS struct {
+		CustomerId   string               `json:"customerId"`
+		CustomerName string               `json:"customerName"`
+		Detail       []DetailBillDescBPJS `json:"detail"`
+	}
+	DetailBillDescBPJS struct {
+		Periode    string  `json:"periode"`
+		Admin      float64 `json:"admin"`
+		Denda      float64 `json:"denda"`
+		Tagihan    float64 `json:"tagihan"`
+		JmlPeserta string  `json:"jmlPeserta"`
 	}
 )
