@@ -76,6 +76,9 @@ func IakPostpaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.Respo
 	fmt.Println(statusCode, statusMsg)
 	if statusCode == configs.WORKER_SUCCESS_CODE || statusCode == configs.WORKER_PENDING_CODE {
 		if req.ProductClan == "" {
+			respWorker.PaymentStatus = configs.WORKER_PENDING_CODE
+			respWorker.PaymentStatusDesc = "PENDING"
+			respWorker.PaymentStatusDescDetail = "PENDING"
 			log.Println("Err ", helperName, "Invalid Product Clan", err)
 			return
 		}
@@ -107,11 +110,6 @@ func IakPostpaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.Respo
 					detail  models.DetailBillDescPLN
 					details []models.DetailBillDescPLN
 				)
-				// paymentDetail = models.PaymentDetails{
-				// 	Price:    float64(respProvider.Data.Nominal),
-				// 	AdminFee: float64(respProvider.Data.Admin),
-				// }
-				// tarif, _ := strconv.ParseFloat(respProvider.Data.Desc.Tarif, 64)
 				lemTag, _ := strconv.Atoi(respProvider.Data.Desc.LembarTagihan)
 				if len(respProvider.Data.Desc.Tagihan.Detail) != 0 {
 					for _, data := range respProvider.Data.Desc.Tagihan.Detail {
@@ -125,16 +123,17 @@ func IakPostpaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.Respo
 							Tagihan:    tagihan,
 							MeterAwal:  data.MeterAwal,
 							MeterAkhir: data.MeterAkhir,
+							Tarif:      respProvider.Data.Desc.Tarif,
+							Daya:       strconv.Itoa(respProvider.Data.Desc.Daya),
 						}
 						details = append(details, detail)
 					}
 				}
 				billdesc := models.BillDescPLN{
-					CustomerId:    strconv.Itoa(respProvider.Data.TrID),
-					Tarif:         respProvider.Data.Desc.Tarif,
-					Daya:          strconv.Itoa(respProvider.Data.Desc.Daya),
-					LembarTagihan: lemTag,
-					Detail:        details,
+					SubscriberNumber: strconv.Itoa(respProvider.Data.TrID),
+					SubscriberName:   respProvider.Data.TrName,
+					LembarTagihan:    lemTag,
+					Detail:           details,
 				}
 				// byte, _ := json.Marshal(billdesc)
 				respWorker.BillInfo = map[string]interface{}{

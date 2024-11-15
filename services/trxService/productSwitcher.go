@@ -1,11 +1,13 @@
 package trxservice
 
 import (
+	"desabiller/configs"
 	"desabiller/models"
 	iakworkerservice "desabiller/services/IAKWorkerService"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 )
 
@@ -73,7 +75,12 @@ func (svc trxService) CheckStatusProviderSwitcher(req models.ProviderInqRequest)
 				ProductClan: req.ProductClan,
 			})
 		default:
-			err = errors.New("invalid product clan")
+			respWorker = models.ResponseWorkerPayment{
+				PaymentStatus:           configs.WORKER_PENDING_CODE,
+				PaymentStatusDesc:       configs.PENDING_MSG,
+				PaymentStatusDescDetail: "PENDING",
+			}
+			log.Println("CheckStatusProviderSwitcher :: invalid product clan")
 		}
 	}
 	return

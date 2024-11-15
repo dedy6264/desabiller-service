@@ -1,0 +1,37 @@
+{
+    "statusCode": "10",
+    "statusMessage": "INQUIRY SUCCESS",
+    "responseDatetime": "2024-11-14T21:29:16+07:00",
+    "result": {
+        "createdAt": "20241114",
+        "merchantOutletName": "TAWCI 02",
+        "merchantOutletUsername": "taucikuenak",
+        "referenceNumber": "DB-20241114-0000031",
+        "productName": "PLN TAGIHAN",
+        "productCode": "PLNPOSTPAID",
+        "subscriberNumber": "530000000000",
+        "productPrice": 302750,
+        "productAdminFee": 0,
+        "productMerchantFee": 0,
+        "totalTrxAmount": 302750,
+        "billInfo": {
+            "billDesc": {
+                "subscriberNumber": "352840568",
+                "subscriberName": "VERGIE",
+                "lembarTagihan": 1,
+                "detail": [
+                    {
+                        "periode": "201608",
+                        "admin": 2750,
+                        "denda": 0,
+                        "tagihan": 300000,
+                        "meterAwal": "",
+                        "meterAkhir": "",
+                        "tarif": "R1",
+                        "daya": "1300"
+                    }
+                ]
+            }
+        }
+    }
+}

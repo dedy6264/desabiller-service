@@ -20,8 +20,9 @@ func IakPLNPostpaidWorkerPayment(req models.ReqInqIak) (respWorker models.Respon
 		statusCodeDetail string
 		statusMsgDetail  string
 		// paymentDetail    models.PaymentDetails
-		respUndefined  models.RespWorkerUndefined
-		respUndefinedI models.RespWorkerUndefinedI
+		respUndefined         models.RespWorkerUndefined
+		respUndefinedI        models.RespWorkerUndefinedI
+		admin, denda, tagihan float64
 	)
 	providerRequest := models.ReqPaymentPostpaidIak{
 		Commands: "pay-pasca",
@@ -75,26 +76,30 @@ func IakPLNPostpaidWorkerPayment(req models.ReqInqIak) (respWorker models.Respon
 		lemTag, _ := strconv.Atoi(respProvider.Data.Desc.LembarTagihan)
 		if len(respProvider.Data.Desc.Tagihan.Detail) != 0 {
 			for _, data := range respProvider.Data.Desc.Tagihan.Detail {
-				admin, _ := strconv.ParseFloat(data.Admin, 64)
-				denda, _ := strconv.ParseFloat(data.Denda, 64)
-				tagihan, _ := strconv.ParseFloat(data.NilaiTagihan, 64)
+				adm, _ := strconv.ParseFloat(data.Admin, 64)
+				admin += adm
+				dnd, _ := strconv.ParseFloat(data.Denda, 64)
+				denda += dnd
+				tag, _ := strconv.ParseFloat(data.NilaiTagihan, 64)
+				tagihan += tag
 				detail = models.DetailBillDescPLN{
 					Periode:    data.Periode,
-					Admin:      admin,
-					Denda:      denda,
-					Tagihan:    tagihan,
+					Admin:      adm,
+					Denda:      dnd,
+					Tagihan:    tag,
 					MeterAwal:  data.MeterAwal,
 					MeterAkhir: data.MeterAkhir,
+					Tarif:      respProvider.Data.Desc.Tarif,
+					Daya:       strconv.Itoa(respProvider.Data.Desc.Daya),
 				}
 				details = append(details, detail)
 			}
 		}
 		billdesc := models.BillDescPLN{
-			CustomerId:    strconv.Itoa(respProvider.Data.TrID),
-			Tarif:         respProvider.Data.Desc.Tarif,
-			Daya:          strconv.Itoa(respProvider.Data.Desc.Daya),
-			LembarTagihan: lemTag,
-			Detail:        details,
+			SubscriberNumber: strconv.Itoa(respProvider.Data.TrID),
+			SubscriberName:   respProvider.Data.TrName,
+			LembarTagihan:    lemTag,
+			Detail:           details,
 		}
 		// byte, _ := json.Marshal(billdesc)
 		respWorker.BillInfo = map[string]interface{}{
@@ -107,7 +112,9 @@ func IakPLNPostpaidWorkerPayment(req models.ReqInqIak) (respWorker models.Respon
 	respWorker.PaymentStatusDesc = statusMsg
 	respWorker.PaymentStatusDetail = statusCodeDetail
 	respWorker.PaymentStatusDescDetail = statusMsgDetail
+	respWorker.AdminFee = admin
 	respWorker.TotalTrxAmount, _ = strconv.ParseFloat(strconv.Itoa(respProvider.Data.Price), 64)
+	respWorker.TrxAmount = tagihan
 	respWorker.TrxReferenceNumber = providerRequest.TrID
 	respWorker.TrxProviderReferenceNumber = strconv.Itoa(respProvider.Data.TrID)
 

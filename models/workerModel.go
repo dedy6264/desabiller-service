@@ -9,6 +9,8 @@ type (
 		TrxReferenceNumber         string                 `json:"trxReferenceNumber"`
 		TrxProviderReferenceNumber string                 `json:"trxProviderReferenceNumber"`
 		TotalTrxAmount             float64                `json:"totalTrxAmount"`
+		TrxAmount                  float64                `json:"trxAmount"`
+		AdminFee                   float64                `json:"adminFee"`
 		BillInfo                   map[string]interface{} `json:"billInfo"`
 		// PaymentDetail              PaymentDetails         `json:"paymentDetail"`
 	}
@@ -48,11 +50,10 @@ type (
 	// 	MerchantFee float64 `json:"merchantFee"`
 	// }
 	BillDescPLN struct {
-		CustomerId    string              `json:"customerId"`
-		Tarif         string              `json:"tarif"`
-		Daya          string              `json:"daya"`
-		LembarTagihan int                 `json:"lembarTagihan"`
-		Detail        []DetailBillDescPLN `json:"detail"`
+		SubscriberName   string              `json:"subscriberName"`
+		SubscriberNumber string              `json:"subscriberNumber"`
+		LembarTagihan    int                 `json:"lembarTagihan"`
+		Detail           []DetailBillDescPLN `json:"detail"`
 	}
 	DetailBillDescPLN struct {
 		Periode    string  `json:"periode"`
@@ -61,6 +62,8 @@ type (
 		Tagihan    float64 `json:"tagihan"`
 		MeterAwal  string  `json:"meterAwal"`
 		MeterAkhir string  `json:"meterAkhir"`
+		Tarif      string  `json:"tarif"`
+		Daya       string  `json:"daya"`
 	}
 	//bpjs
 	BillDescBPJS struct {

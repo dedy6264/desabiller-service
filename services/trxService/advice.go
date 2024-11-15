@@ -21,6 +21,7 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		svcName = "[IAK]Advice"
 		url, statusCode,
 		statusMessage string
+		billdesc map[string]interface{}
 	)
 	req := new(models.ReqAviceTrx)
 	_, err := helpers.BindValidate(req, ctx)
@@ -39,11 +40,6 @@ func (svc trxService) Advice(ctx echo.Context) error {
 	}
 	statusCode = resp.StatusCode
 	statusMessage = resp.StatusMessage
-	// statusDesc = resp.StatusDesc
-	// providerStatusCode = resp.ProviderStatusCode
-	// providerStatusMessage = resp.ProviderStatusMessage
-	// providerStatusDesc = resp.ProviderStatusDesc
-	var billdesc map[string]interface{}
 	err = json.Unmarshal([]byte(resp.OtherMsg), &billdesc)
 	if err != nil {
 		fmt.Println("Error decoding JSON:", err)
@@ -62,12 +58,6 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		MerchantOutletUsername: resp.MerchantOutletUsername,
 	}
 	if resp.StatusCode != configs.PENDING_CODE {
-		// respPayment.StatusCode = statusCode
-		// respPayment.StatusMessage = statusMessage
-		// respPayment.StatusDesc = statusDesc
-		// respPayment.ProviderStatusCode = providerStatusCode
-		// respPayment.ProviderStatusMessage = providerStatusMessage
-		// respPayment.ProviderStatusDesc = providerStatusDesc
 		result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, respPayment)
 		return ctx.JSON(http.StatusOK, result)
 	}
@@ -100,12 +90,8 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		respProvider.TrxProviderReferenceNumber = resp.ProviderReferenceNumber
 		respProvider.TotalTrxAmount = resp.TotalTrxAmount
 		respProvider.BillInfo = billInfo
-		// respProvider.PaymentDetail.AdminFee = resp.ProductProviderAdminFee
-		// respProvider.PaymentDetail.MerchantFee = resp.ProductProviderMerchantFee
-		// respProvider.PaymentDetail.Price = resp.ProductProviderPrice
 		statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus, "PAY")
 		if statusCode == configs.PENDING_CODE {
-
 			result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, respPayment)
 			return ctx.JSON(http.StatusOK, result)
 		}
@@ -141,9 +127,6 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		respProvider.TrxReferenceNumber = resp.ReferenceNumber
 		respProvider.TrxProviderReferenceNumber = resp.ProviderReferenceNumber
 		respProvider.TotalTrxAmount = resp.TotalTrxAmount
-		// respProvider.PaymentDetail.AdminFee = resp.ProductProviderAdminFee
-		// respProvider.PaymentDetail.MerchantFee = resp.ProductProviderMerchantFee
-		// respProvider.PaymentDetail.Price = resp.ProductProviderPrice
 		err = UpdateAndInsertStatusTrx(resp, respProvider, svc)
 		if err != nil {
 			log.Println("Err UpdateAndInsertStatusTrx", svcName, err)
