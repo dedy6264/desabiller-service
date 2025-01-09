@@ -5,6 +5,7 @@ import (
 	"desabiller/configs"
 	"desabiller/services"
 	auth "desabiller/services/authService"
+	helperservices "desabiller/services/helperServices"
 	hierarchyservicego "desabiller/services/hierarchyService"
 	trxservice "desabiller/services/trxService"
 	useractivityservice "desabiller/services/userActivityService"
@@ -29,9 +30,10 @@ import (
 func RouteApi(e echo.Echo, service services.UsecaseService) {
 	providerSvc := providerservice.NewApiProviderServices(service)
 	admSvc := auth.ApiAdministration(service)
-	hierachySvc := hierarchyservicego.ApiHierarchy(service)
+	hierachySvc := hierarchyservicego.RepoHierarchy(service)
 	userAct := useractivityservice.NewApiUserActivityService(service)
-	trxSvc := trxservice.NewApiTrxService(service)
+	helperSvc := helperservices.NewApiHelperService(service)
+	trxSvc := trxservice.NewRepoTrxService(service)
 	e.GET("/", func(ctx echo.Context) error {
 		fmt.Println("OK YA")
 		return nil
@@ -138,26 +140,26 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 		ee.POST("/gets", providerSvc.GetProviders)
 		ee.POST("/drop", providerSvc.DropProvider)
 		ee.POST("/update", providerSvc.UpdateProvider)
-		ff := e.Group("/clan")
-		ff.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
-			if subtle.ConstantTimeCompare([]byte(pss), []byte("joe")) == 1 &&
-				subtle.ConstantTimeCompare([]byte(pwd), []byte("secret")) == 1 {
-				return true, nil
-			}
-			return false, nil
-		}))
-		ff.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
-			log.Println("[Start]")
-			log.Println("EndPoint :", c.Path())
-			log.Println("Header :", c.Request().Header)
-			log.Println("Body :", string(reqBody))
-			log.Println("Response :", string(resBody))
-			log.Println("[End]")
-		}))
-		ff.POST("/add", providerSvc.AddProductClan)
-		ff.POST("/gets", providerSvc.GetProductClans)
-		ff.POST("/drop", providerSvc.DropProductClan)
-		ff.POST("/update", providerSvc.UpdateProductClan)
+		// ff := e.Group("/clan")
+		// ff.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
+		// 	if subtle.ConstantTimeCompare([]byte(pss), []byte("joe")) == 1 &&
+		// 		subtle.ConstantTimeCompare([]byte(pwd), []byte("secret")) == 1 {
+		// 		return true, nil
+		// 	}
+		// 	return false, nil
+		// }))
+		// ff.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+		// 	log.Println("[Start]")
+		// 	log.Println("EndPoint :", c.Path())
+		// 	log.Println("Header :", c.Request().Header)
+		// 	log.Println("Body :", string(reqBody))
+		// 	log.Println("Response :", string(resBody))
+		// 	log.Println("[End]")
+		// }))
+		// ff.POST("/add", providerSvc.AddProductClan)
+		// ff.POST("/gets", providerSvc.GetProductClans)
+		// ff.POST("/drop", providerSvc.DropProductClan)
+		// ff.POST("/update", providerSvc.UpdateProductClan)
 		gg := e.Group("/category")
 		gg.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
 			if subtle.ConstantTimeCompare([]byte(pss), []byte("joe")) == 1 &&
@@ -278,7 +280,7 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 		ll.POST("/get", userAct.GetMerchantOutlets)
 		ll.POST("/update", userAct.UpdateMerchantOutlet)
 	}
-	{ //transaksi
+	{ //BILLER transaksi
 		mm := e.Group("/biller")
 		mm.Use(middleware.JWT([]byte(configs.KEY)))
 		mm.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
@@ -293,7 +295,41 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 		mm.POST("/payment", trxSvc.PaymentBiller)
 		mm.POST("/advice", trxSvc.Advice)
 	}
-	// trxSvc := trxservice.NewApiTrxService(service)
+	{ //transaksi
+		mn := e.Group("/trx")
+		mn.Use(middleware.JWT([]byte(configs.KEY)))
+		mn.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+			log.Println("[Start]")
+			log.Println("EndPoint :", c.Path())
+			log.Println("Header :", c.Request().Header)
+			log.Println("Body :", string(reqBody))
+			log.Println("Response :", string(resBody))
+			log.Println("[End]")
+		}))
+		mn.POST("/getTrx", trxSvc.TrxBillerReport)
+		// mn.POST("/payment", trxSvc.PaymentBiller)
+		// mn.POST("/advice", trxSvc.Advice)
+	}
+	{ //helper
+		nn := e.Group("/helper")
+		nn.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
+			if subtle.ConstantTimeCompare([]byte(pss), []byte("joe")) == 1 &&
+				subtle.ConstantTimeCompare([]byte(pwd), []byte("secret")) == 1 {
+				return true, nil
+			}
+			return false, nil
+		}))
+		nn.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+			log.Println("[Start]")
+			log.Println("EndPoint :", c.Path())
+			log.Println("Header :", c.Request().Header)
+			log.Println("Body :", string(reqBody))
+			log.Println("Response :", string(resBody))
+			log.Println("[End]")
+		}))
+		nn.POST("/getReference", helperSvc.GetOperatorService)
+	}
+	// trxSvc := trxservice.NewRepoTrxService(service)
 	// // nHierachySvc := nhierarchyservice.NewApiNHierarchyServices(service)
 	// nClientSvc := clientservicego.NewApiNHierarchyClientServices(service)
 	// nMerchantSvc := merchantservicego.NewApiNHierarchyMerchantServices(service)

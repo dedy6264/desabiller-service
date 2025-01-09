@@ -17,10 +17,10 @@ import (
 )
 
 func RoutesApi(services services.UsecaseService, e echo.Echo) {
-	hierachySvc := hierarchyservicego.ApiHierarchy(services)
-	productSvc := productservice.ApiProduct(services)
+	hierachySvc := hierarchyservicego.RepoHierarchy(services)
+	productSvc := productservice.RepoProduct(services)
 	admSvc := administrationservice.ApiAdministration(services)
-	trxSvc := trxservice.NewApiTrxService(services)
+	trxSvc := trxservice.NewRepoTrxService(services)
 	vueSvc := vueservice.NewApiVueService(services)
 
 	open := e.Group("/open")

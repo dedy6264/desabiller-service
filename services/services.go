@@ -9,22 +9,25 @@ type UsecaseService struct {
 	RepoDB *sql.DB
 	// cron   *cron.Cron
 	// GenAutonumRepo                        genautonum.GenerateAutonumberRepository
-	ApiHierarchy repositories.Hierarchyrepo
-	ApiProduct   repositories.ProductRepo
-	ApiTrx       repositories.TrxRepo
+	RepoHierarchy repositories.Hierarchyrepo
+	RepoProduct   repositories.ProductRepo
+	RepoTrx       repositories.TrxRepo
+	HelperRepo    repositories.HelperRepo
 }
 
 func NewUsecaseService(
 	repoDB *sql.DB,
-	ApiHierarchyRepo repositories.Hierarchyrepo,
-	ApiProduct repositories.ProductRepo,
-	ApiTrx repositories.TrxRepo,
+	RepoHierarchyRepo repositories.Hierarchyrepo,
+	RepoProduct repositories.ProductRepo,
+	RepoTrx repositories.TrxRepo,
+	HelperRepo repositories.HelperRepo,
 
 ) UsecaseService {
 	return UsecaseService{
-		RepoDB:       repoDB,
-		ApiHierarchy: ApiHierarchyRepo,
-		ApiProduct:   ApiProduct,
-		ApiTrx:       ApiTrx,
+		RepoDB:        repoDB,
+		RepoHierarchy: RepoHierarchyRepo,
+		RepoProduct:   RepoProduct,
+		RepoTrx:       RepoTrx,
+		HelperRepo:    HelperRepo,
 	}
 }

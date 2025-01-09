@@ -3,6 +3,7 @@ package apps
 import (
 	"database/sql"
 	"desabiller/repositories"
+	helperrepo "desabiller/repositories/helperRepo"
 	hierarchyrepo "desabiller/repositories/hierarchyRepo"
 	productrepo "desabiller/repositories/productRepo"
 	trxrepo "desabiller/repositories/trxRepo"
@@ -15,12 +16,14 @@ func SetupApp(DB *sql.DB, repo repositories.Repositories) services.UsecaseServic
 	hierarchyRepo := hierarchyrepo.NewHierarcyRepo(repo)
 	productRepo := productrepo.NewProductRepo(repo)
 	trxRepo := trxrepo.NewTrxRepo(repo)
+	helperRepo := helperrepo.NewHelperRepo(repo)
 
 	usecaseSvc := services.NewUsecaseService(
 		DB,
 		hierarchyRepo,
 		productRepo,
 		trxRepo,
+		helperRepo,
 	)
 
 	return usecaseSvc

@@ -31,7 +31,7 @@ func (svc providerServices) AddProvider(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	req.ProviderName = strings.ToUpper(req.ProviderName)
-	err = svc.services.ApiProduct.AddProvider(*req)
+	err = svc.services.RepoProduct.AddProvider(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "AddProvider", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
@@ -57,7 +57,7 @@ func (svc providerServices) DropProvider(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	err = svc.services.ApiProduct.DropProvider(*req)
+	err = svc.services.RepoProduct.DropProvider(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "DropProvider", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
@@ -82,7 +82,7 @@ func (svc providerServices) UpdateProvider(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	req.ProviderName = strings.ToUpper(req.ProviderName)
-	_, err = svc.services.ApiProduct.UpdateProvider(*req)
+	_, err = svc.services.RepoProduct.UpdateProvider(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "UpdateProvider", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
@@ -106,13 +106,13 @@ func (svc providerServices) GetProviders(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	count, err := svc.services.ApiProduct.GetProviderCount(*req)
+	count, err := svc.services.RepoProduct.GetProviderCount(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "GetProviderCount", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	resp, err := svc.services.ApiProduct.GetProviders(*req)
+	resp, err := svc.services.RepoProduct.GetProviders(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "GetProviders", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)

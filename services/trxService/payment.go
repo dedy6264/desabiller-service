@@ -45,7 +45,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "ReferenceNumber id cannot be null", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	respInqTrx, err := svc.services.ApiTrx.GetTrx(models.ReqGetTrx{
+	respInqTrx, err := svc.services.RepoTrx.GetTrx(models.ReqGetTrx{
 		ReferenceNumber: req.ReferenceNumber,
 	})
 	if err != nil {
@@ -75,7 +75,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		respProvider, err = svc.PayProviderSwitcher(models.ProviderPayRequest{
 			ProviderReferenceNumber: respInqTrx.ProviderReferenceNumber,
 			Url:                     url,
-			ProductClan:             respInqTrx.ProductClanName,
+			ProductReferenceCode:    respInqTrx.ProductReferenceCode,
 			ProviderName:            respInqTrx.ProviderName,
 		})
 		if err != nil {
@@ -83,7 +83,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.PENDING_CODE, configs.PENDING_MSG, nil)
 			return ctx.JSON(http.StatusOK, result)
 		}
-		switch respInqTrx.ProductClanName {
+		switch respInqTrx.ProductReferenceCode {
 		case "BPJSKS":
 			otherMsgInq := helpers.JsonDescape(respInqTrx.OtherMsg)
 			_ = json.Unmarshal([]byte(otherMsgInq), &billDescInq)
@@ -116,8 +116,8 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 
 	byte, _ := json.Marshal(billDescInq)
 	updatePayment := models.ReqGetTrx{
-		ProductClanId:              respInqTrx.ProductClanId,
-		ProductClanName:            respInqTrx.ProductClanName,
+		ProductReferenceId:         respInqTrx.ProductReferenceId,
+		ProductReferenceCode:       respInqTrx.ProductReferenceCode,
 		ProductCategoryId:          respInqTrx.ProductCategoryId,
 		ProductCategoryName:        respInqTrx.ProductCategoryName,
 		ProductTypeId:              respInqTrx.ProductTypeId,
@@ -175,13 +175,13 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		updatePayment.StatusCode = configs.PENDING_CODE
 		updatePayment.StatusMessage = "PAYMENT PENDING"
 	}
-	err = svc.services.ApiTrx.UpdateTrx(updatePayment, nil)
+	err = svc.services.RepoTrx.UpdateTrx(updatePayment, nil)
 	if err != nil {
 		log.Println("Err ", svcName, "UpdateTrx", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.PENDING_CODE, configs.PENDING_MSG, nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	err = svc.services.ApiTrx.InsertTrxStatus(models.ReqGetTrxStatus{
+	err = svc.services.RepoTrx.InsertTrxStatus(models.ReqGetTrxStatus{
 		ReferenceNumber:         updatePayment.ReferenceNumber,
 		ProviderReferenceNumber: updatePayment.ProviderReferenceNumber,
 		StatusCode:              updatePayment.StatusCode,

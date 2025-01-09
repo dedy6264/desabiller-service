@@ -16,7 +16,6 @@ func (ctx product) AddProduct(req models.ReqGetProduct) (result models.RespGetPr
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	query := ` insert into products (
 		product_provider_id,
-		product_clan_id,
 		product_category_id,
 		product_type_id,
 		product_code,
@@ -27,13 +26,14 @@ func (ctx product) AddProduct(req models.ReqGetProduct) (result models.RespGetPr
 		created_at,
 		updated_at,
 		created_by,
-		updated_by)
+		updated_by,
+		product_reference_id,
+		product_reference_code)
 		values(
-			$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13
+			$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14
 		)  `
 	_, err = ctx.repo.Db.Exec(query,
 		req.ProductProviderId,
-		req.ProductClanId,
 		req.ProductCategoryId,
 		req.ProductTypeId,
 		req.ProductCode,
@@ -44,7 +44,9 @@ func (ctx product) AddProduct(req models.ReqGetProduct) (result models.RespGetPr
 		dbTime,
 		dbTime,
 		"sys",
-		"sys")
+		"sys",
+		req.ProductReferenceId,
+		req.ProductReferenceCode)
 	if err != nil {
 		log.Println("Error failed ", err.Error())
 		return result, err
@@ -53,10 +55,9 @@ func (ctx product) AddProduct(req models.ReqGetProduct) (result models.RespGetPr
 }
 func (ctx product) GetProducts(req models.ReqGetProduct) (result []models.RespGetProduct, err error) {
 	query := `select
+	
 	e.id,
 	e.provider_name,
-	d.id,
-	d.product_clan_name,
 	c.id,
 	c.product_category_name,
 	b.id,
@@ -76,11 +77,12 @@ func (ctx product) GetProducts(req models.ReqGetProduct) (result []models.RespGe
 	f.product_provider_code,
 	f.product_provider_price,
 	f.product_provider_admin_fee,
-	f.product_provider_merchant_fee
+	f.product_provider_merchant_fee,
+	a.product_reference_id,
+	a.product_reference_code
 	from products as a
 	join product_types as b on a.product_type_id=b.id
 	join product_categories as c on a.product_category_id=c.id
-	join product_clans as d on a.product_clan_id=d.id
 	join product_providers as f on a.product_provider_id=f.id
 	join providers as e on f.provider_id=e.id
 	where true
@@ -94,14 +96,17 @@ func (ctx product) GetProducts(req models.ReqGetProduct) (result []models.RespGe
 	if req.ProductCategoryId != 0 {
 		query += ` and c.id = ` + strconv.Itoa(req.ProductCategoryId)
 	}
-	if req.ProductClanId != 0 {
-		query += ` and d.id = ` + strconv.Itoa(req.ProductClanId)
-	}
 	if req.ProductTypeId != 0 {
 		query += ` and b.id = ` + strconv.Itoa(req.ProductTypeId)
 	}
 	if req.ProviderId != 0 {
 		query += ` and e.id = ` + strconv.Itoa(req.ProviderId)
+	}
+	if req.ProductReferenceId != 0 {
+		query += ` and a.product_reference_id = ` + strconv.Itoa(req.ProductReferenceId)
+	}
+	if req.ProductReferenceCode != "" {
+		query += ` and a.product_reference_code = '` + req.ProductReferenceCode + `'`
 	}
 	if req.ProductProviderId != 0 {
 		query += ` and f.id = ` + strconv.Itoa(req.ProductProviderId)
@@ -127,8 +132,6 @@ func (ctx product) GetProducts(req models.ReqGetProduct) (result []models.RespGe
 		err := rows.Scan(
 			&val.ProviderId,
 			&val.ProviderName,
-			&val.ProductClanId,
-			&val.ProductClanName,
 			&val.ProductCategoryId,
 			&val.ProductCategoryName,
 			&val.ProductTypeId,
@@ -149,6 +152,8 @@ func (ctx product) GetProducts(req models.ReqGetProduct) (result []models.RespGe
 			&val.ProductProviderPrice,
 			&val.ProductProviderAdminFee,
 			&val.ProductProviderMerchantFee,
+			&val.ProductReferenceId,
+			&val.ProductReferenceCode,
 		)
 		if err != nil {
 			return result, err
@@ -162,7 +167,7 @@ func (ctx product) GetProductCount(req models.ReqGetProduct) (result int, err er
 	from products as a
 	join product_types as b on a.product_type_id=b.id
 	join product_categories as c on a.product_category_id=c.id
-	join product_clans as d on a.product_clan_id=d.id
+
 	join product_providers as f on a.product_provider_id=f.id
 	join providers as e on f.provider_id=e.id
 	where true
@@ -176,9 +181,7 @@ func (ctx product) GetProductCount(req models.ReqGetProduct) (result int, err er
 	if req.ProductCategoryId != 0 {
 		query += ` and c.id = ` + strconv.Itoa(req.ProductCategoryId)
 	}
-	if req.ProductClanId != 0 {
-		query += ` and d.id = ` + strconv.Itoa(req.ProductClanId)
-	}
+
 	if req.ProductTypeId != 0 {
 		query += ` and b.id = ` + strconv.Itoa(req.ProductTypeId)
 	}
@@ -196,8 +199,6 @@ func (ctx product) GetProduct(req models.ReqGetProduct) (result models.RespGetPr
 	query := `select
 	e.id,
 	e.provider_name,
-	d.id,
-	d.product_clan_name,
 	c.id,
 	c.product_category_name,
 	b.id,
@@ -217,11 +218,13 @@ func (ctx product) GetProduct(req models.ReqGetProduct) (result models.RespGetPr
 	f.product_provider_code,
 	f.product_provider_price,
 	f.product_provider_admin_fee,
-	f.product_provider_merchant_fee
+	f.product_provider_merchant_fee,
+	a.product_reference_id,
+	a.product_reference_code
 	from products as a
 	join product_types as b on a.product_type_id=b.id
 	join product_categories as c on a.product_category_id=c.id
-	join product_clans as d on a.product_clan_id=d.id
+
 	join product_providers as f on a.product_provider_id=f.id
 	join providers as e on f.provider_id=e.id
 	where true
@@ -238,8 +241,11 @@ func (ctx product) GetProduct(req models.ReqGetProduct) (result models.RespGetPr
 	if req.ProductCategoryId != 0 {
 		query += ` and c.id = ` + strconv.Itoa(req.ProductCategoryId)
 	}
-	if req.ProductClanId != 0 {
-		query += ` and d.id = ` + strconv.Itoa(req.ProductClanId)
+	if req.ProductReferenceId != 0 {
+		query += ` and a.product_reference_id = ` + strconv.Itoa(req.ProductReferenceId)
+	}
+	if req.ProductReferenceCode != "" {
+		query += ` and a.product_reference_code = '` + req.ProductReferenceCode + `'`
 	}
 	if req.ProductTypeId != 0 {
 		query += ` and b.id = ` + strconv.Itoa(req.ProductTypeId)
@@ -253,8 +259,7 @@ func (ctx product) GetProduct(req models.ReqGetProduct) (result models.RespGetPr
 	err = ctx.repo.Db.QueryRow(query).Scan(
 		&result.ProviderId,
 		&result.ProviderName,
-		&result.ProductClanId,
-		&result.ProductClanName,
+
 		&result.ProductCategoryId,
 		&result.ProductCategoryName,
 		&result.ProductTypeId,
@@ -275,6 +280,8 @@ func (ctx product) GetProduct(req models.ReqGetProduct) (result models.RespGetPr
 		&result.ProductProviderPrice,
 		&result.ProductProviderAdminFee,
 		&result.ProductProviderMerchantFee,
+		&result.ProductReferenceId,
+		&result.ProductReferenceCode,
 	)
 	if err != nil {
 		return result, err
@@ -286,17 +293,18 @@ func (ctx product) UpdateProduct(req models.ReqGetProduct) (result models.RespGe
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	query := ` update products set
 	product_provider_id=$1,
-	product_clan_id=$2,
-	product_category_id=$3,
-	product_type_id=$4,
-	product_name=$5,
-	product_price=$6,
-	product_admin_fee=$7,
-	product_merchant_fee=$8,
-	updated_at=$9,
-	updated_by=$10,
-	product_code=$11
-	where id = $12 
+	product_category_id=$2,
+	product_type_id=$3,
+	product_name=$4,
+	product_price=$5,
+	product_admin_fee=$6,
+	product_merchant_fee=$7,
+	updated_at=$8,
+	updated_by=$9,
+	product_code=$10,
+	product_reference_id=$11,
+	product_reference_code=$2
+	where id =$13
 	`
 	aa, _ := json.Marshal(req)
 
@@ -304,7 +312,6 @@ func (ctx product) UpdateProduct(req models.ReqGetProduct) (result models.RespGe
 	fmt.Println("query ", query)
 	_, err = ctx.repo.Db.Exec(query,
 		req.ProductProviderId,
-		req.ProductClanId,
 		req.ProductCategoryId,
 		req.ProductTypeId,
 		req.ProductName,
@@ -314,7 +321,9 @@ func (ctx product) UpdateProduct(req models.ReqGetProduct) (result models.RespGe
 		dbTime,
 		"sys",
 		req.ProductCode,
-		req.ID)
+		req.ID,
+		req.ProductReferenceId,
+		req.ProductReferenceCode)
 	if err != nil {
 		return result, err
 	}

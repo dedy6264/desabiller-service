@@ -15,20 +15,7 @@ type (
 		CreatedBy    string `json:"createdBy"`
 		UpdatedBy    string `json:"updatedBy"`
 	}
-	ReqGetProductClan struct {
-		ID              int       `json:"id"`
-		ProductClanName string    `json:"productClanName"`
-		Filter          FilterReq `json:"filter"`
-	}
-	/////
-	RespGetProductClan struct {
-		ID              int    `json:"id"`
-		ProductClanName string `json:"productClanName"`
-		CreatedAt       string `json:"createdAt"`
-		UpdatedAt       string `json:"updatedAt"`
-		CreatedBy       string `json:"createdBy"`
-		UpdatedBy       string `json:"updatedBy"`
-	}
+
 	ReqGetProductCategory struct {
 		ID                  int       `json:"id"`
 		ProductCategoryName string    `json:"productCategoryName"`
@@ -85,18 +72,19 @@ type (
 		UpdatedBy                  string  `json:"updatedBy"`
 	}
 	ReqGetProduct struct {
-		ID                 int       `json:"id"`
-		ProviderId         int       `json:"providerId"`
-		ProductProviderId  int       `json:"productProviderId"`
-		ProductClanId      int       `json:"productClanId"`
-		ProductCategoryId  int       `json:"productCategoryId"`
-		ProductTypeId      int       `json:"productTypeId"`
-		ProductName        string    `json:"productName"`
-		ProductCode        string    `json:"productCode"`
-		ProductAdminFee    float64   `json:"productAdminFee"`
-		ProductPrice       float64   `json:"productPrice"`
-		ProductMerchantFee float64   `json:"productMerchantFee"`
-		Filter             FilterReq `json:"filter"`
+		ID                   int       `json:"id"`
+		ProviderId           int       `json:"providerId"`
+		ProductProviderId    int       `json:"productProviderId"`
+		ProductCategoryId    int       `json:"productCategoryId"`
+		ProductTypeId        int       `json:"productTypeId"`
+		ProductName          string    `json:"productName"`
+		ProductCode          string    `json:"productCode"`
+		ProductAdminFee      float64   `json:"productAdminFee"`
+		ProductPrice         float64   `json:"productPrice"`
+		ProductMerchantFee   float64   `json:"productMerchantFee"`
+		ProductReferenceId   int       `json:"productReferenceId"`
+		ProductReferenceCode string    `json:"productReferenceCode"`
+		Filter               FilterReq `json:"filter"`
 	}
 	/////
 	RespGetProduct struct {
@@ -110,8 +98,6 @@ type (
 		ProductProviderAdminFee    float64 `json:"productProviderAdminFee"`
 		ProductProviderPrice       float64 `json:"productProviderPrice"`
 		ProductProviderMerchantFee float64 `json:"productProviderMerchantFee"`
-		ProductClanId              int     `json:"productClanId"`
-		ProductClanName            string  `json:"productClanName"`
 		ProductCategoryId          int     `json:"productCategoryId"`
 		ProductCategoryName        string  `json:"productCategoryName"`
 		ProductTypeId              int     `json:"productTypeId"`
@@ -124,6 +110,8 @@ type (
 		UpdatedAt                  string  `json:"updatedAt"`
 		CreatedBy                  string  `json:"createdBy"`
 		UpdatedBy                  string  `json:"updatedBy"`
+		ProductReferenceId         int     `json:"productReferenceId"`
+		ProductReferenceCode       string  `json:"productReferenceCode"`
 	}
 	// ResGetProductCategory struct {
 	// 	ID                  int    `json:"id"`

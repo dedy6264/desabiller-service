@@ -28,13 +28,13 @@ func (svc HierarcyService) GetMerchants(ctx echo.Context) error {
 	req.ClientName = strings.ToUpper(req.ClientName)
 	req.GroupName = strings.ToUpper(req.GroupName)
 	req.MerchantName = strings.ToUpper(req.MerchantName)
-	count, err := svc.service.ApiHierarchy.GetMerchantCount(*req)
+	count, err := svc.service.RepoHierarchy.GetMerchantCount(*req)
 	if err != nil {
 		log.Println("Err "+svcName+" GetMerchantCount ", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Data :: empty", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	resMerchant, err := svc.service.ApiHierarchy.GetMerchants(*req)
+	resMerchant, err := svc.service.RepoHierarchy.GetMerchants(*req)
 	if err != nil {
 		log.Println("Err ", svcName, " GetMerchants ", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Data :: empty", nil)
@@ -85,10 +85,10 @@ func (svc HierarcyService) AddMerchant(ctx echo.Context) error {
 	req.GroupName = strings.ToUpper(req.GroupName)
 	req.MerchantName = strings.ToUpper(req.MerchantName)
 
-	_, err = svc.service.ApiHierarchy.GetMerchant(*req)
+	_, err = svc.service.RepoHierarchy.GetMerchant(*req)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			err = svc.service.ApiHierarchy.AddMerchant(*req)
+			err = svc.service.RepoHierarchy.AddMerchant(*req)
 			if err != nil {
 				log.Println("Err ", svcName, "AddMerchant", err)
 				result := helpers.ResponseJSON(configs.FALSE_VALUE,
@@ -131,7 +131,7 @@ func (svc HierarcyService) DropMerchant(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	err = svc.service.ApiHierarchy.DropMerchant(*req)
+	err = svc.service.RepoHierarchy.DropMerchant(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "DropMerchant", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
@@ -159,7 +159,7 @@ func (svc HierarcyService) UpdateMerchant(ctx echo.Context) error {
 	req.GroupName = strings.ToUpper(req.GroupName)
 	req.MerchantName = strings.ToUpper(req.MerchantName)
 
-	_, err = svc.service.ApiHierarchy.UpdateMerchant(*req)
+	_, err = svc.service.RepoHierarchy.UpdateMerchant(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "UpdateMerchant", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,

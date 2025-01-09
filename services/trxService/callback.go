@@ -29,7 +29,7 @@ func (svc trxService) IAKCallback(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	resp, err := svc.services.ApiTrx.GetTrx(models.ReqGetTrx{
+	resp, err := svc.services.RepoTrx.GetTrx(models.ReqGetTrx{
 		ReferenceNumber: req.Data.RefID,
 	})
 	if err != nil {
@@ -81,8 +81,8 @@ func (svc trxService) IAKCallback(ctx echo.Context) error {
 	statusCode = helpers.ErrorCodeGateway(statusCode, "PAY")
 	updateTrx := models.ReqGetTrx{
 		Id:                         resp.Id,
-		ProductClanId:              resp.ProductClanId,
-		ProductClanName:            resp.ProductClanName,
+		ProductReferenceId:         resp.ProductReferenceId,
+		ProductReferenceCode:       resp.ProductReferenceCode,
 		ProductCategoryId:          resp.ProductCategoryId,
 		ProductCategoryName:        resp.ProductCategoryName,
 		ProductTypeId:              resp.ProductTypeId,
@@ -125,11 +125,11 @@ func (svc trxService) IAKCallback(ctx echo.Context) error {
 	//cek trx, jika pending, update
 	if resp.StatusCode == configs.PENDING_CODE {
 		err = helpers.DBTransaction(svc.services.RepoDB, func(Tx *sql.Tx) error {
-			err = svc.services.ApiTrx.UpdateTrx(updateTrx, Tx)
+			err = svc.services.RepoTrx.UpdateTrx(updateTrx, Tx)
 			if err != nil {
 				return err
 			}
-			err = svc.services.ApiTrx.InsertTrxStatus(models.ReqGetTrxStatus{
+			err = svc.services.RepoTrx.InsertTrxStatus(models.ReqGetTrxStatus{
 				ReferenceNumber:         updateTrx.ReferenceNumber,
 				ProviderReferenceNumber: updateTrx.ProviderReferenceNumber,
 				StatusCode:              updateTrx.StatusCode,

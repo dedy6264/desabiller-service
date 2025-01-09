@@ -2,29 +2,29 @@ package models
 
 type (
 	ProviderInqRequest struct {
-		ProviderId       int    `json:"providerId"`
-		ProviderName     string `json:"providerName"`
-		ProductClan      string `json:"productClan"`
-		ProductCode      string `json:"productCode"`
-		SubscriberNumber string `json:"subscriberNumber"`
-		SubscriberName   string `json:"subscriberName"`
-		ReferenceNumber  string `json:"referenceNumber"`
-		Url              string `json:"url"`
-		Periode          int    `json:"periode"`
+		ProviderId           int    `json:"providerId"`
+		ProviderName         string `json:"providerName"`
+		ProductReferenceCode string `json:"productReferenceCode"`
+		ProductCode          string `json:"productCode"`
+		SubscriberNumber     string `json:"subscriberNumber"`
+		SubscriberName       string `json:"subscriberName"`
+		ReferenceNumber      string `json:"referenceNumber"`
+		Url                  string `json:"url"`
+		Periode              int    `json:"periode"`
 	}
 	ProviderPayRequest struct {
 		ProviderName            string `json:"providerName"`
 		ProviderReferenceNumber string `json:"ProviderReferenceNumber"`
 		Url                     string `json:"url"`
-		ProductClan             string `json:"productClan"`
+		ProductReferenceCode    string `json:"productReferenceCode"`
 	}
 	ReqAviceTrx struct {
 		ReferenceNumber string `json:"referenceNumber" validate:"required"`
 	}
 	ReqGetTrx struct {
 		Id                         int       `json:"id"` //
-		ProductClanId              int       `json:"productClanId"`
-		ProductClanName            string    `json:"productClanName"`
+		ProductReferenceId         int       `json:"productReferenceId"`
+		ProductReferenceCode       string    `json:"productReferenceCode"`
 		ProductCategoryId          int       `json:"productCategoryId"` //
 		ProductCategoryName        string    `json:"productCategoryName"`
 		ProductTypeId              int       `json:"productTypeId"`
@@ -68,8 +68,8 @@ type (
 	RespGetTrx struct {
 		Index                      int     `json:"index"`
 		Id                         int     `json:"id"`
-		ProductClanId              int     `json:"productClanId"`
-		ProductClanName            string  `json:"productClanName"`
+		ProductReferenceId         int     `json:"productReferenceId"`
+		ProductReferenceCode       string  `json:"productReferenceCode"`
 		ProductCategoryId          int     `json:"productCategoryId"`
 		ProductCategoryName        string  `json:"productCategoryName"`
 		ProductTypeId              int     `json:"productTypeId"`

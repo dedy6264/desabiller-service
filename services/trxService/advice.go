@@ -30,7 +30,7 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	resp, err := svc.services.ApiTrx.GetTrx(models.ReqGetTrx{
+	resp, err := svc.services.RepoTrx.GetTrx(models.ReqGetTrx{
 		ReferenceNumber: req.ReferenceNumber,
 	})
 	if err != nil {
@@ -69,10 +69,10 @@ func (svc trxService) Advice(ctx echo.Context) error {
 			url = configs.IakProdUrlPostpaid + "/api/v1/bill/check"
 		}
 		respProvider, err := svc.CheckStatusProviderSwitcher(models.ProviderInqRequest{
-			ReferenceNumber: resp.ReferenceNumber,
-			Url:             url,
-			ProviderName:    resp.ProviderName,
-			ProductClan:     resp.ProductClanName,
+			ReferenceNumber:      resp.ReferenceNumber,
+			Url:                  url,
+			ProviderName:         resp.ProviderName,
+			ProductReferenceCode: resp.ProductReferenceCode,
 		})
 		if err != nil {
 			log.Println("Err ", svcName, "CheckStatusProviderSwitcher", err)
@@ -155,8 +155,8 @@ func UpdateAndInsertStatusTrx(dataPayment models.RespGetTrx, dataAdvice models.R
 		return errors.New("trx was pending")
 	}
 	updatePayment := models.ReqGetTrx{
-		ProductClanId:              dataPayment.ProductClanId,
-		ProductClanName:            dataPayment.ProductClanName,
+		ProductReferenceId:         dataPayment.ProductReferenceId,
+		ProductReferenceCode:       dataPayment.ProductReferenceCode,
 		ProductCategoryId:          dataPayment.ProductCategoryId,
 		ProductCategoryName:        dataPayment.ProductCategoryName,
 		ProductTypeId:              dataPayment.ProductTypeId,
@@ -203,13 +203,13 @@ func UpdateAndInsertStatusTrx(dataPayment models.RespGetTrx, dataAdvice models.R
 		updatePayment.OtherMsg = string(byte)
 	}
 	err := helpers.DBTransaction(svc.services.RepoDB, func(Tx *sql.Tx) error {
-		err := svc.services.ApiTrx.UpdateTrx(updatePayment, Tx)
+		err := svc.services.RepoTrx.UpdateTrx(updatePayment, Tx)
 		if err != nil {
 			// log.Println("Err ", svcName, "UpdateTrx", err)
 			// result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 			return err
 		}
-		err = svc.services.ApiTrx.InsertTrxStatus(models.ReqGetTrxStatus{
+		err = svc.services.RepoTrx.InsertTrxStatus(models.ReqGetTrxStatus{
 			ReferenceNumber:         updatePayment.ReferenceNumber,
 			ProviderReferenceNumber: updatePayment.ProviderReferenceNumber,
 			StatusCode:              updatePayment.StatusCode,

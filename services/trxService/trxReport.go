@@ -33,7 +33,7 @@ func (svc trxService) TrxBillerReport(ctx echo.Context) error {
 	)
 	t := time.Now()
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMPTRX)
-	req := new(models.ReqPaymentTrx)
+	req := new(models.ReqGetTrx)
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
@@ -45,9 +45,7 @@ func (svc trxService) TrxBillerReport(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "ReferenceNumber id cannot be null", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	respInqTrx, err := svc.services.ApiTrx.GetTrx(models.ReqGetTrx{
-		ReferenceNumber: req.ReferenceNumber,
-	})
+	respInqTrx, err := svc.services.RepoTrx.GetTrx(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "GetTrx", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "transaction not found", nil)
@@ -60,8 +58,8 @@ func (svc trxService) TrxBillerReport(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	updatePayment := models.ReqGetTrx{
-		ProductClanId:              respInqTrx.ProductClanId,
-		ProductClanName:            respInqTrx.ProductClanName,
+		ProductReferenceId:         respInqTrx.ProductReferenceId,
+		ProductReferenceCode:       respInqTrx.ProductReferenceCode,
 		ProductCategoryId:          respInqTrx.ProductCategoryId,
 		ProductCategoryName:        respInqTrx.ProductCategoryName,
 		ProductTypeId:              respInqTrx.ProductTypeId,
@@ -166,13 +164,13 @@ func (svc trxService) TrxBillerReport(ctx echo.Context) error {
 		updatePayment.StatusMessage = "PAYMENT PENDING"
 	}
 	// byte, status, er := utils.WorkerPostWithBearer())
-	err = svc.services.ApiTrx.UpdateTrx(updatePayment, nil)
+	err = svc.services.RepoTrx.UpdateTrx(updatePayment, nil)
 	if err != nil {
 		log.Println("Err ", svcName, "UpdateTrx", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.PENDING_CODE, configs.PENDING_MSG, nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	err = svc.services.ApiTrx.InsertTrxStatus(models.ReqGetTrxStatus{
+	err = svc.services.RepoTrx.InsertTrxStatus(models.ReqGetTrxStatus{
 		ReferenceNumber:         updatePayment.ReferenceNumber,
 		ProviderReferenceNumber: updatePayment.ProviderReferenceNumber,
 		StatusCode:              updatePayment.StatusCode,

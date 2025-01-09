@@ -14,7 +14,7 @@ import (
 func (svc trxService) InqProviderSwitcher(req models.ProviderInqRequest) (respWorker models.ResponseWorkerInquiry, err error) {
 	switch req.ProviderName {
 	case "IAK":
-		switch req.ProductClan {
+		switch req.ProductReferenceCode {
 		case "BPJSKS":
 			respWorker, err = iakworkerservice.IakBPJSWorkerInquiry(models.ReqInqIak{
 				ProductCode: req.ProductCode,
@@ -42,7 +42,7 @@ func (svc trxService) PayProviderSwitcher(req models.ProviderPayRequest) (respWo
 	fmt.Println("SINI 3", string(cc))
 	switch req.ProviderName {
 	case "IAK":
-		switch req.ProductClan {
+		switch req.ProductReferenceCode {
 		case "BPJSKS":
 			respWorker, err = iakworkerservice.IakBPJSWorkerPayment(models.ReqInqIak{
 				// ProductCode: req.ProductCode,
@@ -66,13 +66,13 @@ func (svc trxService) PayProviderSwitcher(req models.ProviderPayRequest) (respWo
 func (svc trxService) CheckStatusProviderSwitcher(req models.ProviderInqRequest) (respWorker models.ResponseWorkerPayment, err error) {
 	switch req.ProviderName {
 	case "IAK":
-		switch req.ProductClan {
+		switch req.ProductReferenceCode {
 		case "BPJSKS":
 			respWorker, err = iakworkerservice.IakPostpaidWorkerCheckStatus(models.ReqInqIak{
-				RefId:       req.ReferenceNumber,
-				Commands:    "checkstatus",
-				Url:         req.Url,
-				ProductClan: req.ProductClan,
+				RefId:                req.ReferenceNumber,
+				Commands:             "checkstatus",
+				Url:                  req.Url,
+				ProductReferenceCode: req.ProductReferenceCode,
 			})
 		default:
 			respWorker = models.ResponseWorkerPayment{

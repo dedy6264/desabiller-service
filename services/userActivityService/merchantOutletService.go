@@ -31,13 +31,13 @@ func (svc userActivity) GetMerchantOutlets(ctx echo.Context) error {
 	req.MerchantName = strings.ToUpper(req.MerchantName)
 	req.MerchantOutletName = strings.ToUpper(req.MerchantOutletName)
 	req.MerchantOutletUsername = data.MerchantOutletUsername
-	count, err := svc.services.ApiHierarchy.GetMerchantOutletCount(*req)
+	count, err := svc.services.RepoHierarchy.GetMerchantOutletCount(*req)
 	if err != nil {
 		log.Println("Err "+svcName+" GetMerchantOutletCount ", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Data :: empty", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	resMerchantOutlet, err := svc.services.ApiHierarchy.GetMerchantOutlets(*req)
+	resMerchantOutlet, err := svc.services.RepoHierarchy.GetMerchantOutlets(*req)
 	if err != nil {
 		log.Println("Err ", svcName, " GetMerchantOutlets ", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Data :: empty", nil)
@@ -79,7 +79,7 @@ func (svc userActivity) UpdateMerchantOutlet(ctx echo.Context) error {
 			return ctx.JSON(http.StatusOK, result)
 		}
 	} else {
-		resp, err := svc.services.ApiHierarchy.GetMerchantOutlet(models.ReqGetMerchantOutlet{
+		resp, err := svc.services.RepoHierarchy.GetMerchantOutlet(models.ReqGetMerchantOutlet{
 			ID: req.ID,
 		})
 		if err != nil {
@@ -93,7 +93,7 @@ func (svc userActivity) UpdateMerchantOutlet(ctx echo.Context) error {
 		req.MerchantOutletPassword = resp.MerchantOutletPassword
 	}
 	fmt.Println(req)
-	_, err = svc.services.ApiHierarchy.UpdateMerchantOutlet(*req)
+	_, err = svc.services.RepoHierarchy.UpdateMerchantOutlet(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "UpdateMerchantOutlet", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
@@ -175,7 +175,7 @@ func (svc userActivity) UpdateMerchantOutlet(ctx echo.Context) error {
 //			ClientId:               req.ClientId,
 //			ClientName:             req.ClientName,
 //		}
-//		resp, err := svc.services.ApiHierarchy.GetMerchantOutlets(request)
+//		resp, err := svc.services.RepoHierarchy.GetMerchantOutlets(request)
 //		if err != nil {
 //			log.Println("Err ", svcName, "GetMerchantOutlet", err)
 //			result := helpers.ResponseJSON(configs.FALSE_VALUE,
@@ -192,7 +192,7 @@ func (svc userActivity) UpdateMerchantOutlet(ctx echo.Context) error {
 //				nil)
 //			return ctx.JSON(http.StatusOK, result)
 //		}
-//		err = svc.services.ApiHierarchy.AddMerchantOutlet(*req)
+//		err = svc.services.RepoHierarchy.AddMerchantOutlet(*req)
 //		if err != nil {
 //			log.Println("Err ", svcName, "AddMerchantOutlet", err)
 //			result := helpers.ResponseJSON(configs.FALSE_VALUE,
@@ -219,7 +219,7 @@ func (svc userActivity) UpdateMerchantOutlet(ctx echo.Context) error {
 //			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 //			return ctx.JSON(http.StatusOK, result)
 //		}
-//		err = svc.services.ApiHierarchy.DropMerchantOutlet(*req)
+//		err = svc.services.RepoHierarchy.DropMerchantOutlet(*req)
 //		if err != nil {
 //			log.Println("Err ", svcName, "DropMerchantOutlet", err)
 //			result := helpers.ResponseJSON(configs.FALSE_VALUE,

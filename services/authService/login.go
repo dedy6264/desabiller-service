@@ -43,7 +43,7 @@ func (svc AdministrationService) Login(ctx echo.Context) error {
 		result := helpers.ResponseJSON(false, configs.VALIDATE_ERROR_CODE, "wrong username or password", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	respGet, err := svc.service.ApiHierarchy.GetMerchantOutlet(models.ReqGetMerchantOutlet{
+	respGet, err := svc.service.RepoHierarchy.GetMerchantOutlet(models.ReqGetMerchantOutlet{
 		MerchantOutletUsername: req.MerchantOutletUsername,
 	})
 	if err != nil {

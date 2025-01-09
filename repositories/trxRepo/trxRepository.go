@@ -8,9 +8,8 @@ import (
 	"time"
 )
 
+// baru sampe sini mau update product reference code, perlu nambah field ti tb trx
 const insertQueryPos = `
-product_clan_id,
-product_clan_name,
 product_category_id,
 product_category_name,
 product_type_id,
@@ -52,12 +51,12 @@ total_trx_amount,
 created_at,
 updated_at,
 created_by,
-updated_by
+updated_by,
+product_reference_id,
+product_reference_code
 `
 const getQueryPos = `
 id,
-product_clan_id,
-product_clan_name,
 product_category_id,
 product_category_name,
 product_type_id,
@@ -99,7 +98,9 @@ total_trx_amount,
 created_at,
 updated_at,
 created_by,
-updated_by`
+updated_by,
+product_reference_id,
+product_reference_code`
 
 func (ctx trxRepository) GetTrx(req models.ReqGetTrx) (result models.RespGetTrx, err error) {
 	query := ` select ` + getQueryPos +
@@ -136,8 +137,6 @@ func (ctx trxRepository) GetTrx(req models.ReqGetTrx) (result models.RespGetTrx,
 	}
 	err = ctx.repo.Db.QueryRow(query).Scan(
 		&result.Id,
-		&result.ProductClanId,
-		&result.ProductClanName,
 		&result.ProductCategoryId,
 		&result.ProductCategoryName,
 		&result.ProductTypeId,
@@ -180,6 +179,8 @@ func (ctx trxRepository) GetTrx(req models.ReqGetTrx) (result models.RespGetTrx,
 		&result.CreatedBy,
 		&result.UpdatedAt,
 		&result.UpdatedBy,
+		&result.ProductReferenceId,
+		&result.ProductReferenceCode,
 	)
 	if err != nil {
 		return result, err
@@ -278,8 +279,6 @@ func (ctx trxRepository) GetTrxs(req models.ReqGetTrx) (result []models.RespGetT
 		var val models.RespGetTrx
 		err = rows.Scan(
 			&val.Id,
-			&val.ProductClanId,
-			&val.ProductClanName,
 			&val.ProductCategoryId,
 			&val.ProductCategoryName,
 			&val.ProductTypeId,
@@ -322,6 +321,8 @@ func (ctx trxRepository) GetTrxs(req models.ReqGetTrx) (result []models.RespGetT
 			&val.CreatedBy,
 			&val.UpdatedAt,
 			&val.UpdatedBy,
+			&val.ProductReferenceId,
+			&val.ProductReferenceCode,
 		)
 		val.Index = n
 		n++
@@ -338,12 +339,9 @@ func (ctx trxRepository) InsertTrx(req models.ReqGetTrx, tx *sql.Tx) (err error)
 		$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,
 		$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,
 		$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,
-		$41,$42,$43,$44
-) returning id`
+		$41,$42,$43,$44) returning id`
 	if tx != nil {
 		_, err = tx.Exec(query,
-			req.ProductClanId,
-			req.ProductClanName,
 			req.ProductCategoryId,
 			req.ProductCategoryName,
 			req.ProductTypeId,
@@ -386,14 +384,14 @@ func (ctx trxRepository) InsertTrx(req models.ReqGetTrx, tx *sql.Tx) (err error)
 			req.Filter.CreatedAt,
 			req.MerchantOutletUsername,
 			req.MerchantOutletUsername,
+			req.ProductReferenceId,
+			req.ProductReferenceCode,
 		)
 		if err != nil {
 			return err
 		}
 	} else {
 		_, err = ctx.repo.Db.Exec(query,
-			req.ProductClanId,
-			req.ProductClanName,
 			req.ProductCategoryId,
 			req.ProductCategoryName,
 			req.ProductTypeId,
@@ -436,6 +434,8 @@ func (ctx trxRepository) InsertTrx(req models.ReqGetTrx, tx *sql.Tx) (err error)
 			req.Filter.CreatedAt,
 			req.MerchantOutletUsername,
 			req.MerchantOutletUsername,
+			req.ProductReferenceId,
+			req.ProductReferenceCode,
 		)
 		if err != nil {
 			return err
@@ -447,65 +447,34 @@ func (ctx trxRepository) UpdateTrx(req models.ReqGetTrx, tx *sql.Tx) (err error)
 	t := time.Now()
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	query := ` update biller_trxs set
-			product_clan_id=$1,
-			product_clan_name=$2,
-			product_category_id=$3,
-			product_category_name=$4,
-			product_type_id=$5,
-			product_type_name=$6,
-			product_id=$7,
-			product_name=$8,
-			product_code=$9,
-			product_price=$10,
-			product_admin_fee=$11,
-			product_merchant_fee=$12,
-			product_provider_id=$13,
-			product_provider_name=$14,
-			product_provider_code=$15,
-			product_provider_price=$16,
-			product_provider_admin_fee=$17,
-			product_provider_merchant_fee=$18,
-			status_code=$19,
-			status_message=$20,
-			status_desc=$21,
-			reference_number=$22,
-			provider_status_code=$23,
-			provider_status_message=$24,
-			provider_status_desc=$25,
-			provider_reference_number=$26,
-			client_id=$27,
-			client_name=$28,
-			group_id=$29,
-			group_name=$30,
-			merchant_id=$31,
-			merchant_name=$32,
-			merchant_outlet_id=$33,
-			merchant_outlet_name=$34,
-			merchant_outlet_username=$35,
-			customer_id=$36,
-			other_msg=$37,
-			updated_at=$38,
-			updated_by=$39,
-			total_trx_amount=$40
-			where reference_number=$41
+			product_price=$1,
+			product_admin_fee=$2,
+			product_merchant_fee=$3,
+			product_provider_price=$4,
+			product_provider_admin_fee=$5,
+			product_provider_merchant_fee=$6,
+			status_code=$7,
+			status_message=$8,
+			status_desc=$9,
+			reference_number=$10,
+			provider_status_code=$11,
+			provider_status_message=$12,
+			provider_status_desc=$13,
+			provider_reference_number=$14,
+			customer_id=$15,
+			other_msg=$16,
+			updated_at=$17,
+			updated_by=$18,
+			total_trx_amount=$19,
+			product_reference_id=$20,
+			product_reference_code=$21
+			where reference_number=$22
 	`
 	if tx != nil {
 		_, err = tx.Exec(query,
-			req.ProductClanId,
-			req.ProductClanName,
-			req.ProductCategoryId,
-			req.ProductCategoryName,
-			req.ProductTypeId,
-			req.ProductTypeName,
-			req.ProductId,
-			req.ProductName,
-			req.ProductCode,
 			req.ProductPrice,
 			req.ProductAdminFee,
 			req.ProductMerchantFee,
-			req.ProductProviderId,
-			req.ProductProviderName,
-			req.ProductProviderCode,
 			req.ProductProviderPrice,
 			req.ProductProviderAdminFee,
 			req.ProductProviderMerchantFee,
@@ -517,39 +486,20 @@ func (ctx trxRepository) UpdateTrx(req models.ReqGetTrx, tx *sql.Tx) (err error)
 			req.ProviderStatusMessage,
 			req.ProviderStatusDesc,
 			req.ProviderReferenceNumber,
-			req.ClientId,
-			req.ClientName,
-			req.GroupId,
-			req.GroupName,
-			req.MerchantId,
-			req.MerchantName,
-			req.MerchantOutletId,
-			req.MerchantOutletName,
-			req.MerchantOutletUsername,
 			req.CustomerId,
 			req.OtherMsg,
 			dbTime,
 			req.MerchantOutletUsername,
 			req.TotalTrxAmount,
+			req.ProductReferenceId,
+			req.ProductReferenceCode,
 			req.ReferenceNumber,
 		)
 	} else {
 		_, err = ctx.repo.Db.Exec(query,
-			req.ProductClanId,
-			req.ProductClanName,
-			req.ProductCategoryId,
-			req.ProductCategoryName,
-			req.ProductTypeId,
-			req.ProductTypeName,
-			req.ProductId,
-			req.ProductName,
-			req.ProductCode,
 			req.ProductPrice,
 			req.ProductAdminFee,
 			req.ProductMerchantFee,
-			req.ProductProviderId,
-			req.ProductProviderName,
-			req.ProductProviderCode,
 			req.ProductProviderPrice,
 			req.ProductProviderAdminFee,
 			req.ProductProviderMerchantFee,
@@ -561,20 +511,13 @@ func (ctx trxRepository) UpdateTrx(req models.ReqGetTrx, tx *sql.Tx) (err error)
 			req.ProviderStatusMessage,
 			req.ProviderStatusDesc,
 			req.ProviderReferenceNumber,
-			req.ClientId,
-			req.ClientName,
-			req.GroupId,
-			req.GroupName,
-			req.MerchantId,
-			req.MerchantName,
-			req.MerchantOutletId,
-			req.MerchantOutletName,
-			req.MerchantOutletUsername,
 			req.CustomerId,
 			req.OtherMsg,
 			dbTime,
 			req.MerchantOutletUsername,
 			req.TotalTrxAmount,
+			req.ProductReferenceId,
+			req.ProductReferenceCode,
 			req.ReferenceNumber,
 		)
 	}

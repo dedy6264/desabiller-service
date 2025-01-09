@@ -25,13 +25,13 @@ func (svc HierarcyService) GetClients(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	req.ClientName = strings.ToUpper(req.ClientName)
-	count, err := svc.service.ApiHierarchy.GetCount(*req)
+	count, err := svc.service.RepoHierarchy.GetCount(*req)
 	if err != nil {
 		log.Println("Err "+svcName+" GetCount ", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Data :: empty", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	resClient, err := svc.service.ApiHierarchy.GetClients(*req)
+	resClient, err := svc.service.RepoHierarchy.GetClients(*req)
 	if err != nil {
 		log.Println("Err ", svcName, " GetClients ", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Data :: empty", nil)
@@ -64,7 +64,7 @@ func (svc HierarcyService) AddClient(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	req.ClientName = strings.ToUpper(req.ClientName)
-	err = svc.service.ApiHierarchy.AddClient(*req, nil)
+	err = svc.service.RepoHierarchy.AddClient(*req, nil)
 	if err != nil {
 		log.Println("Err ", svcName, "AddClient", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
@@ -90,7 +90,7 @@ func (svc HierarcyService) DropClient(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	err = svc.service.ApiHierarchy.DropClient(req.ID, nil)
+	err = svc.service.RepoHierarchy.DropClient(req.ID, nil)
 	if err != nil {
 		log.Println("Err ", svcName, "DropClient", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
@@ -115,7 +115,7 @@ func (svc HierarcyService) UpdateClient(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	req.ClientName = strings.ToUpper(req.ClientName)
-	err = svc.service.ApiHierarchy.UpdateClient(*req, nil)
+	err = svc.service.RepoHierarchy.UpdateClient(*req, nil)
 	if err != nil {
 		log.Println("Err ", svcName, "UpdateClient", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,

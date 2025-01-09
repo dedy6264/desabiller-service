@@ -75,14 +75,14 @@ func IakPostpaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.Respo
 	}
 	fmt.Println(statusCode, statusMsg)
 	if statusCode == configs.WORKER_SUCCESS_CODE || statusCode == configs.WORKER_PENDING_CODE {
-		if req.ProductClan == "" {
+		if req.ProductReferenceCode == "" {
 			respWorker.PaymentStatus = configs.WORKER_PENDING_CODE
 			respWorker.PaymentStatusDesc = "PENDING"
 			respWorker.PaymentStatusDescDetail = "PENDING"
-			log.Println("Err ", helperName, "Invalid Product Clan", err)
+			log.Println("Err ", helperName, "Invalid Product Reference", err)
 			return
 		}
-		switch req.ProductClan {
+		switch req.ProductReferenceCode {
 		case "BPJSKS":
 			fmt.Println("udah bener")
 			if respProvider.Data.Desc == "" {
@@ -98,7 +98,7 @@ func IakPostpaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.Respo
 				respWorker.TotalTrxAmount, _ = strconv.ParseFloat(strconv.Itoa(respProvider.Data.Price), 64)
 				respWorker.TrxProviderReferenceNumber = strconv.Itoa(respProvider.Data.TrID)
 			}
-		case "PLN POST":
+		case "PLNPOST":
 			if respProvider.Data.Desc == "" {
 				var respProvider models.RespPaymentPLNPostpaidIak
 				err := json.Unmarshal(respByte, &respProvider)

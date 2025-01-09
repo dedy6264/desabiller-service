@@ -25,7 +25,7 @@ package administrationservice
 // 		return ctx.JSON(http.StatusOK, result)
 // 	}
 // 	// if strings.Contains(req.Username, "@") {
-// 	// 	resUser, err, _ := svc.service.ApiHierarchy.GetListUser(models.ReqUserList{
+// 	// 	resUser, err, _ := svc.service.RepoHierarchy.GetListUser(models.ReqUserList{
 // 	// 		Username:        "",
 // 	// 		Password:        resEec,
 // 	// 		Email:           req.Username,
@@ -71,7 +71,7 @@ package administrationservice
 // 	// 	ss = strings.Split(ss[0], `,`)
 // 	// 	if resUser[0].HierarchyType == "merchant" {
 // 	// 		mID = resUser[0].HierarchyId
-// 	// 		resMerch, status := svc.service.ApiHierarchy.GetListMerchant(models.ReqGetListMerchant{
+// 	// 		resMerch, status := svc.service.RepoHierarchy.GetListMerchant(models.ReqGetListMerchant{
 // 	// 			ID:           mID,
 // 	// 			MerchantName: "",
 // 	// 			ClientId:     0,
@@ -106,7 +106,7 @@ package administrationservice
 // 	// 	return ctx.JSON(http.StatusOK, result)
 // 	// }
 
-// 	resUser, status := svc.service.ApiHierarchy.GetListUserOutlet(models.ReqGetListUserOutlet{
+// 	resUser, status := svc.service.RepoHierarchy.GetListUserOutlet(models.ReqGetListUserOutlet{
 // 		ID:                 0,
 // 		Nickname:           "",
 // 		OutletUsername:     req.Username,

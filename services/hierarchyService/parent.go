@@ -6,7 +6,7 @@ type HierarcyService struct {
 	service services.UsecaseService
 }
 
-func ApiHierarchy(service services.UsecaseService) HierarcyService {
+func RepoHierarchy(service services.UsecaseService) HierarcyService {
 	return HierarcyService{
 		service: service,
 	}

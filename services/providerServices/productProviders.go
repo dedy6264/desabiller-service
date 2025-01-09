@@ -31,7 +31,7 @@ func (svc providerServices) AddProductProvider(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	req.ProviderName = strings.ToUpper(req.ProviderName)
-	_, err = svc.services.ApiProduct.AddProductProvider(*req)
+	_, err = svc.services.RepoProduct.AddProductProvider(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "AddProductProvider", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
@@ -57,7 +57,7 @@ func (svc providerServices) DropProductProvider(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	err = svc.services.ApiProduct.DropProductProvider(*req)
+	err = svc.services.RepoProduct.DropProductProvider(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "DropProductProvider", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
@@ -82,7 +82,7 @@ func (svc providerServices) UpdateProductProvider(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	req.ProviderName = strings.ToUpper(req.ProviderName)
-	_, err = svc.services.ApiProduct.UpdateProductProvider(*req)
+	_, err = svc.services.RepoProduct.UpdateProductProvider(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "UpdateProductProvider", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
@@ -106,13 +106,13 @@ func (svc providerServices) GetProductProviders(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	count, err := svc.services.ApiProduct.GetProductProviderCount(*req)
+	count, err := svc.services.RepoProduct.GetProductProviderCount(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "GetProductProviderCount", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	resp, err := svc.services.ApiProduct.GetProductProviders(*req)
+	resp, err := svc.services.RepoProduct.GetProductProviders(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "GetProductProviders", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)

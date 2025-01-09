@@ -31,7 +31,7 @@ func (svc providerServices) AddProductType(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	req.ProductTypeName = strings.ToUpper(req.ProductTypeName)
-	_, err = svc.services.ApiProduct.AddProductType(*req)
+	_, err = svc.services.RepoProduct.AddProductType(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "AddProductType", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
@@ -59,13 +59,13 @@ func (svc providerServices) GetProductTypes(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	count, err := svc.services.ApiProduct.GetProductTypeCount(*req)
+	count, err := svc.services.RepoProduct.GetProductTypeCount(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "GetProductTypeCount", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	resp, err := svc.services.ApiProduct.GetProductTypes(*req)
+	resp, err := svc.services.RepoProduct.GetProductTypes(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "GetProductTypes", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
@@ -91,7 +91,7 @@ func (svc providerServices) DropProductType(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	err = svc.services.ApiProduct.DropProductType(*req)
+	err = svc.services.RepoProduct.DropProductType(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "DropProductType", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "failed", nil)
@@ -116,7 +116,7 @@ func (svc providerServices) UpdateProductType(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	req.ProductTypeName = strings.ToUpper(req.ProductTypeName)
-	_, err = svc.services.ApiProduct.UpdateProductType(*req)
+	_, err = svc.services.RepoProduct.UpdateProductType(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "UpdateProductType", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "failed", nil)

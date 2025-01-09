@@ -6,7 +6,7 @@ type trxService struct {
 	services services.UsecaseService
 }
 
-func NewApiTrxService(services services.UsecaseService) trxService {
+func NewRepoTrxService(services services.UsecaseService) trxService {
 	return trxService{
 		services: services,
 	}

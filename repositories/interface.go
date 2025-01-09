@@ -43,12 +43,12 @@ type ProductRepo interface {
 	GetProvider(req models.ReqGetProvider) (result models.RespGetProvider, err error)
 	GetProviderCount(req models.ReqGetProvider) (result int, err error)
 
-	AddProductClan(req models.ReqGetProductClan) (err error)
-	GetProductClans(req models.ReqGetProductClan) (result []models.RespGetProductClan, err error)
-	UpdateProductClan(req models.ReqGetProductClan) (result models.RespGetProductClan, err error)
-	DropProductClan(req models.ReqGetProductClan) (err error)
-	GetProductClanCount(req models.ReqGetProductClan) (result int, err error)
-	GetProductClan(req models.ReqGetProductClan) (result models.RespGetProductClan, err error)
+	// AddProductClan(req models.ReqGetProductClan) (err error)
+	// GetProductClans(req models.ReqGetProductClan) (result []models.RespGetProductClan, err error)
+	// UpdateProductClan(req models.ReqGetProductClan) (result models.RespGetProductClan, err error)
+	// DropProductClan(req models.ReqGetProductClan) (err error)
+	// GetProductClanCount(req models.ReqGetProductClan) (result int, err error)
+	// GetProductClan(req models.ReqGetProductClan) (result models.RespGetProductClan, err error)
 
 	AddProductCategory(req models.ReqGetProductCategory) (result models.RespGetProductCategory, err error)
 	GetProductCategories(req models.ReqGetProductCategory) (result []models.RespGetProductCategory, err error)
@@ -93,4 +93,7 @@ type TrxRepo interface {
 type TrxNoGenerator interface {
 	GetLastTrxNo() (noTrx string, status bool)
 	InsertTrxNo(noTrx string) (id int, status bool)
+}
+type HelperRepo interface {
+	GetProductReferenceById(subscriberId string) (result models.RespGetPrefix, err error)
 }

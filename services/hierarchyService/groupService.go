@@ -27,13 +27,13 @@ func (svc HierarcyService) GetGroups(ctx echo.Context) error {
 	}
 	req.ClientName = strings.ToUpper(req.ClientName)
 	req.GroupName = strings.ToUpper(req.GroupName)
-	count, err := svc.service.ApiHierarchy.GetGroupCount(*req)
+	count, err := svc.service.RepoHierarchy.GetGroupCount(*req)
 	if err != nil {
 		log.Println("Err "+svcName+" GetGroupCount ", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Data :: empty", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	resGroup, err := svc.service.ApiHierarchy.GetGroups(*req)
+	resGroup, err := svc.service.RepoHierarchy.GetGroups(*req)
 	if err != nil {
 		log.Println("Err ", svcName, " GetGroups ", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Data :: empty", nil)
@@ -75,10 +75,10 @@ func (svc HierarcyService) AddGroup(ctx echo.Context) error {
 	req.ClientName = strings.ToUpper(req.ClientName)
 	req.GroupName = strings.ToUpper(req.GroupName)
 
-	_, err = svc.service.ApiHierarchy.GetGroup(*req)
+	_, err = svc.service.RepoHierarchy.GetGroup(*req)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			err = svc.service.ApiHierarchy.AddGroup(*req, nil)
+			err = svc.service.RepoHierarchy.AddGroup(*req, nil)
 			if err != nil {
 				log.Println("Err ", svcName, "AddGroup", err)
 				result := helpers.ResponseJSON(configs.FALSE_VALUE,
@@ -121,7 +121,7 @@ func (svc HierarcyService) DropGroup(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	err = svc.service.ApiHierarchy.DropGroup(req.ID)
+	err = svc.service.RepoHierarchy.DropGroup(req.ID)
 	if err != nil {
 		log.Println("Err ", svcName, "DropGroup", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
@@ -148,7 +148,7 @@ func (svc HierarcyService) UpdateGroup(ctx echo.Context) error {
 	req.ClientName = strings.ToUpper(req.ClientName)
 	req.GroupName = strings.ToUpper(req.GroupName)
 
-	_, err = svc.service.ApiHierarchy.UpdateGroup(*req)
+	_, err = svc.service.RepoHierarchy.UpdateGroup(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "UpdateGroup", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,

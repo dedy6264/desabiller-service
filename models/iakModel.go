@@ -43,13 +43,13 @@ type (
 		Sign        string `json:"sign"`
 	}
 	ReqInqIak struct {
-		Commands    string `json:"commands"`
-		ProductCode string `json:"product_code"`
-		CustomerId  string `json:"customer_id"`
-		RefId       string `json:"ref_id"`
-		Url         string `json:"url"`
-		Month       string `json:"month"`
-		ProductClan string `json:"productClan"`
+		Commands             string `json:"commands"`
+		ProductCode          string `json:"product_code"`
+		CustomerId           string `json:"customer_id"`
+		RefId                string `json:"ref_id"`
+		Url                  string `json:"url"`
+		Month                string `json:"month"`
+		ProductReferenceCode string `json:"productReferenceCode"`
 	}
 	ReqPaymentIak struct {
 		ProductCode string `json:"product_code"`
