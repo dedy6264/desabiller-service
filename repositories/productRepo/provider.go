@@ -34,6 +34,9 @@ func (ctx product) AddProvider(req models.ReqGetProvider) (err error) {
 	return nil
 }
 func (ctx product) GetProviders(req models.ReqGetProvider) (result []models.RespGetProvider, err error) {
+	var (
+		limit, offset int
+	)
 	query := `select 
 id,
 provider_name,
@@ -49,8 +52,14 @@ from providers where true
 	if req.ID != 0 {
 		query += ` and id = ` + strconv.Itoa(req.ID)
 	}
-	if req.Filter.Limit != 0 {
-		query += ` limit  ` + strconv.Itoa(req.Filter.Limit) + `  offset  ` + strconv.Itoa(req.Filter.Offset)
+	if req.Filter.Length != 0 {
+		offset = req.Filter.Start * req.Filter.Length
+		limit = req.Filter.Length
+	} else {
+		limit = 10
+	}
+	if req.Filter.Length != 0 {
+		query += ` limit  ` + strconv.Itoa(limit) + `  offset  ` + strconv.Itoa(offset)
 	} else {
 		if req.Filter.OrderBy != "" {
 			query += `  order by ` + req.Filter.OrderBy + ` asc`
@@ -128,6 +137,9 @@ from providers where true
 	return result, nil
 }
 func (ctx product) GetProvider(req models.ReqGetProvider) (result models.RespGetProvider, err error) {
+	var (
+		limit, offset int
+	)
 	query := `select 
 id,
 provider_name,
@@ -143,8 +155,14 @@ from providers where true
 	if req.ID != 0 {
 		query += ` and id = ` + strconv.Itoa(req.ID)
 	}
-	if req.Filter.Limit != 0 {
-		query += ` limit  ` + strconv.Itoa(req.Filter.Limit) + `  offset  ` + strconv.Itoa(req.Filter.Offset)
+	if req.Filter.Length != 0 {
+		offset = req.Filter.Start * req.Filter.Length
+		limit = req.Filter.Length
+	} else {
+		limit = 10
+	}
+	if req.Filter.Length != 0 {
+		query += ` limit  ` + strconv.Itoa(limit) + `  offset  ` + strconv.Itoa(offset)
 	} else {
 		if req.Filter.OrderBy != "" {
 			query += `  order by ` + req.Filter.OrderBy + ` asc`

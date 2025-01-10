@@ -54,6 +54,9 @@ func (ctx product) AddProduct(req models.ReqGetProduct) (result models.RespGetPr
 	return result, nil
 }
 func (ctx product) GetProducts(req models.ReqGetProduct) (result []models.RespGetProduct, err error) {
+	var (
+		limit, offset int
+	)
 	query := `select
 	
 	e.id,
@@ -111,15 +114,21 @@ func (ctx product) GetProducts(req models.ReqGetProduct) (result []models.RespGe
 	if req.ProductProviderId != 0 {
 		query += ` and f.id = ` + strconv.Itoa(req.ProductProviderId)
 	}
-	if req.Filter.Limit != 0 {
-		query += ` limit  ` + strconv.Itoa(req.Filter.Limit) + `  offset  ` + strconv.Itoa(req.Filter.Offset)
+	if req.Filter.Length != 0 {
+		offset = req.Filter.Start * req.Filter.Length
+		limit = req.Filter.Length
+	} else {
+		limit = 10
+	}
+	if req.Filter.Length != 0 {
+		query += ` limit  ` + strconv.Itoa(limit) + `  offset  ` + strconv.Itoa(offset)
 	} else {
 		if req.Filter.OrderBy != "" {
 			query += `  order by ` + req.Filter.OrderBy + ` asc`
 		} else {
 			query += `  order by a.product_name asc`
 		}
-		query += ` limit 100 offset 0`
+		query += ` limit  ` + strconv.Itoa(limit) + ` offset 0`
 	}
 	rows, err := ctx.repo.Db.Query(query)
 	if err != nil {

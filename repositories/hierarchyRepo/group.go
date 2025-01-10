@@ -60,6 +60,15 @@ func (ctx hierarchy) GetGroupCount(req models.ReqGetGroup) (result int, err erro
 	return result, nil
 }
 func (ctx hierarchy) GetGroup(req models.ReqGetGroup) (result models.RespGetGroup, err error) {
+	var (
+		limit, offset int
+	)
+	if req.Filter.Length != 0 {
+		offset = req.Filter.Start * req.Filter.Length
+		limit = req.Filter.Length
+	} else {
+		limit = 10
+	}
 	query := `select 
 	a.id,
 	a.group_name,
@@ -80,8 +89,8 @@ func (ctx hierarchy) GetGroup(req models.ReqGetGroup) (result models.RespGetGrou
 	if req.ID != 0 {
 		query += ` and a.id = ` + strconv.Itoa(req.ID)
 	}
-	if req.Filter.Limit != 0 {
-		query += ` limit  ` + strconv.Itoa(req.Filter.Limit) + `  offset  ` + strconv.Itoa(req.Filter.Offset)
+	if req.Filter.Length != 0 {
+		query += ` limit  ` + strconv.Itoa(limit) + `  offset  ` + strconv.Itoa(offset)
 	} else {
 		if req.Filter.OrderBy != "" {
 			query += `  order by a.` + req.Filter.OrderBy + ` asc`
@@ -110,6 +119,15 @@ func (ctx hierarchy) GetGroup(req models.ReqGetGroup) (result models.RespGetGrou
 	return result, nil
 }
 func (ctx hierarchy) GetGroups(req models.ReqGetGroup) (result []models.RespGetGroup, err error) {
+	var (
+		limit, offset int
+	)
+	if req.Filter.Length != 0 {
+		offset = req.Filter.Start * req.Filter.Length
+		limit = req.Filter.Length
+	} else {
+		limit = 10
+	}
 	query := `select 
 	a.id,
 	a.group_name,
@@ -130,8 +148,8 @@ func (ctx hierarchy) GetGroups(req models.ReqGetGroup) (result []models.RespGetG
 	if req.ID != 0 {
 		query += ` and a.id = ` + strconv.Itoa(req.ID)
 	}
-	if req.Filter.Limit != 0 {
-		query += ` limit  ` + strconv.Itoa(req.Filter.Limit) + `  offset  ` + strconv.Itoa(req.Filter.Offset)
+	if req.Filter.Length != 0 {
+		query += ` limit  ` + strconv.Itoa(limit) + `  offset  ` + strconv.Itoa(offset)
 	} else {
 		if req.Filter.OrderBy != "" {
 			query += `  order by a.` + req.Filter.OrderBy + ` asc`

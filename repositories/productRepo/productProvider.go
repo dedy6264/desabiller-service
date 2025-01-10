@@ -44,6 +44,9 @@ func (ctx product) AddProductProvider(req models.ReqGetProductProvider) (result 
 	return result, nil
 }
 func (ctx product) GetProductProviders(req models.ReqGetProductProvider) (result []models.RespGetProductProvider, err error) {
+	var (
+		limit, offset int
+	)
 	query := `select
 a.id,
 b.id,
@@ -73,8 +76,14 @@ where true
 	if req.ProviderId != 0 {
 		query += ` and b.id = ` + strconv.Itoa(req.ProviderId)
 	}
-	if req.Filter.Limit != 0 {
-		query += ` limit  ` + strconv.Itoa(req.Filter.Limit) + `  offset  ` + strconv.Itoa(req.Filter.Offset)
+	if req.Filter.Length != 0 {
+		offset = req.Filter.Start * req.Filter.Length
+		limit = req.Filter.Length
+	} else {
+		limit = 10
+	}
+	if req.Filter.Length != 0 {
+		query += ` limit  ` + strconv.Itoa(limit) + `  offset  ` + strconv.Itoa(offset)
 	} else {
 		if req.Filter.OrderBy != "" {
 			query += `  order by ` + req.Filter.OrderBy + ` asc`

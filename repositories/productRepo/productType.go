@@ -29,6 +29,9 @@ func (ctx product) AddProductType(req models.ReqGetProductType) (result models.R
 	return result, nil
 }
 func (ctx product) GetProductTypes(req models.ReqGetProductType) (result []models.RespGetProductType, err error) {
+	var (
+		limit, offset int
+	)
 	query := `select
 	id,
 product_type_name,
@@ -45,9 +48,14 @@ where true
 	if req.ID != 0 {
 		query += ` and id = ` + strconv.Itoa(req.ID)
 	}
-
-	if req.Filter.Limit != 0 {
-		query += ` limit  ` + strconv.Itoa(req.Filter.Limit) + `  offset  ` + strconv.Itoa(req.Filter.Offset)
+	if req.Filter.Length != 0 {
+		offset = req.Filter.Start * req.Filter.Length
+		limit = req.Filter.Length
+	} else {
+		limit = 10
+	}
+	if req.Filter.Length != 0 {
+		query += ` limit  ` + strconv.Itoa(limit) + `  offset  ` + strconv.Itoa(offset)
 	} else {
 		if req.Filter.OrderBy != "" {
 			query += `  order by ` + req.Filter.OrderBy + ` asc`

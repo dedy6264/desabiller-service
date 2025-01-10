@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"desabiller/configs"
 	"desabiller/models"
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -99,10 +100,11 @@ created_at,
 updated_at,
 created_by,
 updated_by,
-product_reference_id,
-product_reference_code`
+COALESCE(product_reference_id,0) as product_reference_id,
+COALESCE(product_reference_code,'') as product_reference_code`
 
 func (ctx trxRepository) GetTrx(req models.ReqGetTrx) (result models.RespGetTrx, err error) {
+
 	query := ` select ` + getQueryPos +
 		` from biller_trxs where true `
 	if req.Id != 0 {
@@ -202,7 +204,7 @@ func (ctx trxRepository) GetTrxCount(req models.ReqGetTrx) (result int, err erro
 		query += ` and statusCode= '` + req.StatusCode + `'`
 	}
 	if req.ReferenceNumber != "" {
-		query += ` and referenceNumber= '` + req.ReferenceNumber + `'`
+		query += ` and reference_Number= '` + req.ReferenceNumber + `'`
 	}
 	if req.ClientId != 0 {
 		query += ` and client_id= ` + strconv.Itoa(req.ClientId)
@@ -228,6 +230,9 @@ func (ctx trxRepository) GetTrxCount(req models.ReqGetTrx) (result int, err erro
 	return result, nil
 }
 func (ctx trxRepository) GetTrxs(req models.ReqGetTrx) (result []models.RespGetTrx, err error) {
+	// var (
+	// 	limit, offset int
+	// )
 	query := ` select ` + getQueryPos +
 		` from biller_trxs where true `
 	if req.Id != 0 {
@@ -261,14 +266,24 @@ func (ctx trxRepository) GetTrxs(req models.ReqGetTrx) (result []models.RespGetT
 		query += ` and customer_id= '` + req.CustomerId + `'`
 	}
 
-	// if req.OrderBy != "" {
-	// 	query += ` order by ` + req.OrderBy + ` ` + req.SortBy
-	// } else {
-	// 	query += ` order by updated_at desc`
-	// }
-	if req.Filter.Limit != 0 {
-		query += ` limit  ` + strconv.Itoa(req.Filter.Limit) + ` offset ` + strconv.Itoa(req.Filter.Offset)
+	if req.Filter.OrderBy != "" {
+		query += ` order by ` + req.Filter.OrderBy + ` ` + req.Filter.AscDesc
+	} else {
+		query += ` order by updated_at desc`
 	}
+
+	// if limit != 0 {
+	// 	query += ` limit  ` + strconv.Itoa(limit) + ` offset ` + strconv.Itoa(offset)
+	// }
+	// if req.Filter.Length != 0 {
+	// 	offset = req.Filter.Start * req.Filter.Length
+	// 	limit = req.Filter.Length
+	// } else {
+	// 	limit = 10
+	// }
+	// query += ` limit  ` + strconv.Itoa(limit) + ` offset ` + strconv.Itoa(offset)
+
+	fmt.Println(query)
 	rows, err := ctx.repo.Db.Query(query)
 	if err != nil {
 		return result, err
@@ -318,8 +333,8 @@ func (ctx trxRepository) GetTrxs(req models.ReqGetTrx) (result []models.RespGetT
 			&val.OtherMsg,
 			&val.TotalTrxAmount,
 			&val.CreatedAt,
-			&val.CreatedBy,
 			&val.UpdatedAt,
+			&val.CreatedBy,
 			&val.UpdatedBy,
 			&val.ProductReferenceId,
 			&val.ProductReferenceCode,

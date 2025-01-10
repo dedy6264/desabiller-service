@@ -72,6 +72,15 @@ from merchant_outlets as a
 	return result, nil
 }
 func (ctx hierarchy) GetMerchantOutlets(req models.ReqGetMerchantOutlet) (result []models.RespGetMerchantOutlet, err error) {
+	var (
+		limit, offset int
+	)
+	if req.Filter.Length != 0 {
+		offset = req.Filter.Start * req.Filter.Length
+		limit = req.Filter.Length
+	} else {
+		limit = 10
+	}
 	query := `select
 	a.id,
 	a.merchant_outlet_name,
@@ -112,8 +121,8 @@ func (ctx hierarchy) GetMerchantOutlets(req models.ReqGetMerchantOutlet) (result
 	// if req.StartDate != "" {
 	// 	query += ` and a.created_at between '` + req.StartDate + `' and '` + req.EndDate + `'`
 	// }
-	if req.Filter.Limit != 0 {
-		query += ` limit  ` + strconv.Itoa(req.Filter.Limit) + `  offset  ` + strconv.Itoa(req.Filter.Offset)
+	if req.Filter.Length != 0 {
+		query += ` limit  ` + strconv.Itoa(limit) + `  offset  ` + strconv.Itoa(offset)
 	} else {
 		if req.Filter.OrderBy != "" {
 			query += `  order by a.` + req.Filter.OrderBy + ` asc`

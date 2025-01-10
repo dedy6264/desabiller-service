@@ -2,13 +2,19 @@ package models
 
 type (
 	FilterReq struct {
-		Limit     int    `json:"limit"`
-		Offset    int    `json:"offset"`
+		// Limit     int    `json:"limit"`
+		// Offset    int    `json:"offset"`
+		AscDesc   string `json:"sscDesc"`
 		OrderBy   string `json:"orderBy"`
 		CreatedAt string `json:"createdAt"`
 		CreatedBy string `json:"createdBy"`
 		UpdatedAt string `json:"updatedAt"`
 		UpdatedBy string `json:"updatedBy"`
+		Start     int    `json:"start"`
+		Length    int    `json:"length"`
+		Draw      int    `json:"draw"`
+		Order     string `json:"order"`
+		Search    string `json:"search"`
 	}
 	ReqGetClient struct {
 		ID         int       `json:"id"`

@@ -61,6 +61,15 @@ func (ctx hierarchy) GetMerchantCount(req models.ReqGetMerchant) (result int, er
 	return result, nil
 }
 func (ctx hierarchy) GetMerchants(req models.ReqGetMerchant) (result []models.RespGetMerchant, err error) {
+	var (
+		limit, offset int
+	)
+	if req.Filter.Length != 0 {
+		offset = req.Filter.Start * req.Filter.Length
+		limit = req.Filter.Length
+	} else {
+		limit = 10
+	}
 	query := `select 
 	a.id,
 	a.merchant_name,
@@ -90,8 +99,8 @@ func (ctx hierarchy) GetMerchants(req models.ReqGetMerchant) (result []models.Re
 	// if req.StartDate != "" {
 	// 	query += ` and a.created_at between '` + req.StartDate + `' and '` + req.EndDate + `'`
 	// }
-	if req.Filter.Limit != 0 {
-		query += ` limit  ` + strconv.Itoa(req.Filter.Limit) + `  offset  ` + strconv.Itoa(req.Filter.Offset)
+	if req.Filter.Length != 0 {
+		query += ` limit  ` + strconv.Itoa(limit) + `  offset  ` + strconv.Itoa(offset)
 	} else {
 		if req.Filter.OrderBy != "" {
 			query += `  order by a.` + req.Filter.OrderBy + ` asc`
@@ -158,6 +167,15 @@ func (ctx hierarchy) AddMerchant(req models.ReqGetMerchant) (err error) {
 	return nil
 }
 func (ctx hierarchy) GetMerchant(req models.ReqGetMerchant) (result models.RespGetMerchant, err error) {
+	var (
+		limit, offset int
+	)
+	if req.Filter.Length != 0 {
+		offset = req.Filter.Start * req.Filter.Length
+		limit = req.Filter.Length
+	} else {
+		limit = 10
+	}
 	query := `select 
 	a.id,
 	a.merchant_name,
@@ -187,8 +205,8 @@ func (ctx hierarchy) GetMerchant(req models.ReqGetMerchant) (result models.RespG
 	// if req.StartDate != "" {
 	// 	query += ` and a.created_at between '` + req.StartDate + `' and '` + req.EndDate + `'`
 	// }
-	if req.Filter.Limit != 0 {
-		query += ` limit  ` + strconv.Itoa(req.Filter.Limit) + `  offset  ` + strconv.Itoa(req.Filter.Offset)
+	if req.Filter.Length != 0 {
+		query += ` limit  ` + strconv.Itoa(limit) + `  offset  ` + strconv.Itoa(offset)
 	} else {
 		if req.Filter.OrderBy != "" {
 			query += `  order by a.` + req.Filter.OrderBy + ` asc`
