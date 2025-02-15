@@ -6,6 +6,7 @@ import (
 	"desabiller/models"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -61,15 +62,6 @@ func (ctx hierarchy) GetMerchantCount(req models.ReqGetMerchant) (result int, er
 	return result, nil
 }
 func (ctx hierarchy) GetMerchants(req models.ReqGetMerchant) (result []models.RespGetMerchant, err error) {
-	var (
-		limit, offset int
-	)
-	if req.Filter.Length != 0 {
-		offset = req.Filter.Start * req.Filter.Length
-		limit = req.Filter.Length
-	} else {
-		limit = 10
-	}
 	query := `select 
 	a.id,
 	a.merchant_name,
@@ -90,8 +82,8 @@ func (ctx hierarchy) GetMerchants(req models.ReqGetMerchant) (result []models.Re
 	if req.GroupId != 0 {
 		query += ` and b.id = ` + strconv.Itoa(req.GroupId)
 	}
-	if req.MerchantName != "" {
-		query += ` and a.merchant_name = '` + req.MerchantName + `' `
+	if req.Filter.Search != "" {
+		query += ` and a.merchant_name like '%` + strings.ToUpper(req.Filter.Search) + `%' `
 	}
 	if req.ID != 0 {
 		query += ` and a.id = ` + strconv.Itoa(req.ID)
@@ -100,7 +92,7 @@ func (ctx hierarchy) GetMerchants(req models.ReqGetMerchant) (result []models.Re
 	// 	query += ` and a.created_at between '` + req.StartDate + `' and '` + req.EndDate + `'`
 	// }
 	if req.Filter.Length != 0 {
-		query += ` limit  ` + strconv.Itoa(limit) + `  offset  ` + strconv.Itoa(offset)
+		query += ` limit  ` + strconv.Itoa(req.Filter.Length) + `  offset  ` + strconv.Itoa(req.Filter.Start)
 	} else {
 		if req.Filter.OrderBy != "" {
 			query += `  order by a.` + req.Filter.OrderBy + ` asc`

@@ -43,6 +43,7 @@ func (svc HierarcyService) GetMerchants(ctx echo.Context) error {
 	respSvc.RecordsTotal = count
 	respSvc.RecordsFiltered = count
 	respSvc.Data = resMerchant
+	respSvc.Draw = req.Filter.Draw
 	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, "SUCCESS", respSvc)
 	return ctx.JSON(http.StatusOK, result)
 }
