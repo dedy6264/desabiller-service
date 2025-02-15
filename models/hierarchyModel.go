@@ -4,7 +4,7 @@ type (
 	FilterReq struct {
 		// Limit     int    `json:"limit"`
 		// Offset    int    `json:"offset"`
-		AscDesc   string `json:"sscDesc"`
+		AscDesc   string `json:"ascDesc"`
 		OrderBy   string `json:"orderBy"`
 		CreatedAt string `json:"createdAt"`
 		CreatedBy string `json:"createdBy"`

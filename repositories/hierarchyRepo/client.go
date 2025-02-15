@@ -4,8 +4,10 @@ import (
 	"database/sql"
 	"desabiller/configs"
 	"desabiller/models"
+	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -88,29 +90,17 @@ func (ctx hierarchy) GetCount(req models.ReqGetClient) (result int, err error) {
 	return result, nil
 }
 func (ctx hierarchy) GetClients(req models.ReqGetClient) (result []models.RespGetClient, err error) {
-	// if req.ClientName != "" && req.ID != 0 {
-	// 	req.ID = 0
-	// }
-	var (
-		limit, offset int
-	)
-	if req.Filter.Length != 0 {
-		offset = req.Filter.Start * req.Filter.Length
-		limit = req.Filter.Length
-	} else {
-		limit = 10
-	}
-
 	query := `select ` + field + ` from clients where true `
-	if req.ClientName != "" {
-		query += ` and client_name = '` + req.ClientName + `' `
+
+	if req.Filter.Search != "" {
+		query += ` and client_name like '%` + strings.ToUpper(req.Filter.Search) + `%' `
 	}
 	if req.ID != 0 {
 		query += ` and id = '` + strconv.Itoa(req.ID) + `' `
 	}
 
 	if req.Filter.Length != 0 {
-		query += ` limit  ` + strconv.Itoa(limit) + `  offset  ` + strconv.Itoa(offset)
+		query += ` limit  ` + strconv.Itoa(req.Filter.Length) + `  offset  ` + strconv.Itoa(req.Filter.Start)
 	} else {
 		if req.Filter.OrderBy != "" {
 			query += `  order by '` + req.Filter.OrderBy + `' asc`
@@ -118,6 +108,7 @@ func (ctx hierarchy) GetClients(req models.ReqGetClient) (result []models.RespGe
 			query += `  order by client_name asc`
 		}
 	}
+	fmt.Println(";;;", query)
 	rows, err := ctx.repo.Db.Query(query)
 	if err != nil {
 		log.Println("GetClients :: ", err.Error())
