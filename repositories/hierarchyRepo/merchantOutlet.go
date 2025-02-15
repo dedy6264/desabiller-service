@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -72,15 +73,7 @@ from merchant_outlets as a
 	return result, nil
 }
 func (ctx hierarchy) GetMerchantOutlets(req models.ReqGetMerchantOutlet) (result []models.RespGetMerchantOutlet, err error) {
-	var (
-		limit, offset int
-	)
-	if req.Filter.Length != 0 {
-		offset = req.Filter.Start * req.Filter.Length
-		limit = req.Filter.Length
-	} else {
-		limit = 10
-	}
+
 	query := `select
 	a.id,
 	a.merchant_outlet_name,
@@ -109,12 +102,15 @@ func (ctx hierarchy) GetMerchantOutlets(req models.ReqGetMerchantOutlet) (result
 	if req.MerchantId != 0 {
 		query += ` and a.merchant_id = ` + strconv.Itoa(req.MerchantId)
 	}
-	if req.MerchantOutletName != "" {
-		query += ` and a.merchant_outlet_name = '` + req.MerchantOutletName + `' `
+	if req.Filter.Search != "" {
+		query += ` and a.merchant_outlet_name like '%` + strings.ToUpper(req.Filter.Search) + `%' `
 	}
-	if req.MerchantOutletUsername != "" {
-		query += ` and a.merchant_outlet_username = '` + req.MerchantOutletUsername + `' `
-	}
+	// if req.MerchantOutletName != "" {
+	// 	query += ` and a.merchant_outlet_name = '` + req.MerchantOutletName + `' `
+	// }
+	// if req.MerchantOutletUsername != "" {
+	// 	query += ` and a.merchant_outlet_username = '` + req.MerchantOutletUsername + `' `
+	// }
 	if req.ID != 0 {
 		query += ` and a.id = ` + strconv.Itoa(req.ID)
 	}
@@ -122,7 +118,8 @@ func (ctx hierarchy) GetMerchantOutlets(req models.ReqGetMerchantOutlet) (result
 	// 	query += ` and a.created_at between '` + req.StartDate + `' and '` + req.EndDate + `'`
 	// }
 	if req.Filter.Length != 0 {
-		query += ` limit  ` + strconv.Itoa(limit) + `  offset  ` + strconv.Itoa(offset)
+		query += ` limit  ` + strconv.Itoa(req.Filter.Length) + `  offset  ` + strconv.Itoa(req.Filter.Start)
+
 	} else {
 		if req.Filter.OrderBy != "" {
 			query += `  order by a.` + req.Filter.OrderBy + ` asc`
