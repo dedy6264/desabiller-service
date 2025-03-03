@@ -51,7 +51,6 @@ func (ctx hierarchy) DropClient(id int, tx *sql.DB) (err error) {
 }
 func (ctx hierarchy) UpdateClient(req models.ReqGetClient, tx *sql.DB) (err error) {
 	t := time.Now()
-
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	query := `update clients set 
 				client_name = $1,
@@ -79,7 +78,7 @@ func (ctx hierarchy) GetCount(req models.ReqGetClient) (result int, err error) {
 		query += ` and client_name = '` + req.ClientName + `' `
 	}
 	if req.ID != 0 {
-		query += ` and id = '` + strconv.Itoa(req.ID) + `' `
+		query += ` and id = ` + strconv.Itoa(req.ID)
 	}
 
 	err = ctx.repo.Db.QueryRow(query).Scan(&result)
@@ -96,7 +95,7 @@ func (ctx hierarchy) GetClients(req models.ReqGetClient) (result []models.RespGe
 		query += ` and client_name like '%` + strings.ToUpper(req.Filter.Search) + `%' `
 	}
 	if req.ID != 0 {
-		query += ` and id = '` + strconv.Itoa(req.ID) + `' `
+		query += ` and id = ` + strconv.Itoa(req.ID)
 	}
 
 	if req.Filter.Length != 0 {
@@ -151,7 +150,7 @@ func (ctx hierarchy) GetClient(req models.ReqGetClient) (result models.RespGetCl
 		query += ` and client_name = '` + req.ClientName + `' `
 	}
 	if req.ID != 0 {
-		query += ` and id = '` + strconv.Itoa(req.ID) + `' `
+		query += ` and id = ` + strconv.Itoa(req.ID)
 	}
 	err = ctx.repo.Db.QueryRow(query).Scan(
 		&result.ID,

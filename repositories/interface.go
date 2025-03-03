@@ -97,3 +97,25 @@ type TrxNoGenerator interface {
 type HelperRepo interface {
 	GetProductReferenceById(subscriberId string) (result models.RespGetPrefix, err error)
 }
+type SavingRepo interface {
+	DropCif(id int, tx *sql.DB) (err error)
+	UpdateCif(req models.ReqGetCif, tx *sql.DB) (err error)
+	AddCif(req models.ReqGetCif, tx *sql.DB) (result models.RespGetCif, err error)
+	GetCif(req models.ReqGetCif) (result models.RespGetCif, err error)
+	GetCifs(req models.ReqGetCif) (result []models.RespGetCif, err error)
+	GetCifCount(req models.ReqGetCif) (result int, err error)
+
+	GetSavingTypeCount(req models.ReqGetSavingType) (result int, err error)
+	DropSavingType(id int, tx *sql.DB) (err error)
+	UpdateSavingType(req models.ReqGetSavingType, tx *sql.DB) (err error)
+	AddSavingType(req models.ReqGetSavingType, tx *sql.DB) (result models.RespGetSavingType, err error)
+	GetSavingType(req models.ReqGetSavingType) (result models.RespGetSavingType, err error)
+	GetSavingTypes(req models.ReqGetSavingType) (result []models.RespGetSavingType, err error)
+
+	GetSavingSegmentCount(req models.ReqGetSavingSegment) (result int, err error)
+	DropSavingSegment(id int, tx *sql.DB) (err error)
+	UpdateSavingSegment(req models.ReqGetSavingSegment, tx *sql.DB) (err error)
+	AddSavingSegment(req models.ReqGetSavingSegment, tx *sql.DB) (result models.RespGetSavingSegment, err error)
+	GetSavingSegment(req models.ReqGetSavingSegment) (result models.RespGetSavingSegment, err error)
+	GetSavingSegments(req models.ReqGetSavingSegment) (result []models.RespGetSavingSegment, err error)
+}

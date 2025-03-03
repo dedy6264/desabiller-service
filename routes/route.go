@@ -7,6 +7,7 @@ import (
 	auth "desabiller/services/authService"
 	helperservices "desabiller/services/helperServices"
 	hierarchyservicego "desabiller/services/hierarchyService"
+	savingservices "desabiller/services/savingServices"
 	trxservice "desabiller/services/trxService"
 	useractivityservice "desabiller/services/userActivityService"
 	"fmt"
@@ -34,6 +35,42 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 	userAct := useractivityservice.NewApiUserActivityService(service)
 	helperSvc := helperservices.NewApiHelperService(service)
 	trxSvc := trxservice.NewRepoTrxService(service)
+	savingSvc := savingservices.NewApiSavingServices(service)
+	{
+		private := e.Group("/private")
+		private.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
+			if subtle.ConstantTimeCompare([]byte(pss), []byte("joe")) == 1 &&
+				subtle.ConstantTimeCompare([]byte(pwd), []byte("secret")) == 1 {
+				return true, nil
+			}
+			return false, nil
+		}))
+		private.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+			log.Println("[Start]")
+			log.Println("EndPoint :", c.Path())
+			log.Println("Header :", c.Request().Header)
+			log.Println("Body :", string(reqBody))
+			log.Println("Response :", string(resBody))
+			log.Println("[End]")
+		}))
+		cif := private.Group("/cif")
+		cif.POST("/add", savingSvc.AddCif)
+		cif.POST("/update", savingSvc.UpdateCif)
+		cif.POST("/drop", savingSvc.DropCif)
+		cif.POST("/gets", savingSvc.GetCifs)
+
+		savingSegment := private.Group("/savingSegment")
+		savingSegment.POST("/add", savingSvc.AddSavingSegment)
+		savingSegment.POST("/update", savingSvc.UpdateSavingSegment)
+		savingSegment.POST("/drop", savingSvc.DropSavingSegment)
+		savingSegment.POST("/gets", savingSvc.GetSavingSegments)
+
+		savingType := private.Group("/savingType")
+		savingType.POST("/add", savingSvc.AddSavingType)
+		savingType.POST("/update", savingSvc.UpdateSavingType)
+		savingType.POST("/drop", savingSvc.DropSavingType)
+		savingType.POST("/gets", savingSvc.GetSavingTypes)
+	}
 	e.GET("/", func(ctx echo.Context) error {
 		fmt.Println("OK YA")
 		return nil

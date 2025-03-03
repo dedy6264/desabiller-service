@@ -13,6 +13,7 @@ type UsecaseService struct {
 	RepoProduct   repositories.ProductRepo
 	RepoTrx       repositories.TrxRepo
 	HelperRepo    repositories.HelperRepo
+	SavingRepo    repositories.SavingRepo
 }
 
 func NewUsecaseService(
@@ -21,6 +22,7 @@ func NewUsecaseService(
 	RepoProduct repositories.ProductRepo,
 	RepoTrx repositories.TrxRepo,
 	HelperRepo repositories.HelperRepo,
+	SavingRepo repositories.SavingRepo,
 
 ) UsecaseService {
 	return UsecaseService{
@@ -29,5 +31,6 @@ func NewUsecaseService(
 		RepoProduct:   RepoProduct,
 		RepoTrx:       RepoTrx,
 		HelperRepo:    HelperRepo,
+		SavingRepo:    SavingRepo,
 	}
 }
