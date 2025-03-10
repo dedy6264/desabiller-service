@@ -70,6 +70,12 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 		savingType.POST("/update", savingSvc.UpdateSavingType)
 		savingType.POST("/drop", savingSvc.DropSavingType)
 		savingType.POST("/gets", savingSvc.GetSavingTypes)
+
+		account := private.Group("/account")
+		account.POST("/add", savingSvc.AddAccount)
+		account.POST("/update", savingSvc.UpdateAccount)
+		account.POST("/drop", savingSvc.DropAccount)
+		account.POST("/gets", savingSvc.GetAccounts)
 	}
 	e.GET("/", func(ctx echo.Context) error {
 		fmt.Println("OK YA")

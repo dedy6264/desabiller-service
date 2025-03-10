@@ -187,7 +187,7 @@ func DataRowGroup(rows *sql.Rows) (result []models.RespGetGroup, err error) {
 	}
 	return result, nil
 }
-func (ctx hierarchy) AddGroup(req models.ReqGetGroup, tx *sql.DB) (err error) {
+func (ctx hierarchy) AddGroup(req models.ReqGetGroup, tx *sql.Tx) (err error) {
 	t := time.Now()
 	id := 0
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)

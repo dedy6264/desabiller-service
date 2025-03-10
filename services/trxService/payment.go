@@ -45,6 +45,16 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "ReferenceNumber id cannot be null", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
+	if req.AccountNumber == "" {
+		log.Println("Err ", svcName, "Account Number cannot be null")
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "Account Number id cannot be null", nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
+	if req.AccountPIN == "" {
+		log.Println("Err ", svcName, "PIN cannot be null")
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "PIN id cannot be null", nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
 	respInqTrx, err := svc.services.RepoTrx.GetTrx(models.ReqGetTrx{
 		ReferenceNumber: req.ReferenceNumber,
 	})
@@ -59,6 +69,13 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "Transaction invalid", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
+	//----->> trigger kredit
+	// err = svc.TriggerKredit(respInqTrx.TotalTrxAmount, req.AccountNumber, req.AccountPIN, respInqTrx.ReferenceNumber, configs.TRX_CODE_PAYMENT)
+	// if err != nil {
+	// 	log.Println("Err ", svcName, err)
+	// 	result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, configs.FAILED_MSG, nil)
+	// 	return ctx.JSON(http.StatusOK, result)
+	// }
 	fmt.Println("SINI 1")
 	billDescInq := models.BillInfoBPJS{}
 	// billDescPay := BillInfoBPJS{}
@@ -193,6 +210,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	if updatePayment.StatusCode == configs.FAILED_CODE {
+		// svc.TriggerDebet(respInqTrx.TotalTrxAmount, req.AccountNumber, req.AccountPIN, respInqTrx.ReferenceNumber, configs.TRX_CODE_REVERSAL)
 		result := helpers.ResponseJSON(configs.TRUE_VALUE, updatePayment.StatusCode, updatePayment.StatusMessage, nil)
 		return ctx.JSON(http.StatusOK, result)
 	}

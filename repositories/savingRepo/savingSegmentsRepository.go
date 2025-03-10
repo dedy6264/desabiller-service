@@ -31,7 +31,7 @@ func (ctx savingRepository) GetSavingSegmentCount(req models.ReqGetSavingSegment
 	}
 	return result, nil
 }
-func (ctx savingRepository) DropSavingSegment(id int, tx *sql.DB) (err error) {
+func (ctx savingRepository) DropSavingSegment(id int, tx *sql.Tx) (err error) {
 	query := `delete from saving_segments where id = $1`
 	if tx != nil {
 		_, err = tx.Exec(query, id)
@@ -44,7 +44,7 @@ func (ctx savingRepository) DropSavingSegment(id int, tx *sql.DB) (err error) {
 	}
 	return nil
 }
-func (ctx savingRepository) UpdateSavingSegment(req models.ReqGetSavingSegment, tx *sql.DB) (err error) {
+func (ctx savingRepository) UpdateSavingSegment(req models.ReqGetSavingSegment, tx *sql.Tx) (err error) {
 	t := time.Now()
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	query := `update saving_segments set 
@@ -66,7 +66,7 @@ func (ctx savingRepository) UpdateSavingSegment(req models.ReqGetSavingSegment, 
 	}
 	return nil
 }
-func (ctx savingRepository) AddSavingSegment(req models.ReqGetSavingSegment, tx *sql.DB) (result models.RespGetSavingSegment, err error) {
+func (ctx savingRepository) AddSavingSegment(req models.ReqGetSavingSegment, tx *sql.Tx) (result models.RespGetSavingSegment, err error) {
 	t := time.Now()
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	query := `insert into saving_segments (saving_segment_name,limit_amount,saving_type_id,created_at,updated_at, created_by,  updated_by) values ($1,$2,$3,$4,$5,$6,$7) returning id,saving_segment_name,limit_amount,saving_type_id,created_at,updated_at, created_by,  updated_by`

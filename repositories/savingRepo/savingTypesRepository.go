@@ -26,7 +26,7 @@ func (ctx savingRepository) GetSavingTypeCount(req models.ReqGetSavingType) (res
 	}
 	return result, nil
 }
-func (ctx savingRepository) DropSavingType(id int, tx *sql.DB) (err error) {
+func (ctx savingRepository) DropSavingType(id int, tx *sql.Tx) (err error) {
 	query := `delete from saving_types where id = $1`
 	if tx != nil {
 		_, err = tx.Exec(query, id)
@@ -39,7 +39,7 @@ func (ctx savingRepository) DropSavingType(id int, tx *sql.DB) (err error) {
 	}
 	return nil
 }
-func (ctx savingRepository) UpdateSavingType(req models.ReqGetSavingType, tx *sql.DB) (err error) {
+func (ctx savingRepository) UpdateSavingType(req models.ReqGetSavingType, tx *sql.Tx) (err error) {
 	t := time.Now()
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	query := `update saving_types set 
@@ -60,7 +60,7 @@ func (ctx savingRepository) UpdateSavingType(req models.ReqGetSavingType, tx *sq
 	}
 	return nil
 }
-func (ctx savingRepository) AddSavingType(req models.ReqGetSavingType, tx *sql.DB) (result models.RespGetSavingType, err error) {
+func (ctx savingRepository) AddSavingType(req models.ReqGetSavingType, tx *sql.Tx) (result models.RespGetSavingType, err error) {
 	t := time.Now()
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	query := `insert into saving_types (saving_type_name,saving_type_desc,created_at,updated_at, created_by,  updated_by) values ($1,$2,$3,$4,$5,$6) returning id,saving_type_name,saving_type_desc,created_at,updated_at, created_by,  updated_by`

@@ -137,6 +137,8 @@ type (
 		PaymentMethodName       string `json:"paymentMethodName"`
 		ReferenceNumber         string `json:"referenceNumber"`
 		ProviderReferenceNumber string `json:"providerReferenceNumber"`
+		AccountNumber           string `json:"accountNumber"`
+		AccountPIN              string `json:"accounrPin"`
 	}
 	RespPayment struct { //jelasin produknya
 		CreatedAt              string      `json:"createdAt"`

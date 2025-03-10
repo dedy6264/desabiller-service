@@ -19,4 +19,9 @@ const (
 
 	ENDPOINT_IAK_PREPAID  = "/api/top-up"
 	ENDPOINT_IAK_POSTPAID = "/api/v1/bill/check"
+	TRX_TYPE_CREDIT       = "C"
+	TRX_TYPE_DEBET        = "D"
+	TRX_CODE_PURCHASING   = "100"
+	TRX_CODE_PAYMENT      = "150"
+	TRX_CODE_REVERSAL     = "300"
 )

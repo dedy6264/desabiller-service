@@ -56,7 +56,7 @@ func (svc AdministrationService) Login(ctx echo.Context) error {
 		result := helpers.ResponseJSON(false, configs.VALIDATE_ERROR_CODE, "wrong username or password", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	token, err := helpers.TokenJwtGenerate(respGet.MerchantId, respGet.ID, respGet.MerchantOutletUsername)
+	token, err := helpers.TokenJwtGenerate(respGet.MerchantId, respGet.ID, respGet.MerchantOutletName)
 	if err != nil {
 		log.Println("Err ", svcName, "PswEnc", err)
 		result := helpers.ResponseJSON(false, configs.VALIDATE_ERROR_CODE, "wrong username or password", nil)

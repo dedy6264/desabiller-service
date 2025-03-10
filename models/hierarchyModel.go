@@ -107,6 +107,7 @@ type (
 	DataToken struct {
 		MerchantOutletId       int    `json:"merchantOutletId"`
 		MerchantOutletUsername string `json:"merchantOutletUsername"`
+		MerchantOutletName     string `json:"merchantOutletName"`
 		MerchantId             int    `json:"merchantId"`
 	}
 	// //userOutlet

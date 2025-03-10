@@ -7,9 +7,9 @@ import (
 
 type Hierarchyrepo interface {
 	//client
-	AddClient(req models.ReqGetClient, tx *sql.DB) (err error)
-	DropClient(id int, tx *sql.DB) (err error)
-	UpdateClient(req models.ReqGetClient, tx *sql.DB) (err error)
+	AddClient(req models.ReqGetClient, tx *sql.Tx) (err error)
+	DropClient(id int, tx *sql.Tx) (err error)
+	UpdateClient(req models.ReqGetClient, tx *sql.Tx) (err error)
 	GetCount(req models.ReqGetClient) (result int, err error)
 	GetClients(req models.ReqGetClient) (result []models.RespGetClient, err error)
 	GetClient(req models.ReqGetClient) (result models.RespGetClient, err error)
@@ -18,7 +18,7 @@ type Hierarchyrepo interface {
 	UpdateGroup(req models.ReqGetGroup) (result models.RespGetGroup, err error)
 	GetGroupCount(req models.ReqGetGroup) (result int, err error)
 	GetGroups(req models.ReqGetGroup) (result []models.RespGetGroup, err error)
-	AddGroup(req models.ReqGetGroup, tx *sql.DB) (err error)
+	AddGroup(req models.ReqGetGroup, tx *sql.Tx) (err error)
 	GetGroup(req models.ReqGetGroup) (result models.RespGetGroup, err error)
 
 	DropMerchant(req models.ReqGetMerchant) (err error)
@@ -98,24 +98,38 @@ type HelperRepo interface {
 	GetProductReferenceById(subscriberId string) (result models.RespGetPrefix, err error)
 }
 type SavingRepo interface {
-	DropCif(id int, tx *sql.DB) (err error)
-	UpdateCif(req models.ReqGetCif, tx *sql.DB) (err error)
-	AddCif(req models.ReqGetCif, tx *sql.DB) (result models.RespGetCif, err error)
+	DropCif(id int, tx *sql.Tx) (err error)
+	UpdateCif(req models.ReqGetCif, tx *sql.Tx) (err error)
+	AddCif(req models.ReqGetCif, tx *sql.Tx) (result models.RespGetCif, err error)
 	GetCif(req models.ReqGetCif) (result models.RespGetCif, err error)
 	GetCifs(req models.ReqGetCif) (result []models.RespGetCif, err error)
 	GetCifCount(req models.ReqGetCif) (result int, err error)
 
 	GetSavingTypeCount(req models.ReqGetSavingType) (result int, err error)
-	DropSavingType(id int, tx *sql.DB) (err error)
-	UpdateSavingType(req models.ReqGetSavingType, tx *sql.DB) (err error)
-	AddSavingType(req models.ReqGetSavingType, tx *sql.DB) (result models.RespGetSavingType, err error)
+	DropSavingType(id int, tx *sql.Tx) (err error)
+	UpdateSavingType(req models.ReqGetSavingType, tx *sql.Tx) (err error)
+	AddSavingType(req models.ReqGetSavingType, tx *sql.Tx) (result models.RespGetSavingType, err error)
 	GetSavingType(req models.ReqGetSavingType) (result models.RespGetSavingType, err error)
 	GetSavingTypes(req models.ReqGetSavingType) (result []models.RespGetSavingType, err error)
 
 	GetSavingSegmentCount(req models.ReqGetSavingSegment) (result int, err error)
-	DropSavingSegment(id int, tx *sql.DB) (err error)
-	UpdateSavingSegment(req models.ReqGetSavingSegment, tx *sql.DB) (err error)
-	AddSavingSegment(req models.ReqGetSavingSegment, tx *sql.DB) (result models.RespGetSavingSegment, err error)
+	DropSavingSegment(id int, tx *sql.Tx) (err error)
+	UpdateSavingSegment(req models.ReqGetSavingSegment, tx *sql.Tx) (err error)
+	AddSavingSegment(req models.ReqGetSavingSegment, tx *sql.Tx) (result models.RespGetSavingSegment, err error)
 	GetSavingSegment(req models.ReqGetSavingSegment) (result models.RespGetSavingSegment, err error)
 	GetSavingSegments(req models.ReqGetSavingSegment) (result []models.RespGetSavingSegment, err error)
+
+	GetAccountCount(req models.ReqGetAccount) (result int, err error)
+	DropAccount(id int, tx *sql.Tx) (err error)
+	UpdateAccount(req models.ReqGetAccount, tx *sql.Tx) (err error)
+	AddAccount(req models.ReqGetAccount, tx *sql.Tx) (result models.RespGetAccount, err error)
+	GetAccount(req models.ReqGetAccount) (result models.RespGetAccount, err error)
+	GetAccounts(req models.ReqGetAccount) (result []models.RespGetAccount, err error)
+
+	GetSavingTransactionCount(req models.ReqGetSavingTransaction) (result int, err error)
+	DropSavingTransaction(id int, tx *sql.Tx) (err error)
+	UpdateSavingTransaction(req models.ReqGetSavingTransaction, tx *sql.Tx) (err error)
+	AddSavingTransaction(req models.ReqGetSavingTransaction, tx *sql.Tx) (result models.RespGetSavingTransaction, err error)
+	GetSavingTransaction(req models.ReqGetSavingTransaction) (result models.RespGetSavingTransaction, err error)
+	GetSavingTransactions(req models.ReqGetSavingTransaction) (result []models.RespGetSavingTransaction, err error)
 }

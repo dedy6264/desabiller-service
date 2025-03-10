@@ -30,14 +30,14 @@ func TokenJWTDecode(ctx echo.Context) (data models.DataToken) {
 	claims := user.Claims.(jwt.MapClaims)
 	data.MerchantId = int(claims["merchantId"].(float64))
 	data.MerchantOutletId = int(claims["outletId"].(float64))
-	data.MerchantOutletUsername = claims["outletUsername"].(string)
+	data.MerchantOutletName = claims["outletName"].(string)
 	return data
 }
-func TokenJwtGenerate(mID, oID int, oUsername string) (tkn string, err error) {
+func TokenJwtGenerate(mID, oID int, oName string) (tkn string, err error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	// claims["snDevice"] = snDev
-	claims["outletUsername"] = oUsername
+	claims["outletName"] = oName
 	claims["outletId"] = oID
 	claims["merchantId"] = mID
 	// claims["clientId"] = cID
@@ -86,9 +86,10 @@ func PassEncrypt(pswrd string) (result string, err error) {
 	}
 	return string(hashedPassword), nil
 }
-func PassCheck(reqpswrd string, pssword string) {
+func PassCheck(reqpswrd string, pssword string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(reqpswrd), []byte(pssword))
 	fmt.Println("::::::CHECK", err)
+	return err
 }
 
 func PswEnc(word string) (enc string, err error) {

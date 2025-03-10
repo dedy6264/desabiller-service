@@ -13,7 +13,7 @@ import (
 
 const field = `id, client_name, created_at, created_by, updated_at, updated_by`
 
-func (ctx hierarchy) AddClient(req models.ReqGetClient, tx *sql.DB) (err error) {
+func (ctx hierarchy) AddClient(req models.ReqGetClient, tx *sql.Tx) (err error) {
 
 	t := time.Now()
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
@@ -36,7 +36,7 @@ func (ctx hierarchy) AddClient(req models.ReqGetClient, tx *sql.DB) (err error) 
 	}
 	return nil
 }
-func (ctx hierarchy) DropClient(id int, tx *sql.DB) (err error) {
+func (ctx hierarchy) DropClient(id int, tx *sql.Tx) (err error) {
 	query := `delete from clients where id = $1`
 	if tx != nil {
 		_, err = tx.Exec(query, id)
@@ -49,7 +49,7 @@ func (ctx hierarchy) DropClient(id int, tx *sql.DB) (err error) {
 	}
 	return nil
 }
-func (ctx hierarchy) UpdateClient(req models.ReqGetClient, tx *sql.DB) (err error) {
+func (ctx hierarchy) UpdateClient(req models.ReqGetClient, tx *sql.Tx) (err error) {
 	t := time.Now()
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	query := `update clients set 

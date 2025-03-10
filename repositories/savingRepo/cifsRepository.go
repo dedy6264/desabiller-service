@@ -33,7 +33,7 @@ func (ctx savingRepository) GetCifCount(req models.ReqGetCif) (result int, err e
 	}
 	return result, nil
 }
-func (ctx savingRepository) DropCif(id int, tx *sql.DB) (err error) {
+func (ctx savingRepository) DropCif(id int, tx *sql.Tx) (err error) {
 	query := `delete from cifs where id = $1`
 	if tx != nil {
 		_, err = tx.Exec(query, id)
@@ -46,7 +46,7 @@ func (ctx savingRepository) DropCif(id int, tx *sql.DB) (err error) {
 	}
 	return nil
 }
-func (ctx savingRepository) UpdateCif(req models.ReqGetCif, tx *sql.DB) (err error) {
+func (ctx savingRepository) UpdateCif(req models.ReqGetCif, tx *sql.Tx) (err error) {
 	t := time.Now()
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	query := `update cifs set 
@@ -74,7 +74,7 @@ func (ctx savingRepository) UpdateCif(req models.ReqGetCif, tx *sql.DB) (err err
 	}
 	return nil
 }
-func (ctx savingRepository) AddCif(req models.ReqGetCif, tx *sql.DB) (result models.RespGetCif, err error) {
+func (ctx savingRepository) AddCif(req models.ReqGetCif, tx *sql.Tx) (result models.RespGetCif, err error) {
 	t := time.Now()
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	query := `insert into cifs (cif_name,cif_nik,cif_phone,cif_email,cif_address,created_at,updated_at, created_by,  updated_by) values ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning id,cif_name,cif_nik,cif_phone,cif_email,cif_address,created_at,updated_at, created_by,  updated_by`

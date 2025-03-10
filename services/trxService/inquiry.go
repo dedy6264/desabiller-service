@@ -246,6 +246,6 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		TotalTrxAmount:         recordInq.TotalTrxAmount,
 		BillInfo:               billInfo,
 	}
-	result = helpers.ResponseJSON(configs.TRUE_VALUE, recordInq.StatusCode, respWorker.InquiryStatusDescDetail, respInquiry)
+	result = helpers.ResponseJSON(configs.TRUE_VALUE, recordInq.StatusCode, recordInq.StatusMessage, respInquiry)
 	return ctx.JSON(http.StatusOK, result)
 }
