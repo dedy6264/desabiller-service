@@ -265,11 +265,14 @@ func (ctx trxRepository) GetTrxs(req models.ReqGetTrx) (result []models.RespGetT
 	if req.CustomerId != "" {
 		query += ` and customer_id= '` + req.CustomerId + `'`
 	}
-
-	if req.Filter.OrderBy != "" {
-		query += ` order by ` + req.Filter.OrderBy + ` ` + req.Filter.AscDesc
+	if req.Filter.Length != 0 {
+		query += ` limit  ` + strconv.Itoa(req.Filter.Length) + `  offset  ` + strconv.Itoa(req.Filter.Start)
 	} else {
-		query += ` order by updated_at desc`
+		if req.Filter.OrderBy != "" {
+			query += `  order by '` + req.Filter.OrderBy + `' asc`
+		} else {
+			query += `  order by id asc`
+		}
 	}
 
 	// if limit != 0 {
