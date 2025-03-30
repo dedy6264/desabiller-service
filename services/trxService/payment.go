@@ -45,16 +45,16 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "ReferenceNumber id cannot be null", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	if req.AccountNumber == "" {
-		log.Println("Err ", svcName, "Account Number cannot be null")
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "Account Number id cannot be null", nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
-	if req.AccountPIN == "" {
-		log.Println("Err ", svcName, "PIN cannot be null")
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "PIN id cannot be null", nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
+	// if req.AccountNumber == "" {
+	// 	log.Println("Err ", svcName, "Account Number cannot be null")
+	// 	result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "Account Number id cannot be null", nil)
+	// 	return ctx.JSON(http.StatusOK, result)
+	// }
+	// if req.AccountPIN == "" {
+	// 	log.Println("Err ", svcName, "PIN cannot be null")
+	// 	result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "PIN id cannot be null", nil)
+	// 	return ctx.JSON(http.StatusOK, result)
+	// }
 	respInqTrx, err := svc.services.RepoTrx.GetTrx(models.ReqGetTrx{
 		ReferenceNumber: req.ReferenceNumber,
 	})
@@ -97,7 +97,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		})
 		if err != nil {
 			log.Println("Err ", svcName, err)
-			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.PENDING_CODE, configs.PENDING_MSG, nil)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, configs.FAILED_MSG, nil)
 			return ctx.JSON(http.StatusOK, result)
 		}
 		switch respInqTrx.ProductReferenceCode {
@@ -209,11 +209,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.PENDING_CODE, configs.PENDING_MSG, nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	if updatePayment.StatusCode == configs.FAILED_CODE {
-		// svc.TriggerDebet(respInqTrx.TotalTrxAmount, req.AccountNumber, req.AccountPIN, respInqTrx.ReferenceNumber, configs.TRX_CODE_REVERSAL)
-		result := helpers.ResponseJSON(configs.TRUE_VALUE, updatePayment.StatusCode, updatePayment.StatusMessage, nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
+
 	responsePayment := models.RespPayment{
 		ReferenceNumber:        updatePayment.ReferenceNumber,
 		CreatedAt:              respInqTrx.CreatedAt,
@@ -226,6 +222,11 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		MerchantOutletName:     updatePayment.MerchantOutletName,
 		MerchantOutletUsername: updatePayment.MerchantOutletUsername,
 		TotalTrxAmount:         updatePayment.ProductPrice + updatePayment.ProductAdminFee,
+	}
+	if updatePayment.StatusCode == configs.FAILED_CODE {
+		// svc.TriggerDebet(respInqTrx.TotalTrxAmount, req.AccountNumber, req.AccountPIN, respInqTrx.ReferenceNumber, configs.TRX_CODE_REVERSAL)
+		result := helpers.ResponseJSON(configs.TRUE_VALUE, updatePayment.StatusCode, updatePayment.StatusMessage, responsePayment)
+		return ctx.JSON(http.StatusOK, result)
 	}
 	result := helpers.ResponseJSON(configs.TRUE_VALUE, updatePayment.StatusCode, updatePayment.StatusMessage, responsePayment)
 	return ctx.JSON(http.StatusOK, result)

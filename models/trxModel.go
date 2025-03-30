@@ -156,6 +156,7 @@ type (
 
 	}
 	RespInquiry struct {
+		StatusMessage          string      `json:"statusMessage"`
 		CreatedAt              string      `json:"createdAt"`
 		MerchantOutletName     string      `json:"merchantOutletName"`
 		MerchantOutletUsername string      `json:"merchantOutletUsername"`

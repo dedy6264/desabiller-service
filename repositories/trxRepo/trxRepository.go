@@ -62,6 +62,7 @@ product_category_id,
 product_category_name,
 product_type_id,
 product_type_name,
+product_reference_code,
 product_id,
 product_name,
 product_code,
@@ -143,6 +144,7 @@ func (ctx trxRepository) GetTrx(req models.ReqGetTrx) (result models.RespGetTrx,
 		&result.ProductCategoryName,
 		&result.ProductTypeId,
 		&result.ProductTypeName,
+		&result.ProductReferenceCode,
 		&result.ProductId,
 		&result.ProductName,
 		&result.ProductCode,
@@ -266,7 +268,7 @@ func (ctx trxRepository) GetTrxs(req models.ReqGetTrx) (result []models.RespGetT
 		query += ` and customer_id= '` + req.CustomerId + `'`
 	}
 	if req.Filter.Length != 0 {
-		query += ` limit  ` + strconv.Itoa(req.Filter.Length) + `  offset  ` + strconv.Itoa(req.Filter.Start)
+		query += ` order by updated_at desc limit  ` + strconv.Itoa(req.Filter.Length) + `  offset  ` + strconv.Itoa(req.Filter.Start)
 	} else {
 		if req.Filter.OrderBy != "" {
 			query += `  order by '` + req.Filter.OrderBy + `' asc`
@@ -301,6 +303,7 @@ func (ctx trxRepository) GetTrxs(req models.ReqGetTrx) (result []models.RespGetT
 			&val.ProductCategoryName,
 			&val.ProductTypeId,
 			&val.ProductTypeName,
+			&val.ProductReferenceCode,
 			&val.ProductId,
 			&val.ProductName,
 			&val.ProductCode,

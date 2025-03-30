@@ -354,15 +354,15 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 		// mn.POST("/advice", trxSvc.Advice)
 	}
 	{ //helper
-		nn := e.Group("/helper")
-		nn.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
+		helper := e.Group("/helper")
+		helper.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
 			if subtle.ConstantTimeCompare([]byte(pss), []byte("joe")) == 1 &&
 				subtle.ConstantTimeCompare([]byte(pwd), []byte("secret")) == 1 {
 				return true, nil
 			}
 			return false, nil
 		}))
-		nn.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+		helper.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
 			log.Println("[Start]")
 			log.Println("EndPoint :", c.Path())
 			log.Println("Header :", c.Request().Header)
@@ -370,7 +370,7 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 			log.Println("Response :", string(resBody))
 			log.Println("[End]")
 		}))
-		nn.POST("/getReference", helperSvc.GetOperatorService)
+		helper.POST("/getReference", helperSvc.GetOperatorService)
 	}
 	// trxSvc := trxservice.NewRepoTrxService(service)
 	// // nHierachySvc := nhierarchyservice.NewApiNHierarchyServices(service)

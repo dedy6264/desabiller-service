@@ -163,14 +163,15 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		}
 		//inquiry ke partner
 		respWorker, err = svc.InqProviderSwitcher(models.ProviderInqRequest{
-			ProviderName:     respProduct.ProviderName,
-			ProviderId:       respProduct.ProviderId,
-			ProductCode:      respProduct.ProductProviderCode,
-			SubscriberNumber: req.AdditionalField.SubscriberNumber,
-			SubscriberName:   req.AdditionalField.SubscriberName,
-			ReferenceNumber:  referenceNumber,
-			Url:              url,
-			Periode:          req.AdditionalField.Periode,
+			ProviderName:         respProduct.ProviderName,
+			ProviderId:           respProduct.ProviderId,
+			ProductCode:          respProduct.ProductProviderCode,
+			SubscriberNumber:     req.AdditionalField.SubscriberNumber,
+			SubscriberName:       req.AdditionalField.SubscriberName,
+			ReferenceNumber:      referenceNumber,
+			Url:                  url,
+			Periode:              req.AdditionalField.Periode,
+			ProductReferenceCode: respProduct.ProductReferenceCode,
 		})
 		if err != nil {
 			log.Println("Err ", svcName, err)
@@ -211,6 +212,7 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		recordInq.ProductProviderPrice = productProviderPrice
 		recordInq.ProductProviderAdminFee = productProviderAdminFee
 		recordInq.ProductProviderMerchantFee = productProviderMerchantFee
+		recordInq.ProductReferenceCode = respProduct.ProductReferenceCode
 
 		err = svc.services.RepoTrx.InsertTrx(recordInq, nil)
 		if err != nil {
@@ -233,6 +235,7 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 
 	// byte, status, er := utils.WorkerPostWithBearer())
 	respInquiry := models.RespInquiry{
+		StatusMessage:          recordInq.ProviderStatusMessage,
 		CreatedAt:              recordInq.Filter.CreatedAt,
 		MerchantOutletName:     recordInq.MerchantOutletName,
 		MerchantOutletUsername: recordInq.MerchantOutletUsername,

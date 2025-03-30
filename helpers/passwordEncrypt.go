@@ -42,7 +42,7 @@ func TokenJwtGenerate(mID, oID int, oName string) (tkn string, err error) {
 	claims["merchantId"] = mID
 	// claims["clientId"] = cID
 	//claims["exp"] = time.Now().Add(time.Minute * 5).Unix()
-	claims["exp"] = time.Now().Add(time.Hour * 30).Unix()
+	claims["exp"] = time.Now().Add(time.Hour * 5).Unix()
 
 	t, err := token.SignedString([]byte(configs.KEY))
 	if err != nil {

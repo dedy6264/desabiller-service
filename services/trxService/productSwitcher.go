@@ -14,6 +14,7 @@ import (
 func (svc trxService) InqProviderSwitcher(req models.ProviderInqRequest) (respWorker models.ResponseWorkerInquiry, err error) {
 	switch req.ProviderName {
 	case "IAK":
+		fmt.Println("=====", req.ProductReferenceCode)
 		switch req.ProductReferenceCode {
 		case "BPJSKS":
 			respWorker, err = iakworkerservice.IakBPJSWorkerInquiry(models.ReqInqIak{
@@ -39,7 +40,7 @@ func (svc trxService) InqProviderSwitcher(req models.ProviderInqRequest) (respWo
 }
 func (svc trxService) PayProviderSwitcher(req models.ProviderPayRequest) (respWorker models.ResponseWorkerPayment, err error) {
 	cc, _ := json.Marshal(req)
-	fmt.Println("SINI 3", string(cc))
+	fmt.Println("SINI 3", string(cc), req.ProductReferenceCode)
 	switch req.ProviderName {
 	case "IAK":
 		switch req.ProductReferenceCode {
