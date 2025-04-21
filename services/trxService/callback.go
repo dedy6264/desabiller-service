@@ -26,7 +26,7 @@ func (svc trxService) IAKCallback(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	resp, err := svc.services.RepoTrx.GetTrx(models.ReqGetTrx{
@@ -34,7 +34,7 @@ func (svc trxService) IAKCallback(ctx echo.Context) error {
 	})
 	if err != nil {
 		log.Println("Err ", svcName, "GetTrx", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "transaction not found", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", "transaction not found", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	statusCodeDetail = req.Data.Rc

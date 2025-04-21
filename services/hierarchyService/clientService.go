@@ -21,20 +21,20 @@ func (svc HierarcyService) GetClients(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	req.ClientName = strings.ToUpper(req.ClientName)
 	count, err := svc.service.RepoHierarchy.GetCount(*req)
 	if err != nil {
 		log.Println("Err "+svcName+" GetCount ", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Data :: empty", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", "Data :: empty", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	resClient, err := svc.service.RepoHierarchy.GetClients(*req)
 	if err != nil {
 		log.Println("Err ", svcName, " GetClients ", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Data :: empty", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", "Data :: empty", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	respSvc.RecordsTotal = count
@@ -42,7 +42,7 @@ func (svc HierarcyService) GetClients(ctx echo.Context) error {
 	respSvc.Data = resClient
 	respSvc.Draw = req.Filter.Draw
 
-	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, "SUCCESS", respSvc)
+	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, configs.SUCCESS_MSG, configs.SUCCESS_MSG, respSvc)
 	return ctx.JSON(http.StatusOK, result)
 }
 func (svc HierarcyService) AddClient(ctx echo.Context) error {
@@ -53,13 +53,14 @@ func (svc HierarcyService) AddClient(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	if req.ClientName == "" {
 		log.Println("Err ", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
+			"client name is empty",
 			"client name is empty",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
@@ -69,14 +70,15 @@ func (svc HierarcyService) AddClient(ctx echo.Context) error {
 	if err != nil {
 		log.Println("Err ", svcName, "AddClient", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.VALIDATE_ERROR_CODE,
+			configs.DB_ERROR,
+			"failed",
 			"failed",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
 		configs.SUCCESS_CODE,
-		"Success",
+		configs.SUCCESS_MSG, configs.SUCCESS_MSG,
 		nil)
 	return ctx.JSON(http.StatusOK, result)
 }
@@ -88,19 +90,20 @@ func (svc HierarcyService) DropClient(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	err = svc.service.RepoHierarchy.DropClient(req.ID, nil)
 	if err != nil {
 		log.Println("Err ", svcName, "DropClient", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.VALIDATE_ERROR_CODE,
+			configs.DB_NOT_FOUND,
+			"failed",
 			"failed",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, "Success", nil)
+	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, configs.SUCCESS_MSG, configs.SUCCESS_MSG, nil)
 	return ctx.JSON(http.StatusOK, result)
 }
 func (svc HierarcyService) UpdateClient(ctx echo.Context) error {
@@ -112,7 +115,7 @@ func (svc HierarcyService) UpdateClient(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	req.ClientName = strings.ToUpper(req.ClientName)
@@ -120,11 +123,12 @@ func (svc HierarcyService) UpdateClient(ctx echo.Context) error {
 	if err != nil {
 		log.Println("Err ", svcName, "UpdateClient", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.VALIDATE_ERROR_CODE,
+			configs.DB_NOT_FOUND,
+			"failed",
 			"failed",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, "SUCCESS", nil)
+	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, configs.SUCCESS_MSG, configs.SUCCESS_MSG, nil)
 	return ctx.JSON(http.StatusOK, result)
 }

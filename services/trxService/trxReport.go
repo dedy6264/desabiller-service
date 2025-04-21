@@ -19,19 +19,19 @@ func (svc trxService) TrxBillerReport(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	count, err := svc.services.RepoTrx.GetTrxCount(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "GetTrxCount", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "transaction not found", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "Failed", "transaction not found", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	respInqTrx, err := svc.services.RepoTrx.GetTrxs(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "GetTrx", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "transaction not found", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "Failed", "transaction not found", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	if len(respInqTrx) != 0 {
@@ -42,6 +42,6 @@ func (svc trxService) TrxBillerReport(ctx echo.Context) error {
 	respSvc.RecordsTotal = count
 	respSvc.RecordsFiltered = len(respInqTrx)
 	respSvc.Draw = 1
-	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, configs.SUCCESS_MSG, respSvc)
+	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, configs.SUCCESS_MSG, configs.SUCCESS_MSG, respSvc)
 	return ctx.JSON(http.StatusOK, result)
 }

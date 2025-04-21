@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/labstack/echo"
@@ -33,17 +32,24 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.INQUIRY_FAILED_CODE, err.Error(), nil)
+		result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	if req.ProductCode == "" {
-		log.Println("Err ", svcName, "product code cannot be null")
-		result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.INQUIRY_FAILED_CODE, "product code cannot be null", nil)
-		return ctx.JSON(http.StatusOK, result)
+	{ //valitasi #1
+		if req.ProductCode == "" {
+			log.Println("Err ", svcName, "product code cannot be null")
+			result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", "product code cannot be null", nil)
+			return ctx.JSON(http.StatusOK, result)
+		}
+		if req.AdditionalField.SubscriberNumber == "" {
+			log.Println("Err ", svcName, "customer id cannot be null")
+			result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", "customer id cannot be null", nil)
+			return ctx.JSON(http.StatusOK, result)
+		}
 	}
 	// if req.AdditionalField.SubscriberNumber == "" {
 	// 	log.Println("Err ", svcName, "customer id cannot be null")
-	// 	result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.INQUIRY_FAILED_CODE, "customer id cannot be null", nil)
+	// 	result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "customer id cannot be null", nil)
 	// 	return ctx.JSON(http.StatusOK, result)
 	// }
 	data := helpers.TokenJWTDecode(ctx)
@@ -52,7 +58,7 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 	})
 	if err != nil {
 		log.Println("Err ", svcName, "GetMerchantOutlet", err)
-		result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.INQUIRY_FAILED_CODE, "Not Found", nil)
+		result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", "Not Found", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 
@@ -62,13 +68,20 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 	})
 	if err != nil {
 		log.Println("Err Product Invalid ", svcName, "GetProduct", err)
-		result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.INQUIRY_FAILED_CODE, "Product Invalid", nil)
+		result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", "Product Invalid", nil)
 		return ctx.JSON(http.StatusOK, result)
+	}
+	if respProduct.ProductCode == "BPJSKS" && req.AdditionalField.Periode == 0 {
+		if req.ProductCode == "" {
+			log.Println("Err ", svcName, "periode cannot be null")
+			result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", "periode cannot be null", nil)
+			return ctx.JSON(http.StatusOK, result)
+		}
 	}
 	referenceNumber, err = svc.services.RepoTrx.GenerateNo("DB-"+dbTime, "", 7)
 	if err != nil {
 		log.Println("Err ", svcName, "GenerateNo", err)
-		result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.INQUIRY_FAILED_CODE, "Not Found", nil)
+		result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.INQUIRY_FAILED_CODE, "Failed", "Not Found", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	statusCode = configs.INQUIRY_SUCCESS_CODE
@@ -129,13 +142,13 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		// }
 		if respProduct.ProductPrice < respProduct.ProductProviderPrice {
 			log.Println("Err ", svcName, "product price invalid", respProduct.ProductPrice, respProduct.ProductProviderPrice)
-			result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.INQUIRY_FAILED_CODE, "invalid product price ", nil)
+			result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", "invalid product price ", nil)
 			return ctx.JSON(http.StatusOK, result)
 		}
 		err = svc.services.RepoTrx.InsertTrx(recordInq, nil)
 		if err != nil {
 			log.Println("Err ", svcName, "InsertTrx", err)
-			result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.INQUIRY_FAILED_CODE, "failed", nil)
+			result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.INQUIRY_FAILED_CODE, "Failed", "failed", nil)
 			return ctx.JSON(http.StatusOK, result)
 		}
 		err = svc.services.RepoTrx.InsertTrxStatus(models.ReqGetTrxStatus{
@@ -146,7 +159,7 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		}, nil)
 		if err != nil {
 			log.Println("Err ", svcName, "InsertTrxStatus", err)
-			result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.INQUIRY_FAILED_CODE, err.Error(), nil)
+			result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.INQUIRY_FAILED_CODE, "Failed", err.Error(), nil)
 			return ctx.JSON(http.StatusOK, result)
 		}
 	} else { //postpaid
@@ -158,7 +171,7 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		}
 		if respProduct.ProductMerchantFee > respProduct.ProductProviderMerchantFee {
 			log.Println("Err ", svcName, "product merchant fee invalid", respProduct.ProductMerchantFee, respProduct.ProductProviderMerchantFee)
-			result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.INQUIRY_FAILED_CODE, "product merchant fee invalid", nil)
+			result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", "product merchant fee invalid", nil)
 			return ctx.JSON(http.StatusOK, result)
 		}
 		//inquiry ke partner
@@ -175,11 +188,11 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		})
 		if err != nil {
 			log.Println("Err ", svcName, err)
-			if strings.Contains(err.Error(), "BPJSKSValidate") {
-				result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.INQUIRY_FAILED_CODE, err.Error(), nil)
-			} else {
-				result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.INQUIRY_FAILED_CODE, "Trx failed", nil)
-			}
+			// if strings.Contains(err.Error(), "BPJSKSValidate") {
+			// 	result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+			// } else {
+			result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.INQUIRY_FAILED_CODE, "Failed", "Trx failed", nil)
+			// }
 			return ctx.JSON(http.StatusOK, result)
 		}
 		productProviderPrice = respWorker.TrxAmount
@@ -194,7 +207,7 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		byte, _ := json.Marshal(billInfo)
 		statusCode = helpers.ErrorCodeGateway(respWorker.InquiryStatus, "INQ")
 		recordInq.StatusCode = statusCode
-		recordInq.StatusMessage = "INQUIRY " + respWorker.InquiryStatusDesc
+		recordInq.StatusMessage = "INQUIRY " + respWorker.InquiryStatusMsg
 		recordInq.StatusDesc = respWorker.InquiryStatusDesc
 		recordInq.ReferenceNumber = referenceNumber
 		recordInq.ProviderStatusCode = respWorker.InquiryStatusDetail
@@ -217,7 +230,7 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		err = svc.services.RepoTrx.InsertTrx(recordInq, nil)
 		if err != nil {
 			log.Println("Err ", svcName, "UpdateTrx", err)
-			result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.INQUIRY_FAILED_CODE, err.Error(), nil)
+			result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.INQUIRY_FAILED_CODE, "Failed", err.Error(), nil)
 			return ctx.JSON(http.StatusOK, result)
 		}
 		err = svc.services.RepoTrx.InsertTrxStatus(models.ReqGetTrxStatus{
@@ -228,7 +241,7 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		}, nil)
 		if err != nil {
 			log.Println("Err ", svcName, "InsertTrxStatus", err)
-			result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.INQUIRY_FAILED_CODE, err.Error(), nil)
+			result = helpers.ResponseJSON(configs.FALSE_VALUE, configs.INQUIRY_FAILED_CODE, "Failed", err.Error(), nil)
 			return ctx.JSON(http.StatusOK, result)
 		}
 	}
@@ -249,6 +262,6 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		TotalTrxAmount:         recordInq.TotalTrxAmount,
 		BillInfo:               billInfo,
 	}
-	result = helpers.ResponseJSON(configs.TRUE_VALUE, recordInq.StatusCode, recordInq.StatusMessage, respInquiry)
+	result = helpers.ResponseJSON(configs.TRUE_VALUE, recordInq.StatusCode, recordInq.StatusMessage, recordInq.StatusDesc, respInquiry)
 	return ctx.JSON(http.StatusOK, result)
 }

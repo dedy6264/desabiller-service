@@ -13,12 +13,12 @@ import (
 func IakPLNPostpaidWorkerPayment(req models.ReqInqIak) (respWorker models.ResponseWorkerPayment, err error) {
 
 	var (
-		helperName       = "[IAK][WKR]IakPLNPostpaidWorkerPayment"
-		respProvider     models.RespPaymentPLNPostpaidIak
-		statusCode       string
-		statusMsg        string
-		statusCodeDetail string
-		statusMsgDetail  string
+		helperName   = "[IAK][WKR]IakPLNPostpaidWorkerPayment"
+		respProvider models.RespPaymentPLNPostpaidIak
+		statusCode,
+		statusMsg, statusDesc,
+		statusCodeDetail,
+		statusMsgDetail string
 		// paymentDetail    models.PaymentDetails
 		respUndefined         models.RespWorkerUndefined
 		respUndefinedI        models.RespWorkerUndefinedI
@@ -62,7 +62,7 @@ func IakPLNPostpaidWorkerPayment(req models.ReqInqIak) (respWorker models.Respon
 	}
 	statusCodeDetail = respProvider.Data.ResponseCode
 	statusMsgDetail = respProvider.Data.Message
-	statusCode, statusMsg = helpers.IakPayResponseConverter(respProvider.Data.ResponseCode)
+	statusCode, statusMsg, statusDesc = helpers.IakPayResponseConverter(respProvider.Data.ResponseCode)
 	if statusCode == configs.WORKER_SUCCESS_CODE || statusCode == configs.WORKER_PENDING_CODE {
 		var (
 			detail  models.DetailBillDescPLN
@@ -109,7 +109,8 @@ func IakPLNPostpaidWorkerPayment(req models.ReqInqIak) (respWorker models.Respon
 	}
 	// respWorker.PaymentDetail = paymentDetail
 	respWorker.PaymentStatus = statusCode
-	respWorker.PaymentStatusDesc = statusMsg
+	respWorker.PaymentStatusDesc = statusDesc
+	respWorker.PaymentStatusMsg = statusMsg
 	respWorker.PaymentStatusDetail = statusCodeDetail
 	respWorker.PaymentStatusDescDetail = statusMsgDetail
 	respWorker.AdminFee = admin

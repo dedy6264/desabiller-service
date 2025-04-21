@@ -19,13 +19,14 @@ func (svc savingServices) AddCif(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	if req.CifName == "" {
 		log.Println("Err ", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
+			"Cif name is empty",
 			"Cif name is empty",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
@@ -35,6 +36,7 @@ func (svc savingServices) AddCif(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
 			"Cif NIK is empty",
+			"Cif NIK is empty",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
@@ -42,6 +44,7 @@ func (svc savingServices) AddCif(ctx echo.Context) error {
 		log.Println("Err ", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
+			"Cif Phone is empty",
 			"Cif Phone is empty",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
@@ -51,6 +54,7 @@ func (svc savingServices) AddCif(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
 			"Cif Email is empty",
+			"Cif Email is empty",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
@@ -59,7 +63,8 @@ func (svc savingServices) AddCif(ctx echo.Context) error {
 	if err != nil {
 		log.Println("Err ", svcName, "AddCif", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.VALIDATE_ERROR_CODE,
+			configs.DB_ERROR,
+			"failed",
 			"failed",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
@@ -67,7 +72,8 @@ func (svc savingServices) AddCif(ctx echo.Context) error {
 
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
 		configs.SUCCESS_CODE,
-		"Success",
+		configs.SUCCESS_MSG,
+		configs.SUCCESS_MSG,
 		nil)
 	return ctx.JSON(http.StatusOK, result)
 }
@@ -80,19 +86,19 @@ func (svc savingServices) GetCifs(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	count, err := svc.services.SavingRepo.GetCifCount(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "GetCifCount", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	resp, err := svc.services.SavingRepo.GetCifs(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "GetCif", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	respSvc.Data = resp
@@ -100,7 +106,8 @@ func (svc savingServices) GetCifs(ctx echo.Context) error {
 	respSvc.RecordsFiltered = count
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
 		configs.SUCCESS_CODE,
-		"Success",
+		configs.SUCCESS_MSG,
+		configs.SUCCESS_MSG,
 		respSvc)
 	return ctx.JSON(http.StatusOK, result)
 }
@@ -112,19 +119,20 @@ func (svc savingServices) DropCif(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	err = svc.services.SavingRepo.DropCif(req.ID, nil)
 	if err != nil {
 		log.Println("Err ", svcName, "DropCif", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "failed", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "Failed", "failed", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
 		configs.SUCCESS_CODE,
-		"Success",
+		configs.SUCCESS_MSG,
+		configs.SUCCESS_MSG,
 		nil)
 	return ctx.JSON(http.StatusOK, result)
 }
@@ -136,19 +144,20 @@ func (svc savingServices) UpdateCif(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	req.CifName = strings.ToUpper(req.CifName)
 	err = svc.services.SavingRepo.UpdateCif(*req, nil)
 	if err != nil {
 		log.Println("Err ", svcName, "UpdateCif", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "failed", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "Failed", "failed", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
 		configs.SUCCESS_CODE,
-		"Success",
+		configs.SUCCESS_MSG,
+		configs.SUCCESS_MSG,
 		nil)
 	return ctx.JSON(http.StatusOK, result)
 }

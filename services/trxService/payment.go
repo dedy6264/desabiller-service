@@ -37,12 +37,12 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	if req.ReferenceNumber == "" {
 		log.Println("Err ", svcName, "ReferenceNumber id cannot be null")
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "ReferenceNumber id cannot be null", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", "ReferenceNumber id cannot be null", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	// if req.AccountNumber == "" {
@@ -60,13 +60,13 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 	})
 	if err != nil {
 		log.Println("Err ", svcName, "GetTrx", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "transaction not found", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "Failed", "transaction not found", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 
 	if respInqTrx.StatusCode != configs.INQUIRY_SUCCESS_CODE {
 		log.Println("Err ", svcName, "Transaction invalid")
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "Transaction invalid", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "Failed", "Transaction invalid", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	//----->> trigger kredit
@@ -76,7 +76,6 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 	// 	result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, configs.FAILED_MSG, nil)
 	// 	return ctx.JSON(http.StatusOK, result)
 	// }
-	fmt.Println("SINI 1")
 	billDescInq := models.BillInfoBPJS{}
 	// billDescPay := BillInfoBPJS{}
 	switch respInqTrx.ProductTypeId {
@@ -97,7 +96,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		})
 		if err != nil {
 			log.Println("Err ", svcName, err)
-			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, configs.FAILED_MSG, nil)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, "Failed", configs.FAILED_MSG, nil)
 			return ctx.JSON(http.StatusOK, result)
 		}
 		switch respInqTrx.ProductReferenceCode {
@@ -125,7 +124,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 			})
 			if err != nil {
 				log.Println("Err ", svcName, "IakPulsaWorkerPayment", err)
-				result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.PENDING_CODE, configs.PENDING_MSG, nil)
+				result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.PENDING_CODE, configs.PENDING_MSG, configs.PENDING_MSG, nil)
 				return ctx.JSON(http.StatusOK, result)
 			}
 		}
@@ -176,7 +175,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 	}
 	statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus, "PAY")
 	updatePayment.StatusCode = statusCode
-	updatePayment.StatusMessage = "PAYMENT " + respProvider.PaymentStatusDesc
+	updatePayment.StatusMessage = "PAYMENT " + respProvider.PaymentStatusMsg
 	updatePayment.StatusDesc = respProvider.PaymentStatusDesc
 	updatePayment.ReferenceNumber = respInqTrx.ReferenceNumber
 	updatePayment.ProviderStatusCode = respProvider.PaymentStatusDetail
@@ -195,7 +194,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 	err = svc.services.RepoTrx.UpdateTrx(updatePayment, nil)
 	if err != nil {
 		log.Println("Err ", svcName, "UpdateTrx", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.PENDING_CODE, configs.PENDING_MSG, nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.PENDING_CODE, configs.PENDING_MSG, configs.PENDING_MSG, nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	err = svc.services.RepoTrx.InsertTrxStatus(models.ReqGetTrxStatus{
@@ -206,7 +205,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 	}, nil)
 	if err != nil {
 		log.Println("Err ", svcName, "InsertTrxStatus", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.PENDING_CODE, configs.PENDING_MSG, nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.PENDING_CODE, configs.PENDING_MSG, configs.PENDING_MSG, nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 
@@ -225,9 +224,9 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 	}
 	if updatePayment.StatusCode == configs.FAILED_CODE {
 		// svc.TriggerDebet(respInqTrx.TotalTrxAmount, req.AccountNumber, req.AccountPIN, respInqTrx.ReferenceNumber, configs.TRX_CODE_REVERSAL)
-		result := helpers.ResponseJSON(configs.TRUE_VALUE, updatePayment.StatusCode, updatePayment.StatusMessage, responsePayment)
+		result := helpers.ResponseJSON(configs.TRUE_VALUE, updatePayment.StatusCode, updatePayment.StatusMessage, updatePayment.StatusDesc, responsePayment)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	result := helpers.ResponseJSON(configs.TRUE_VALUE, updatePayment.StatusCode, updatePayment.StatusMessage, responsePayment)
+	result := helpers.ResponseJSON(configs.TRUE_VALUE, updatePayment.StatusCode, updatePayment.StatusMessage, updatePayment.StatusDesc, responsePayment)
 	return ctx.JSON(http.StatusOK, result)
 }

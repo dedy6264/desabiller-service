@@ -13,12 +13,12 @@ import (
 func IakBPJSWorkerPayment(req models.ReqInqIak) (respWorker models.ResponseWorkerPayment, err error) {
 
 	var (
-		helperName       = "[IAK][WKR]IakBPJSWorkerPayment"
-		respProvider     models.RespPaymentBPJSIak
-		statusCode       string
-		statusMsg        string
-		statusCodeDetail string
-		statusMsgDetail  string
+		helperName   = "[IAK][WKR]IakBPJSWorkerPayment"
+		respProvider models.RespPaymentBPJSIak
+		statusCode,
+		statusMsg, statusDesc,
+		statusCodeDetail,
+		statusMsgDetail string
 		// paymentDetail    models.PaymentDetails
 		respUndefined  models.RespWorkerUndefined
 		respUndefinedI models.RespWorkerUndefinedI
@@ -61,12 +61,13 @@ func IakBPJSWorkerPayment(req models.ReqInqIak) (respWorker models.ResponseWorke
 	}
 	statusCodeDetail = respProvider.Data.ResponseCode
 	statusMsgDetail = respProvider.Data.Message
-	statusCode, statusMsg = helpers.IakPayResponseConverter(respProvider.Data.ResponseCode)
+	statusCode, statusMsg, statusDesc = helpers.IakResponseConverter(respProvider.Data.ResponseCode, respProvider.Data.Message)
 	respWorker.BillInfo = map[string]interface{}{
 		"sn": respProvider.Data.Noref,
 	}
 	respWorker.PaymentStatus = statusCode
-	respWorker.PaymentStatusDesc = statusMsg
+	respWorker.PaymentStatusMsg = statusMsg
+	respWorker.PaymentStatusDesc = statusDesc
 	respWorker.PaymentStatusDetail = statusCodeDetail
 	respWorker.PaymentStatusDescDetail = statusMsgDetail
 	// respWorker.TotalTrxAmount, _ = strconv.ParseFloat(strconv.Itoa(respProvider.Data.Price), 64)

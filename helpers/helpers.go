@@ -9,12 +9,13 @@ import (
 	"time"
 )
 
-func ResponseJSON(success bool, code string, msg string, result interface{}) models.Response {
+func ResponseJSON(success bool, code string, msg, desc string, result interface{}) models.Response {
 	dbTime := time.Now().Format(time.RFC3339)
 	response := models.Response{
 		StatusCode:       code,
 		Result:           result,
 		StatusMessage:    msg,
+		StatusDesc:       desc,
 		ResponseDatetime: dbTime,
 	}
 	return response

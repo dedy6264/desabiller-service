@@ -102,7 +102,7 @@ func init() {
 		if !ok {
 			report = echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, strconv.Itoa(report.Code), err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, strconv.Itoa(report.Code), "Failed", err.Error(), nil)
 		c.Logger().Error(report)
 		c.JSON(report.Code, result)
 	}

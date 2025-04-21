@@ -22,7 +22,7 @@ func (svc userActivity) GetMerchantOutlets(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	data := helpers.TokenJWTDecode(ctx)
@@ -34,19 +34,19 @@ func (svc userActivity) GetMerchantOutlets(ctx echo.Context) error {
 	count, err := svc.services.RepoHierarchy.GetMerchantOutletCount(*req)
 	if err != nil {
 		log.Println("Err "+svcName+" GetMerchantOutletCount ", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Data :: empty", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", "Data :: empty", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	resMerchantOutlet, err := svc.services.RepoHierarchy.GetMerchantOutlets(*req)
 	if err != nil {
 		log.Println("Err ", svcName, " GetMerchantOutlets ", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Data :: empty", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", "Data :: empty", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	respSvc.RecordsTotal = count
 	respSvc.RecordsFiltered = count
 	respSvc.Data = resMerchantOutlet
-	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, "SUCCESS", respSvc)
+	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, configs.SUCCESS_MSG, configs.SUCCESS_MSG, respSvc)
 	return ctx.JSON(http.StatusOK, result)
 }
 func (svc userActivity) UpdateMerchantOutlet(ctx echo.Context) error {
@@ -58,7 +58,7 @@ func (svc userActivity) UpdateMerchantOutlet(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 
@@ -73,7 +73,7 @@ func (svc userActivity) UpdateMerchantOutlet(ctx echo.Context) error {
 		if err != nil {
 			log.Println("Err ", svcName, "PswEnc", err)
 			result := helpers.ResponseJSON(configs.FALSE_VALUE,
-				configs.VALIDATE_ERROR_CODE,
+				configs.VALIDATE_ERROR_CODE, "Failed",
 				"password not generated",
 				nil)
 			return ctx.JSON(http.StatusOK, result)
@@ -85,7 +85,7 @@ func (svc userActivity) UpdateMerchantOutlet(ctx echo.Context) error {
 		if err != nil {
 			log.Println("Err ", svcName, "UpdateMerchantOutlet", err)
 			result := helpers.ResponseJSON(configs.FALSE_VALUE,
-				configs.VALIDATE_ERROR_CODE,
+				configs.VALIDATE_ERROR_CODE, "Failed",
 				"failed",
 				nil)
 			return ctx.JSON(http.StatusOK, result)
@@ -97,12 +97,12 @@ func (svc userActivity) UpdateMerchantOutlet(ctx echo.Context) error {
 	if err != nil {
 		log.Println("Err ", svcName, "UpdateMerchantOutlet", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.VALIDATE_ERROR_CODE,
+			configs.VALIDATE_ERROR_CODE, "Failed",
 			"failed",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, "SUCCESS", nil)
+	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, configs.SUCCESS_MSG, configs.SUCCESS_MSG, nil)
 	return ctx.JSON(http.StatusOK, result)
 }
 

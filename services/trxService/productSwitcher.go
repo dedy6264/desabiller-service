@@ -14,7 +14,6 @@ import (
 func (svc trxService) InqProviderSwitcher(req models.ProviderInqRequest) (respWorker models.ResponseWorkerInquiry, err error) {
 	switch req.ProviderName {
 	case "IAK":
-		fmt.Println("=====", req.ProductReferenceCode)
 		switch req.ProductReferenceCode {
 		case "BPJSKS":
 			respWorker, err = iakworkerservice.IakBPJSWorkerInquiry(models.ReqInqIak{

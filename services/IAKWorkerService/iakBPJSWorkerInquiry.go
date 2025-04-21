@@ -6,7 +6,6 @@ import (
 	"desabiller/models"
 	"desabiller/utils"
 	"encoding/json"
-	"errors"
 	"log"
 	"strconv"
 )
@@ -14,20 +13,20 @@ import (
 func IakBPJSWorkerInquiry(req models.ReqInqIak) (respWorker models.ResponseWorkerInquiry, err error) {
 
 	var (
-		helperName       = "[IAK][WKR]IakBPJSWorkerInquiry"
-		respProvider     models.RespInquiryBPJSIak
-		statusCode       string
-		statusMsg        string
-		statusCodeDetail string
-		statusMsgDetail  string
-		respUndefined    models.RespWorkerUndefined
-		respUndefinedI   models.RespWorkerUndefinedI
+		helperName   = "[IAK][WKR]IakBPJSWorkerInquiry"
+		respProvider models.RespInquiryBPJSIak
+		statusCode,
+		statusMsg, statusDesc,
+		statusCodeDetail,
+		statusMsgDetail string
+		respUndefined  models.RespWorkerUndefined
+		respUndefinedI models.RespWorkerUndefinedI
 	)
-	if req.Month == "" || req.Month == "0" {
-		err = errors.New("BPJSKSValidate :: Month/Period can be null")
-		log.Println("Err ", helperName, err)
-		return respWorker, err
-	}
+	// if req.Month == "" || req.Month == "0" {
+	// 	err = errors.New("BPJSKSValidate :: Month/Period can be null")
+	// 	log.Println("Err ", helperName, err)
+	// 	return respWorker, err
+	// }
 	providerRequest := models.ReqInquiryPostpaidIak{
 		Commands: "inq-pasca",
 		Hp:       req.CustomerId,
@@ -70,7 +69,7 @@ func IakBPJSWorkerInquiry(req models.ReqInqIak) (respWorker models.ResponseWorke
 	}
 	statusCodeDetail = respProvider.Data.ResponseCode
 	statusMsgDetail = respProvider.Data.Message
-	statusCode, statusMsg = helpers.IakInqResponseConverter(respProvider.Data.ResponseCode)
+	statusCode, statusMsg, statusDesc = helpers.IakResponseConverter(respProvider.Data.ResponseCode, respProvider.Data.Message)
 	if statusCode == configs.WORKER_SUCCESS_CODE || statusCode == configs.WORKER_PENDING_CODE {
 		var (
 			detail  models.DetailBillDescBPJS
@@ -102,7 +101,8 @@ func IakBPJSWorkerInquiry(req models.ReqInqIak) (respWorker models.ResponseWorke
 	respWorker.SubscriberNumber = respProvider.Data.Hp
 	respWorker.SubscriberName = respProvider.Data.TrName
 	respWorker.InquiryStatus = statusCode
-	respWorker.InquiryStatusDesc = statusMsg
+	respWorker.InquiryStatusMsg = statusMsg
+	respWorker.InquiryStatusDesc = statusDesc
 	respWorker.InquiryStatusDetail = statusCodeDetail
 	respWorker.InquiryStatusDescDetail = statusMsgDetail
 

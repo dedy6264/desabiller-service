@@ -22,7 +22,7 @@ func (svc HierarcyService) GetMerchants(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	req.ClientName = strings.ToUpper(req.ClientName)
@@ -31,20 +31,20 @@ func (svc HierarcyService) GetMerchants(ctx echo.Context) error {
 	count, err := svc.service.RepoHierarchy.GetMerchantCount(*req)
 	if err != nil {
 		log.Println("Err "+svcName+" GetMerchantCount ", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Data :: empty", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", "Data :: empty", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	resMerchant, err := svc.service.RepoHierarchy.GetMerchants(*req)
 	if err != nil {
 		log.Println("Err ", svcName, " GetMerchants ", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Data :: empty", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", "Data :: empty", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	respSvc.RecordsTotal = count
 	respSvc.RecordsFiltered = count
 	respSvc.Data = resMerchant
 	respSvc.Draw = req.Filter.Draw
-	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, "SUCCESS", respSvc)
+	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, configs.SUCCESS_MSG, configs.SUCCESS_MSG, respSvc)
 	return ctx.JSON(http.StatusOK, result)
 }
 func (svc HierarcyService) AddMerchant(ctx echo.Context) error {
@@ -55,13 +55,14 @@ func (svc HierarcyService) AddMerchant(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	if req.ClientName == "" {
 		log.Println("Err ", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
+			"client name is empty",
 			"client name is empty",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
@@ -71,6 +72,7 @@ func (svc HierarcyService) AddMerchant(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
 			"group name is empty",
+			"group name is empty",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
@@ -78,6 +80,7 @@ func (svc HierarcyService) AddMerchant(ctx echo.Context) error {
 		log.Println("Err ", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
+			"merchant name is empty",
 			"merchant name is empty",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
@@ -93,7 +96,8 @@ func (svc HierarcyService) AddMerchant(ctx echo.Context) error {
 			if err != nil {
 				log.Println("Err ", svcName, "AddMerchant", err)
 				result := helpers.ResponseJSON(configs.FALSE_VALUE,
-					configs.VALIDATE_ERROR_CODE,
+					configs.DB_NOT_FOUND,
+					"failed",
 					"failed",
 					nil)
 				return ctx.JSON(http.StatusOK, result)
@@ -101,7 +105,8 @@ func (svc HierarcyService) AddMerchant(ctx echo.Context) error {
 		} else {
 			log.Println("Err ", svcName, "GetMerchant", err)
 			result := helpers.ResponseJSON(configs.FALSE_VALUE,
-				configs.VALIDATE_ERROR_CODE,
+				configs.DB_NOT_FOUND,
+				"failed",
 				"failed",
 				nil)
 			return ctx.JSON(http.StatusOK, result)
@@ -109,7 +114,8 @@ func (svc HierarcyService) AddMerchant(ctx echo.Context) error {
 	} else {
 		log.Println("Err ", svcName, "GetMerchant", " Merchant is exist")
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.VALIDATE_ERROR_CODE,
+			configs.DB_NOT_FOUND,
+			"Merchant name is exist",
 			"Merchant name is exist",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
@@ -117,7 +123,7 @@ func (svc HierarcyService) AddMerchant(ctx echo.Context) error {
 
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
 		configs.SUCCESS_CODE,
-		"Success",
+		configs.SUCCESS_MSG, configs.SUCCESS_MSG,
 		nil)
 	return ctx.JSON(http.StatusOK, result)
 }
@@ -129,19 +135,20 @@ func (svc HierarcyService) DropMerchant(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	err = svc.service.RepoHierarchy.DropMerchant(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "DropMerchant", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.VALIDATE_ERROR_CODE,
+			configs.DB_NOT_FOUND,
+			"failed",
 			"failed",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, "Success", nil)
+	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, configs.SUCCESS_MSG, configs.SUCCESS_MSG, nil)
 	return ctx.JSON(http.StatusOK, result)
 }
 func (svc HierarcyService) UpdateMerchant(ctx echo.Context) error {
@@ -153,7 +160,7 @@ func (svc HierarcyService) UpdateMerchant(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	req.ClientName = strings.ToUpper(req.ClientName)
@@ -166,9 +173,10 @@ func (svc HierarcyService) UpdateMerchant(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
 			"failed",
+			"failed",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, "SUCCESS", nil)
+	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, configs.SUCCESS_MSG, configs.SUCCESS_MSG, nil)
 	return ctx.JSON(http.StatusOK, result)
 }

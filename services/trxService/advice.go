@@ -20,14 +20,14 @@ func (svc trxService) Advice(ctx echo.Context) error {
 	var (
 		svcName = "[IAK]Advice"
 		url, statusCode,
-		statusMessage string
+		statusMessage, statusDesc string
 		billdesc map[string]interface{}
 	)
 	req := new(models.ReqAviceTrx)
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	resp, err := svc.services.RepoTrx.GetTrx(models.ReqGetTrx{
@@ -35,11 +35,12 @@ func (svc trxService) Advice(ctx echo.Context) error {
 	})
 	if err != nil {
 		log.Println("Err ", svcName, "GetTrx", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "transaction not found", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", "transaction not found", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	statusCode = resp.StatusCode
 	statusMessage = resp.StatusMessage
+	statusDesc = resp.StatusDesc
 	err = json.Unmarshal([]byte(resp.OtherMsg), &billdesc)
 	if err != nil {
 		fmt.Println("Error decoding JSON:", err)
@@ -58,7 +59,7 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		MerchantOutletUsername: resp.MerchantOutletUsername,
 	}
 	if resp.StatusCode != configs.PENDING_CODE {
-		result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, respPayment)
+		result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, statusDesc, respPayment)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	if resp.ProductTypeId == 1 {
@@ -76,14 +77,14 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		})
 		if err != nil {
 			log.Println("Err ", svcName, "CheckStatusProviderSwitcher", err)
-			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Trx failed", nil)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, configs.FAILED_MSG, "Trx failed", nil)
 			return ctx.JSON(http.StatusOK, result)
 		}
 		var billInfo map[string]interface{}
 		err = json.Unmarshal([]byte(resp.OtherMsg), &billInfo)
 		if err != nil {
 			log.Println("Err ", svcName, "Unmarshal", err)
-			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, configs.FAILED_MSG, err.Error(), nil)
 			return ctx.JSON(http.StatusOK, result)
 		}
 		respProvider.TrxReferenceNumber = resp.ReferenceNumber
@@ -92,20 +93,20 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		respProvider.BillInfo = billInfo
 		statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus, "PAY")
 		if statusCode == configs.PENDING_CODE {
-			result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, respPayment)
+			result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, statusDesc, respPayment)
 			return ctx.JSON(http.StatusOK, result)
 		}
 		err = UpdateAndInsertStatusTrx(resp, respProvider, svc)
 		if err != nil {
 			log.Println("Err UpdateAndInsertStatusTrx", svcName, err)
-			result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, respPayment)
+			result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, statusDesc, respPayment)
 			return ctx.JSON(http.StatusOK, result)
 		}
 
 		byte, _ := json.Marshal(respProvider.BillInfo)
 		statusMessage = "PAYMENT " + respProvider.PaymentStatusDesc
 		respPayment.BillInfo = string(byte)
-		result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, respPayment)
+		result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, statusDesc, respPayment)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	if resp.ProductTypeId == 2 {
@@ -121,7 +122,7 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		})
 		if err != nil {
 			log.Println("Err ", svcName, "IakPrepaidiakworkerservice", err)
-			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Trx failed", nil)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", "Trx failed", nil)
 			return ctx.JSON(http.StatusOK, result)
 		}
 		respProvider.TrxReferenceNumber = resp.ReferenceNumber
@@ -130,19 +131,19 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		err = UpdateAndInsertStatusTrx(resp, respProvider, svc)
 		if err != nil {
 			log.Println("Err UpdateAndInsertStatusTrx", svcName, err)
-			result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, respPayment)
+			result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, statusDesc, respPayment)
 			return ctx.JSON(http.StatusOK, result)
 		}
 		statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus, "PAY")
 		if statusCode == configs.PENDING_CODE {
-			result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, respPayment)
+			result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, statusDesc, respPayment)
 			return ctx.JSON(http.StatusOK, result)
 		}
 		byte, _ := json.Marshal(respProvider.BillInfo)
 		statusMessage = "PAYMENT " + respProvider.PaymentStatusDesc
 		respPayment.BillInfo = string(byte)
 
-		result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, respPayment)
+		result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, statusDesc, respPayment)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	return nil

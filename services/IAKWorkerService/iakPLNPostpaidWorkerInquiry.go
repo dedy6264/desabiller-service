@@ -13,12 +13,12 @@ import (
 func IakPLNPostpaidWorkerInquiry(req models.ReqInqIak) (respWorker models.ResponseWorkerInquiry, err error) {
 
 	var (
-		helperName            = "[IAK][WKR]IakPLNPostpaidWorkerInquiry"
-		respProvider          models.RespInquiryPLNPostpaidIak
-		statusCode            string
-		statusMsg             string
-		statusCodeDetail      string
-		statusMsgDetail       string
+		helperName   = "[IAK][WKR]IakPLNPostpaidWorkerInquiry"
+		respProvider models.RespInquiryPLNPostpaidIak
+		statusCode,
+		statusMsg, statusDesc,
+		statusCodeDetail,
+		statusMsgDetail string
 		respUndefined         models.RespWorkerUndefined
 		respUndefinedI        models.RespWorkerUndefinedI
 		admin, denda, tagihan float64
@@ -64,7 +64,7 @@ func IakPLNPostpaidWorkerInquiry(req models.ReqInqIak) (respWorker models.Respon
 	}
 	statusCodeDetail = respProvider.Data.ResponseCode
 	statusMsgDetail = respProvider.Data.Message
-	statusCode, statusMsg = helpers.IakInqResponseConverter(respProvider.Data.ResponseCode)
+	statusCode, statusMsg, statusDesc = helpers.IakInqResponseConverter(respProvider.Data.ResponseCode)
 	if statusCode == configs.WORKER_SUCCESS_CODE {
 		var (
 			detail  models.DetailBillDescPLN
@@ -109,7 +109,8 @@ func IakPLNPostpaidWorkerInquiry(req models.ReqInqIak) (respWorker models.Respon
 	}
 	respWorker.AdminFee = admin
 	respWorker.InquiryStatus = statusCode
-	respWorker.InquiryStatusDesc = statusMsg
+	respWorker.InquiryStatusMsg = statusMsg
+	respWorker.InquiryStatusDesc = statusDesc
 	respWorker.InquiryStatusDetail = statusCodeDetail
 	respWorker.InquiryStatusDescDetail = statusMsgDetail
 	respWorker.TotalTrxAmount, _ = strconv.ParseFloat(strconv.Itoa(respProvider.Data.Price), 64)

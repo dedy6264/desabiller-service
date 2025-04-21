@@ -19,13 +19,14 @@ func (svc savingServices) AddSavingSegment(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	if req.SavingSegmentName == "" {
 		log.Println("Err ", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
+			"Segment name is empty",
 			"Segment name is empty",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
@@ -35,6 +36,7 @@ func (svc savingServices) AddSavingSegment(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
 			"Limit Amount is empty",
+			"Limit Amount is empty",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
@@ -42,6 +44,7 @@ func (svc savingServices) AddSavingSegment(ctx echo.Context) error {
 		log.Println("Err ", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
+			"Saving Type is empty",
 			"Saving Type is empty",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
@@ -52,7 +55,8 @@ func (svc savingServices) AddSavingSegment(ctx echo.Context) error {
 	if err != nil {
 		log.Println("Err ", svcName, "AddSavingSegment", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.VALIDATE_ERROR_CODE,
+			configs.DB_ERROR,
+			"failed",
 			"failed",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
@@ -60,7 +64,8 @@ func (svc savingServices) AddSavingSegment(ctx echo.Context) error {
 
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
 		configs.SUCCESS_CODE,
-		"Success",
+		configs.SUCCESS_MSG,
+		configs.SUCCESS_MSG,
 		nil)
 	return ctx.JSON(http.StatusOK, result)
 }
@@ -73,19 +78,19 @@ func (svc savingServices) GetSavingSegments(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	count, err := svc.services.SavingRepo.GetSavingSegmentCount(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "GetSavingSegmentCount", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	resp, err := svc.services.SavingRepo.GetSavingSegments(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "GetSavingSegment", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	respSvc.Data = resp
@@ -93,7 +98,8 @@ func (svc savingServices) GetSavingSegments(ctx echo.Context) error {
 	respSvc.RecordsFiltered = count
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
 		configs.SUCCESS_CODE,
-		"Success",
+		configs.SUCCESS_MSG,
+		configs.SUCCESS_MSG,
 		respSvc)
 	return ctx.JSON(http.StatusOK, result)
 }
@@ -105,19 +111,20 @@ func (svc savingServices) DropSavingSegment(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	err = svc.services.SavingRepo.DropSavingSegment(req.ID, nil)
 	if err != nil {
 		log.Println("Err ", svcName, "DropSavingSegment", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "failed", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "Failed", "failed", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
 		configs.SUCCESS_CODE,
-		"Success",
+		configs.SUCCESS_MSG,
+		configs.SUCCESS_MSG,
 		nil)
 	return ctx.JSON(http.StatusOK, result)
 }
@@ -129,19 +136,20 @@ func (svc savingServices) UpdateSavingSegment(ctx echo.Context) error {
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	req.SavingSegmentName = strings.ToUpper(req.SavingSegmentName)
 	err = svc.services.SavingRepo.UpdateSavingSegment(*req, nil)
 	if err != nil {
 		log.Println("Err ", svcName, "UpdateSavingSegment", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "failed", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "Failed", "failed", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
 		configs.SUCCESS_CODE,
-		"Success",
+		configs.SUCCESS_MSG,
+		configs.SUCCESS_MSG,
 		nil)
 	return ctx.JSON(http.StatusOK, result)
 }

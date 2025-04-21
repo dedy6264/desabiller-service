@@ -4,6 +4,7 @@ type (
 	ResponseWorkerPayment struct {
 		PaymentStatus              string                 `json:"paymentStatus"`
 		PaymentStatusDesc          string                 `json:"paymentStatusDesc"`
+		PaymentStatusMsg           string                 `json:"paymentStatusMsg"`
 		PaymentStatusDetail        string                 `json:"paymentStatusDetail"`
 		PaymentStatusDescDetail    string                 `json:"paymentStatusDescDetail"`
 		TrxReferenceNumber         string                 `json:"trxReferenceNumber"`
@@ -17,6 +18,7 @@ type (
 	ResponseWorkerInquiry struct {
 		InquiryStatus              string                 `json:"inquiryStatus"`
 		InquiryStatusDesc          string                 `json:"inquiryStatusDesc"`
+		InquiryStatusMsg           string                 `json:"inquiryStatusMsg"`
 		InquiryStatusDetail        string                 `json:"inquiryStatusDetail"`
 		InquiryStatusDescDetail    string                 `json:"inquiryStatusDescDetail"`
 		TrxReferenceNumber         string                 `json:"trxReferenceNumber"`
