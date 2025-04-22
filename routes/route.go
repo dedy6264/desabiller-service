@@ -349,6 +349,7 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 			log.Println("Response :", string(resBody))
 			log.Println("[End]")
 		}))
+		mn.POST("/getTrxs", trxSvc.TrxBillerReports)
 		mn.POST("/getTrx", trxSvc.TrxBillerReport)
 		// mn.POST("/payment", trxSvc.PaymentBiller)
 		// mn.POST("/advice", trxSvc.Advice)
