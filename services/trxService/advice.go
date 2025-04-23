@@ -62,7 +62,8 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, statusDesc, respPayment)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	if resp.ProductTypeId == 1 {
+	switch resp.ProductTypeId {
+	case 1:
 		if configs.AppEnv == "DEV" {
 			url = configs.IakDevUrlPostpaid + "/api/v1/bill/check"
 		}
@@ -108,8 +109,7 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		respPayment.BillInfo = string(byte)
 		result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, statusDesc, respPayment)
 		return ctx.JSON(http.StatusOK, result)
-	}
-	if resp.ProductTypeId == 2 {
+	case 2:
 		if configs.AppEnv == "DEV" {
 			url = configs.IakDevUrlPrepaid + "/api/check-status"
 		}
@@ -145,8 +145,96 @@ func (svc trxService) Advice(ctx echo.Context) error {
 
 		result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, statusDesc, respPayment)
 		return ctx.JSON(http.StatusOK, result)
+	default:
+		log.Println("Err ", svcName, "Unknown Product Type ID")
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", "Unknown Product Type ID", nil)
+		return ctx.JSON(http.StatusOK, result)
 	}
-	return nil
+	// if resp.ProductTypeId == 1 {
+	// 	if configs.AppEnv == "DEV" {
+	// 		url = configs.IakDevUrlPostpaid + "/api/v1/bill/check"
+	// 	}
+	// 	if configs.AppEnv == "PROD" {
+	// 		url = configs.IakProdUrlPostpaid + "/api/v1/bill/check"
+	// 	}
+	// 	respProvider, err := svc.CheckStatusProviderSwitcher(models.ProviderInqRequest{
+	// 		ReferenceNumber:      resp.ReferenceNumber,
+	// 		Url:                  url,
+	// 		ProviderName:         resp.ProviderName,
+	// 		ProductReferenceCode: resp.ProductReferenceCode,
+	// 	})
+	// 	if err != nil {
+	// 		log.Println("Err ", svcName, "CheckStatusProviderSwitcher", err)
+	// 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, configs.FAILED_MSG, "Trx failed", nil)
+	// 		return ctx.JSON(http.StatusOK, result)
+	// 	}
+	// 	var billInfo map[string]interface{}
+	// 	err = json.Unmarshal([]byte(resp.OtherMsg), &billInfo)
+	// 	if err != nil {
+	// 		log.Println("Err ", svcName, "Unmarshal", err)
+	// 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.FAILED_CODE, configs.FAILED_MSG, err.Error(), nil)
+	// 		return ctx.JSON(http.StatusOK, result)
+	// 	}
+	// 	respProvider.TrxReferenceNumber = resp.ReferenceNumber
+	// 	respProvider.TrxProviderReferenceNumber = resp.ProviderReferenceNumber
+	// 	respProvider.TotalTrxAmount = resp.TotalTrxAmount
+	// 	respProvider.BillInfo = billInfo
+	// 	statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus, "PAY")
+	// 	if statusCode == configs.PENDING_CODE {
+	// 		result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, statusDesc, respPayment)
+	// 		return ctx.JSON(http.StatusOK, result)
+	// 	}
+	// 	err = UpdateAndInsertStatusTrx(resp, respProvider, svc)
+	// 	if err != nil {
+	// 		log.Println("Err UpdateAndInsertStatusTrx", svcName, err)
+	// 		result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, statusDesc, respPayment)
+	// 		return ctx.JSON(http.StatusOK, result)
+	// 	}
+
+	// 	byte, _ := json.Marshal(respProvider.BillInfo)
+	// 	statusMessage = "PAYMENT " + respProvider.PaymentStatusDesc
+	// 	respPayment.BillInfo = string(byte)
+	// 	result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, statusDesc, respPayment)
+	// 	return ctx.JSON(http.StatusOK, result)
+	// }
+	// if resp.ProductTypeId == 2 {
+	// 	if configs.AppEnv == "DEV" {
+	// 		url = configs.IakDevUrlPrepaid + "/api/check-status"
+	// 	}
+	// 	if configs.AppEnv == "PROD" {
+	// 		url = configs.IakProdUrlPrepaid + "/api/check-status"
+	// 	}
+	// 	respProvider, err := iakworkerservice.IakPrepaidWorkerCheckStatus(models.ReqInqIak{
+	// 		RefId: resp.ReferenceNumber,
+	// 		Url:   url,
+	// 	})
+	// 	if err != nil {
+	// 		log.Println("Err ", svcName, "IakPrepaidiakworkerservice", err)
+	// 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", "Trx failed", nil)
+	// 		return ctx.JSON(http.StatusOK, result)
+	// 	}
+	// 	respProvider.TrxReferenceNumber = resp.ReferenceNumber
+	// 	respProvider.TrxProviderReferenceNumber = resp.ProviderReferenceNumber
+	// 	respProvider.TotalTrxAmount = resp.TotalTrxAmount
+	// 	err = UpdateAndInsertStatusTrx(resp, respProvider, svc)
+	// 	if err != nil {
+	// 		log.Println("Err UpdateAndInsertStatusTrx", svcName, err)
+	// 		result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, statusDesc, respPayment)
+	// 		return ctx.JSON(http.StatusOK, result)
+	// 	}
+	// 	statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus, "PAY")
+	// 	if statusCode == configs.PENDING_CODE {
+	// 		result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, statusDesc, respPayment)
+	// 		return ctx.JSON(http.StatusOK, result)
+	// 	}
+	// 	byte, _ := json.Marshal(respProvider.BillInfo)
+	// 	statusMessage = "PAYMENT " + respProvider.PaymentStatusDesc
+	// 	respPayment.BillInfo = string(byte)
+
+	// 	result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, statusDesc, respPayment)
+	// 	return ctx.JSON(http.StatusOK, result)
+	// }
+	// return nil
 }
 func UpdateAndInsertStatusTrx(dataPayment models.RespGetTrx, dataAdvice models.ResponseWorkerPayment, svc trxService) error {
 	t := time.Now()

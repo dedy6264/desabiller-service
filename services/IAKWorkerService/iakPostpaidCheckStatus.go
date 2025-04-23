@@ -14,12 +14,13 @@ import (
 func IakPostpaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.ResponseWorkerPayment, err error) {
 
 	var (
-		helperName       = "[IAK][WKR]IakPostpaidWorkerCheckStatus"
-		respProvider     models.RespCheckStatusPostpaidIak
-		statusCode       string
-		statusMsg        string
-		statusCodeDetail string
-		statusMsgDetail  string
+		helperName   = "[IAK][WKR]IakPostpaidWorkerCheckStatus"
+		respProvider models.RespCheckStatusPostpaidIak
+		statusCode,
+		statusDesc,
+		statusMsg,
+		statusCodeDetail,
+		statusMsgDetail string
 		// paymentDetail    models.PaymentDetails
 		respUndefined  models.RespWorkerUndefined
 		respUndefinedI models.RespWorkerUndefinedI
@@ -66,12 +67,15 @@ func IakPostpaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.Respo
 	if respProvider.Data.ResponseCode == "00" {
 		statusCode = configs.WORKER_SUCCESS_CODE
 		statusMsg = "SUCCESS"
+		statusDesc = statusMsg
 	} else if respProvider.Data.ResponseCode == "07" {
 		statusCode = configs.WORKER_FAILED_CODE
 		statusMsg = "FAILED"
+		statusDesc = configs.BILLER_DISRUPTION_MSG
 	} else {
 		statusCode = configs.WORKER_PENDING_CODE
 		statusMsg = "PENDING"
+		statusDesc = statusMsg
 	}
 	fmt.Println(statusCode, statusMsg)
 	if statusCode == configs.WORKER_SUCCESS_CODE || statusCode == configs.WORKER_PENDING_CODE {
@@ -151,7 +155,8 @@ func IakPostpaidWorkerCheckStatus(req models.ReqInqIak) (respWorker models.Respo
 	}
 	// respWorker.PaymentDetail = paymentDetail
 	respWorker.PaymentStatus = statusCode
-	respWorker.PaymentStatusDesc = statusMsg
+	respWorker.PaymentStatusDesc = statusDesc
+	respWorker.PaymentStatusMsg = statusMsg
 	respWorker.PaymentStatusDetail = statusCodeDetail
 	respWorker.PaymentStatusDescDetail = statusMsgDetail
 

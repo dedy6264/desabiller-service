@@ -64,7 +64,7 @@ func IakPLNPostpaidWorkerInquiry(req models.ReqInqIak) (respWorker models.Respon
 	}
 	statusCodeDetail = respProvider.Data.ResponseCode
 	statusMsgDetail = respProvider.Data.Message
-	statusCode, statusMsg, statusDesc = helpers.IakInqResponseConverter(respProvider.Data.ResponseCode)
+	statusCode, statusMsg, statusDesc = helpers.IakResponseConverter(respProvider.Data.ResponseCode, respProvider.Data.Message)
 	if statusCode == configs.WORKER_SUCCESS_CODE {
 		var (
 			detail  models.DetailBillDescPLN

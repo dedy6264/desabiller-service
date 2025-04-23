@@ -70,7 +70,7 @@ func IakBPJSWorkerPayment(req models.ReqInqIak) (respWorker models.ResponseWorke
 	respWorker.PaymentStatusDesc = statusDesc
 	respWorker.PaymentStatusDetail = statusCodeDetail
 	respWorker.PaymentStatusDescDetail = statusMsgDetail
-	// respWorker.TotalTrxAmount, _ = strconv.ParseFloat(strconv.Itoa(respProvider.Data.Price), 64)
+	respWorker.TotalTrxAmount, _ = strconv.ParseFloat(strconv.Itoa(respProvider.Data.Price), 64)
 	respWorker.TrxReferenceNumber = providerRequest.TrID
 	respWorker.TrxProviderReferenceNumber = strconv.Itoa(respProvider.Data.TrID)
 

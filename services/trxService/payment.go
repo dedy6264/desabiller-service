@@ -132,6 +132,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 
 	byte, _ := json.Marshal(billDescInq)
 	updatePayment := models.ReqGetTrx{
+		// TotalTrxAmount:             respInqTrx.TotalTrxAmount,
 		ProductReferenceId:         respInqTrx.ProductReferenceId,
 		ProductReferenceCode:       respInqTrx.ProductReferenceCode,
 		ProductCategoryId:          respInqTrx.ProductCategoryId,
