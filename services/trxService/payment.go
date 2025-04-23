@@ -187,7 +187,11 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 	updatePayment.Filter = models.FilterReq{
 		CreatedAt: dbTime,
 	}
-	updatePayment.TotalTrxAmount = respProvider.TotalTrxAmount
+	if updatePayment.StatusCode == configs.FAILED_CODE || updatePayment.StatusCode == configs.PENDING_CODE {
+		updatePayment.TotalTrxAmount = respInqTrx.TotalTrxAmount
+	} else {
+		updatePayment.TotalTrxAmount = respProvider.TotalTrxAmount
+	}
 	if configs.TrxPaymentPending == "YES" && statusCode == configs.SUCCESS_CODE {
 		updatePayment.StatusCode = configs.PENDING_CODE
 		updatePayment.StatusMessage = "PAYMENT PENDING"
