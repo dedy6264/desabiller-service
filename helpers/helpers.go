@@ -4,11 +4,15 @@ import (
 	"desabiller/models"
 	"errors"
 	"fmt"
+	"log"
 	"reflect"
 	"strings"
 	"time"
 )
 
+func ErrLogger(svc, desc string, err error) {
+	log.Println("Error: ", svc, " | ", desc, " | ", err)
+}
 func ResponseJSON(success bool, code string, msg, desc string, result interface{}) models.Response {
 	dbTime := time.Now().Format(time.RFC3339)
 	response := models.Response{

@@ -54,6 +54,7 @@ type (
 	BillDescPLN struct {
 		SubscriberName   string              `json:"subscriberName"`
 		SubscriberNumber string              `json:"subscriberNumber"`
+		MeterNo          string              `json:"meterNo"`
 		LembarTagihan    int                 `json:"lembarTagihan"`
 		Detail           []DetailBillDescPLN `json:"detail"`
 	}

@@ -37,7 +37,7 @@ func (svc savingServices) AddSavingType(ctx echo.Context) error {
 	if err != nil {
 		log.Println("Err ", svcName, "AddSavingType", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.DB_ERROR,
+			configs.DB_NOT_FOUND,
 			"failed", "Failed",
 			nil)
 		return ctx.JSON(http.StatusOK, result)

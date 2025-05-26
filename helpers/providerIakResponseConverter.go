@@ -5,7 +5,7 @@ import "desabiller/configs"
 func IakResponseConverter(respCode, respDesc string) (statusCode, statusMsg, statusDesc string) {
 	statusDesc = respDesc //desc adalah message detail atau message dari provider
 	if respCode != "00" {
-		if ok, _ := InArray(respCode, []string{"07", "08", "09", "91", "92", "94", "102", "103", "105", "109", "110", "117", "02", "37", "38", "04", "12", "13", "17", "110", "121", "131", "132", "202", "203", "204", "205", "206", "207"}); ok { //failed/Biller Disruption
+		if ok, _ := InArray(respCode, []string{"07", "08", "09", "91", "92", "94", "102", "103", "105", "109", "110", "117", "02", "37", "38", "04", "12", "13", "17", "110", "121", "131", "132", "202", "203", "205", "206", "207"}); ok { //failed/Biller Disruption
 			statusCode = configs.BILLER_DISRUPTION
 			statusDesc = configs.BILLER_DISRUPTION_MSG
 			statusMsg = configs.FAILED_MSG
@@ -13,7 +13,11 @@ func IakResponseConverter(respCode, respDesc string) (statusCode, statusMsg, sta
 			statusCode = configs.WORKER_FAILED_CODE
 			statusDesc = configs.BIIL_PAID_MSG
 			statusMsg = configs.FAILED_MSG
-		} else if ok, _ := InArray(respCode, []string{"201"}); ok { //failed/Undefined
+		} else if ok, _ := InArray(respCode, []string{"204"}); ok { //failed/paid bill
+			statusCode = configs.BILLER_DISRUPTION
+			statusDesc = configs.BILLER_DISRUPTION_MSG
+			statusMsg = statusDesc
+		} else if ok, _ := InArray(respCode, []string{"201"}); ok { //wrong auth
 			statusCode = configs.WORKER_UNDEFINED_ERROR
 			statusDesc = configs.UNDEFINED_MSG
 			statusMsg = configs.FAILED_MSG

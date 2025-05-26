@@ -55,7 +55,7 @@ func (svc savingServices) AddSavingSegment(ctx echo.Context) error {
 	if err != nil {
 		log.Println("Err ", svcName, "AddSavingSegment", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.DB_ERROR,
+			configs.DB_NOT_FOUND,
 			"failed",
 			"failed",
 			nil)
@@ -84,13 +84,13 @@ func (svc savingServices) GetSavingSegments(ctx echo.Context) error {
 	count, err := svc.services.SavingRepo.GetSavingSegmentCount(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "GetSavingSegmentCount", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "Failed", err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	resp, err := svc.services.SavingRepo.GetSavingSegments(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "GetSavingSegment", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "Failed", err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	respSvc.Data = resp
@@ -117,7 +117,7 @@ func (svc savingServices) DropSavingSegment(ctx echo.Context) error {
 	err = svc.services.SavingRepo.DropSavingSegment(req.ID, nil)
 	if err != nil {
 		log.Println("Err ", svcName, "DropSavingSegment", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "Failed", "failed", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", "failed", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 
@@ -143,7 +143,7 @@ func (svc savingServices) UpdateSavingSegment(ctx echo.Context) error {
 	err = svc.services.SavingRepo.UpdateSavingSegment(*req, nil)
 	if err != nil {
 		log.Println("Err ", svcName, "UpdateSavingSegment", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "Failed", "failed", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", "failed", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,

@@ -87,13 +87,13 @@ func (svc savingServices) GetAccounts(ctx echo.Context) error {
 	count, err := svc.services.SavingRepo.GetAccountCount(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "GetAccountCount", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "Failed", err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	resp, err := svc.services.SavingRepo.GetAccounts(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "GetAccount", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "Failed", err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	respSvc.Data = resp
@@ -119,7 +119,7 @@ func (svc savingServices) DropAccount(ctx echo.Context) error {
 	err = svc.services.SavingRepo.DropAccount(req.ID, nil)
 	if err != nil {
 		log.Println("Err ", svcName, "DropAccount", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "Failed", "failed", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", "failed", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 
@@ -155,7 +155,7 @@ func (svc savingServices) UpdateAccount(ctx echo.Context) error {
 	err = svc.services.SavingRepo.UpdateAccount(*req, nil)
 	if err != nil {
 		log.Println("Err ", svcName, "UpdateAccount", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "Failed", "failed", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", "failed", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,

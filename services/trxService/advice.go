@@ -5,7 +5,6 @@ import (
 	"desabiller/configs"
 	"desabiller/helpers"
 	"desabiller/models"
-	iakworkerservice "desabiller/services/IAKWorkerService"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -63,7 +62,7 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	switch resp.ProductTypeId {
-	case 1:
+	case 1: //postpaid
 		if configs.AppEnv == "DEV" {
 			url = configs.IakDevUrlPostpaid + "/api/v1/bill/check"
 		}
@@ -75,6 +74,7 @@ func (svc trxService) Advice(ctx echo.Context) error {
 			Url:                  url,
 			ProviderName:         resp.ProviderName,
 			ProductReferenceCode: resp.ProductReferenceCode,
+			ProductReferenceId:   resp.ProductReferenceId,
 		})
 		if err != nil {
 			log.Println("Err ", svcName, "CheckStatusProviderSwitcher", err)
@@ -109,17 +109,24 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		respPayment.BillInfo = string(byte)
 		result := helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMessage, statusDesc, respPayment)
 		return ctx.JSON(http.StatusOK, result)
-	case 2:
+	case 2: //PREPAID
 		if configs.AppEnv == "DEV" {
 			url = configs.IakDevUrlPrepaid + "/api/check-status"
 		}
 		if configs.AppEnv == "PROD" {
 			url = configs.IakProdUrlPrepaid + "/api/check-status"
 		}
-		respProvider, err := iakworkerservice.IakPrepaidWorkerCheckStatus(models.ReqInqIak{
-			RefId: resp.ReferenceNumber,
-			Url:   url,
+		respProvider, err := svc.CheckStatusProviderSwitcher(models.ProviderInqRequest{
+			ReferenceNumber:      resp.ReferenceNumber,
+			Url:                  url,
+			ProviderName:         resp.ProviderName,
+			ProductReferenceCode: resp.ProductReferenceCode,
+			ProductReferenceId:   resp.ProductReferenceId,
 		})
+		// respProvider, err := iakworkerservice.IakPrepaidWorkerCheckStatus(models.ReqInqIak{
+		// 	RefId: resp.ReferenceNumber,
+		// 	Url:   url,
+		// })
 		if err != nil {
 			log.Println("Err ", svcName, "IakPrepaidiakworkerservice", err)
 			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", "Trx failed", nil)

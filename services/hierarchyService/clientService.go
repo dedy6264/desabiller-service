@@ -70,7 +70,7 @@ func (svc HierarcyService) AddClient(ctx echo.Context) error {
 	if err != nil {
 		log.Println("Err ", svcName, "AddClient", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.DB_ERROR,
+			configs.DB_NOT_FOUND,
 			"failed",
 			"failed",
 			nil)

@@ -30,6 +30,10 @@ type (
 		MerchantOutletPassword string `json:"merchantOutletPassword"`
 	}
 	RespLogin struct {
+		Data  Data   `json:"data"`
+		Token string `json:"token"`
+	}
+	Data struct {
 		ID                     int    `json:"id"`
 		MerchantOutletName     string `json:"merchantOutletName"`
 		MerchantOutletUsername string `json:"merchantOutletUsername"`
@@ -40,6 +44,5 @@ type (
 		GroupName              string `json:"groupName"`
 		ClientId               int    `json:"clientId"`
 		ClientName             string `json:"clientName"`
-		Token                  string `json:"token"`
 	}
 )

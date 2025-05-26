@@ -128,7 +128,7 @@ func IakPulsaWorkerPayment(req models.ReqInqIak) (respWorker models.ResponseWork
 	// 	// respWorker.BillInfo = string(byte)
 	// }
 	if respProvider.Data.Rc != "00" {
-		if ok, _ := helpers.InArray(respProvider.Data.Rc, []string{"07", "08", "09", "91", "92", "94", "102", "103", "105", "109", "110", "117", "02", "37", "38", "04"}); ok { //failed/Biller Disruption
+		if ok, _ := helpers.InArray(respProvider.Data.Rc, []string{"07", "08", "09", "91", "92", "94", "102", "103", "105", "109", "110", "117", "02", "37", "38", "04", "202"}); ok { //failed/Biller Disruption
 			statusCode = configs.BILLER_DISRUPTION
 			statusDesc = configs.BILLER_DISRUPTION_MSG
 			statusMsg = configs.FAILED_MSG

@@ -36,7 +36,7 @@ func (svc providerServices) AddProduct(ctx echo.Context) error {
 	if err != nil {
 		log.Println("Err ", svcName, "AddProduct", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.DB_ERROR,
+			configs.DB_NOT_FOUND,
 			"failed",
 			"failed",
 			nil)

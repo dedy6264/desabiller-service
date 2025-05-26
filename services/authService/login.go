@@ -63,16 +63,16 @@ func (svc AdministrationService) Login(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 
-	resultSvc.ID = respGet.ID
-	resultSvc.MerchantOutletName = respGet.MerchantOutletName
-	resultSvc.MerchantOutletUsername = respGet.MerchantOutletUsername
-	resultSvc.MerchantOutletPassword = ""
-	resultSvc.MerchantId = respGet.MerchantId
-	resultSvc.MerchantName = respGet.MerchantName
-	resultSvc.GroupId = respGet.GroupId
-	resultSvc.GroupName = respGet.GroupName
-	resultSvc.ClientId = respGet.ClientId
-	resultSvc.ClientName = respGet.ClientName
+	resultSvc.Data.ID = respGet.ID
+	resultSvc.Data.MerchantOutletName = respGet.MerchantOutletName
+	resultSvc.Data.MerchantOutletUsername = respGet.MerchantOutletUsername
+	resultSvc.Data.MerchantOutletPassword = ""
+	resultSvc.Data.MerchantId = respGet.MerchantId
+	resultSvc.Data.MerchantName = respGet.MerchantName
+	resultSvc.Data.GroupId = respGet.GroupId
+	resultSvc.Data.GroupName = respGet.GroupName
+	resultSvc.Data.ClientId = respGet.ClientId
+	resultSvc.Data.ClientName = respGet.ClientName
 	resultSvc.Token = token
 	result := helpers.ResponseJSON(false, configs.SUCCESS_CODE, configs.SUCCESS_MSG, configs.SUCCESS_MSG, resultSvc)
 	return ctx.JSON(http.StatusOK, result)

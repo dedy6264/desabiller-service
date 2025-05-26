@@ -71,6 +71,21 @@ func (svc trxService) TrxBillerReport(ctx echo.Context) error {
 	respSvc.RecordsTotal = 1
 	respSvc.RecordsFiltered = 1
 	respSvc.Draw = 1
+	// responsePayment := models.RespPayment{
+	// 	ReferenceNumber:        respInqTrx.ReferenceNumber,
+	// 	CreatedAt:              respInqTrx.CreatedAt,
+	// 	SubscriberNumber:       respInqTrx.CustomerId,
+	// 	// BillInfo:               billDescInq,
+	// 	ProductName:            respInqTrx.ProductName,
+	// 	ProductCode:            respInqTrx.ProductCode,
+	// 	ProductCategoryId:      respInqTrx.ProductCategoryId,
+	// 	ProductCategoryName:    respInqTrx.ProductCategoryName,
+	// 	ProductPrice:           respInqTrx.ProductPrice,
+	// 	ProductAdminFee:        respInqTrx.ProductAdminFee,
+	// 	MerchantOutletName:     respInqTrx.MerchantOutletName,
+	// 	MerchantOutletUsername: respInqTrx.MerchantOutletUsername,
+	// 	TotalTrxAmount:         respInqTrx.ProductPrice + respInqTrx.ProductAdminFee,
+	// }
 	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, configs.SUCCESS_MSG, configs.SUCCESS_MSG, respSvc)
 	return ctx.JSON(http.StatusOK, result)
 }

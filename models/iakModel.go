@@ -71,6 +71,21 @@ type (
 		Sign     string `json:"sign"`
 		Month    string `json:"month"`
 	}
+	ReqInquiryPrepaidIak struct {
+		Commands string `json:"commands"`
+		Hp       string `json:"hp"`
+		Code     string `json:"code"`
+		RefId    string `json:"ref_id"`
+		Username string `json:"username"`
+		Sign     string `json:"sign"`
+		Month    string `json:"month"`
+	}
+	ReqInquiryPLNPrepaidIak struct {
+		Commands string `json:"commands"`
+		Hp       string `json:"hp"`
+		Username string `json:"username"`
+		Sign     string `json:"sign"`
+	}
 	ReqPaymentPostpaidIak struct {
 		Commands string `json:"commands"`
 		Username string `json:"username"`
@@ -91,6 +106,19 @@ type (
 			Sn          string `json:"sn"`
 		} `json:"data"`
 	}
+	RespInquiryPLNPrepaidIak struct {
+		Data struct {
+			Status       string `json:"status"`
+			Hp           string `json:"hp"`
+			MeterNo      string `json:"meter_no"`
+			SubscriberId string `json:"subscriber_id"`
+			Name         string `json:"name"`
+			SegmentPower string `json:"segment_power"`
+			Message      string `json:"message"`
+			Rc           string `json:"rc"`
+		}
+	}
+
 	RespInquiryPLNPostpaidIak struct {
 		Data struct {
 			TrID         int    `json:"tr_id"`

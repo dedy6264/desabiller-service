@@ -4,6 +4,7 @@ type (
 	ProviderInqRequest struct {
 		ProviderId           int    `json:"providerId"`
 		ProviderName         string `json:"providerName"`
+		ProductReferenceId   int    `json:"productReferenceId"`
 		ProductReferenceCode string `json:"productReferenceCode"`
 		ProductCode          string `json:"productCode"`
 		SubscriberNumber     string `json:"subscriberNumber"`
@@ -14,6 +15,7 @@ type (
 	}
 	ProviderPayRequest struct {
 		ProviderName            string `json:"providerName"`
+		ProductReferenceId      int    `json:"productReferenceId"`
 		ProviderReferenceNumber string `json:"ProviderReferenceNumber"`
 		Url                     string `json:"url"`
 		ProductReferenceCode    string `json:"productReferenceCode"`
@@ -147,6 +149,8 @@ type (
 		ReferenceNumber        string      `json:"referenceNumber"`
 		ProductName            string      `json:"productName"`
 		ProductCode            string      `json:"productCode"`
+		ProductCategoryId      int         `json:"productCategoryId"`
+		ProductCategoryName    string      `json:"productCategoryName"`
 		SubscriberNumber       string      `json:"subscriberNumber"`
 		ProductPrice           float64     `json:"productPrice"`
 		ProductAdminFee        float64     `json:"productAdminFee"`

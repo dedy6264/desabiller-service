@@ -85,7 +85,7 @@ func (svc HierarcyService) AddGroup(ctx echo.Context) error {
 			if err != nil {
 				log.Println("Err ", svcName, "AddGroup", err)
 				result := helpers.ResponseJSON(configs.FALSE_VALUE,
-					configs.DB_ERROR,
+					configs.DB_NOT_FOUND,
 					"failed",
 					"failed",
 					nil)
@@ -94,7 +94,7 @@ func (svc HierarcyService) AddGroup(ctx echo.Context) error {
 		} else {
 			log.Println("Err ", svcName, "GetGroup", err)
 			result := helpers.ResponseJSON(configs.FALSE_VALUE,
-				configs.DB_ERROR,
+				configs.DB_NOT_FOUND,
 				"failed",
 				"failed",
 				nil)

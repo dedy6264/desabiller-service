@@ -62,6 +62,7 @@ product_category_id,
 product_category_name,
 product_type_id,
 product_type_name,
+product_reference_id,
 product_reference_code,
 product_id,
 product_name,
@@ -105,7 +106,6 @@ COALESCE(product_reference_id,0) as product_reference_id,
 COALESCE(product_reference_code,'') as product_reference_code`
 
 func (ctx trxRepository) GetTrx(req models.ReqGetTrx) (result models.RespGetTrx, err error) {
-
 	query := ` select ` + getQueryPos +
 		` from biller_trxs where true `
 	if req.Id != 0 {
@@ -144,6 +144,7 @@ func (ctx trxRepository) GetTrx(req models.ReqGetTrx) (result models.RespGetTrx,
 		&result.ProductCategoryName,
 		&result.ProductTypeId,
 		&result.ProductTypeName,
+		&result.ProductReferenceId,
 		&result.ProductReferenceCode,
 		&result.ProductId,
 		&result.ProductName,
@@ -197,13 +198,13 @@ func (ctx trxRepository) GetTrxCount(req models.ReqGetTrx) (result int, err erro
 		query += ` and id= ` + strconv.Itoa(req.Id)
 	}
 	if req.ProductCategoryId != 0 {
-		query += ` and productCategory_id= ` + strconv.Itoa(req.ProductCategoryId)
+		query += ` and product_category_id= ` + strconv.Itoa(req.ProductCategoryId)
 	}
 	if req.ProductName != "" {
-		query += ` and productName= '` + req.ProductName + `'`
+		query += ` and product_name= '` + req.ProductName + `'`
 	}
 	if req.StatusCode != "" {
-		query += ` and statusCode= '` + req.StatusCode + `'`
+		query += ` and status_code= '` + req.StatusCode + `'`
 	}
 	if req.ReferenceNumber != "" {
 		query += ` and reference_Number= '` + req.ReferenceNumber + `'`
@@ -218,7 +219,7 @@ func (ctx trxRepository) GetTrxCount(req models.ReqGetTrx) (result int, err erro
 		query += ` and merchant_id= ` + strconv.Itoa(req.MerchantId)
 	}
 	if req.MerchantOutletId != 0 {
-		query += ` and merchantOutlet_id= ` + strconv.Itoa(req.MerchantOutletId)
+		query += ` and merchant_outlet_id= ` + strconv.Itoa(req.MerchantOutletId)
 	}
 	if req.CustomerId != "" {
 		query += ` and customer_id= '` + req.CustomerId + `'`
@@ -303,6 +304,7 @@ func (ctx trxRepository) GetTrxs(req models.ReqGetTrx) (result []models.RespGetT
 			&val.ProductCategoryName,
 			&val.ProductTypeId,
 			&val.ProductTypeName,
+			&val.ProductReferenceId,
 			&val.ProductReferenceCode,
 			&val.ProductId,
 			&val.ProductName,

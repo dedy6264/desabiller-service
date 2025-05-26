@@ -63,7 +63,7 @@ func (svc savingServices) AddCif(ctx echo.Context) error {
 	if err != nil {
 		log.Println("Err ", svcName, "AddCif", err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.DB_ERROR,
+			configs.DB_NOT_FOUND,
 			"failed",
 			"failed",
 			nil)
@@ -92,13 +92,13 @@ func (svc savingServices) GetCifs(ctx echo.Context) error {
 	count, err := svc.services.SavingRepo.GetCifCount(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "GetCifCount", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "Failed", err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	resp, err := svc.services.SavingRepo.GetCifs(*req)
 	if err != nil {
 		log.Println("Err ", svcName, "GetCif", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "Failed", err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	respSvc.Data = resp
@@ -125,7 +125,7 @@ func (svc savingServices) DropCif(ctx echo.Context) error {
 	err = svc.services.SavingRepo.DropCif(req.ID, nil)
 	if err != nil {
 		log.Println("Err ", svcName, "DropCif", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "Failed", "failed", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", "failed", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 
@@ -151,7 +151,7 @@ func (svc savingServices) UpdateCif(ctx echo.Context) error {
 	err = svc.services.SavingRepo.UpdateCif(*req, nil)
 	if err != nil {
 		log.Println("Err ", svcName, "UpdateCif", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_ERROR, "Failed", "failed", nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", "failed", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
