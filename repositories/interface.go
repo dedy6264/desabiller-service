@@ -6,7 +6,13 @@ import (
 )
 
 type Hierarchyrepo interface {
-	//client
+	AddUserApp(req models.ReqGetUserApp, tx *sql.Tx) (err error)
+	DropUserApp(id int, tx *sql.Tx) (err error)
+	UpdateUserApp(req models.ReqGetUserApp, tx *sql.Tx) (err error)
+	GetUserAppCount(req models.ReqGetUserApp) (result int, err error)
+	GetUserApps(req models.ReqGetUserApp) (result []models.UserApp, err error)
+	GetUserApp(req models.ReqGetUserApp) (result models.UserApp, err error)
+
 	AddClient(req models.ReqGetClient, tx *sql.Tx) (err error)
 	DropClient(id int, tx *sql.Tx) (err error)
 	UpdateClient(req models.ReqGetClient, tx *sql.Tx) (err error)

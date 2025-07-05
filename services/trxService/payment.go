@@ -135,8 +135,8 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 				otherMsgInq := helpers.JsonDescape(respInqTrx.OtherMsg)
 				_ = json.Unmarshal([]byte(otherMsgInq), &billDescInq)
 				if len(respProvider.BillInfo) != 0 {
-					snVal, _ := respProvider.BillInfo["sn"].(string)
-					billDescInq.Sn = snVal
+					// snVal, _ := respProvider.BillInfo["sn"].(string)
+					// billDescInq.Sn = snVal
 				}
 				billDescByte, _ = json.Marshal(billDescInq)
 			}
@@ -227,10 +227,10 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 	}
 
 	responsePayment := models.RespPayment{
-		ReferenceNumber:        updatePayment.ReferenceNumber,
-		CreatedAt:              respInqTrx.CreatedAt,
-		SubscriberNumber:       updatePayment.CustomerId,
-		BillInfo:               billDescInq,
+		ReferenceNumber:  updatePayment.ReferenceNumber,
+		CreatedAt:        respInqTrx.CreatedAt,
+		SubscriberNumber: updatePayment.CustomerId,
+		// BillInfo:               billDescInq,
 		ProductName:            updatePayment.ProductName,
 		ProductCode:            updatePayment.ProductCode,
 		ProductCategoryId:      updatePayment.ProductCategoryId,

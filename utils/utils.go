@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"strconv"
 	"strings"
 )
 
@@ -19,4 +20,12 @@ func NumberFixer(numb string) string {
 		numb = numb[:5]
 	}
 	return numb
+}
+
+func QuerySupport(query string) string {
+	count := strings.Count(query, "?")
+	for i := 0; i < count; i++ {
+		query = strings.Replace(query, "?", "$"+strconv.Itoa(i+1), 1)
+	}
+	return query
 }
