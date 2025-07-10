@@ -198,6 +198,7 @@ class AddNewHierarchyTable extends Migration
         Schema::create('saving_transactions', function (Blueprint $table) {
             $table->id();
             $table->string("reference_number");
+            $table->string("reference_number_partner");
             $table->string("dc_type");
             $table->double("transaction_amount");
             $table->string("transaction_code");
