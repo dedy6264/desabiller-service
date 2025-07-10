@@ -1,4 +1,4 @@
-package savingservices
+package providerservices
 
 import (
 	"database/sql"
@@ -13,37 +13,37 @@ import (
 	"github.com/labstack/echo"
 )
 
-func (svc savingServices) AddSavingType(ctx echo.Context) error {
+func (svc providerServices) AddProductReference(ctx echo.Context) error {
 	var (
-		svcName = "AddSavingType"
+		svcName = "AddProductReference"
 		t       = time.Now()
 		dbTime  = t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	)
-	req := new(models.ReqGetSavingType)
+	req := new(models.ReqGetProductReference)
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		utils.Log(" ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_VALIDATION_FAILED[0], configs.RC_VALIDATION_FAILED[1], err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	if req.Filter.SavingTypeName == "" {
-		utils.Log(" ", svcName, nil)
+	if req.Filter.ProductReferenceName == "" {
+		utils.Log(" ", svcName, err)
 
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.VALIDATE_ERROR_CODE,
-			"Saving Type name is empty",
-			"Saving Type name is empty",
+			configs.RC_INVALID_PARAM[0],
+			"Product clan name is empty",
+			"Product clan name is empty",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	req.Filter.SavingTypeName = strings.ToUpper(req.Filter.SavingTypeName)
 	req.Filter.CreatedAt = dbTime
 	req.Filter.UpdatedAt = dbTime
 	req.Filter.CreatedBy = "sys"
 	req.Filter.UpdatedBy = "sys"
-	_, err = svc.services.SavingRepo.AddSavingType(*req, nil)
+	req.Filter.ProductReferenceName = strings.ToUpper(req.Filter.ProductReferenceName)
+	_, err = svc.services.RepoProduct.AddProductReference(*req)
 	if err != nil {
-		utils.Log(" AddSavingType", svcName, err)
+		utils.Log(" AddProductReference", svcName, err)
 
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.RC_SYSTEM_ERROR[0],
@@ -53,33 +53,36 @@ func (svc savingServices) AddSavingType(ctx echo.Context) error {
 	}
 
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
-		configs.RC_SUCCESS[0], configs.RC_SUCCESS[1], configs.RC_SUCCESS[1],
+		configs.RC_SUCCESS[0],
+		configs.RC_SUCCESS[1],
+		configs.RC_SUCCESS[1],
 		nil)
 	return ctx.JSON(http.StatusOK, result)
 }
-func (svc savingServices) GetSavingTypes(ctx echo.Context) error {
+func (svc providerServices) GetProductReferences(ctx echo.Context) error {
 	var (
-		svcName = "GetSavingType"
+		svcName = "GetProductReferences"
 		respSvc models.ResponseList
 	)
-	req := new(models.ReqGetSavingType)
+	req := new(models.ReqGetProductReference)
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		utils.Log(" ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
+
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_VALIDATION_FAILED[0], configs.RC_VALIDATION_FAILED[1], err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	count, err := svc.services.SavingRepo.GetSavingTypeCount(*req)
+	count, err := svc.services.RepoProduct.GetProductReferenceCount(*req)
 	if err != nil {
-		utils.Log(" GetSavingTypeCount", svcName, err)
+		utils.Log(" GetProductReferenceCount", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_SYSTEM_ERROR[0],
 			configs.RC_SYSTEM_ERROR[1],
 			configs.RC_SYSTEM_ERROR[1], nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	resp, err := svc.services.SavingRepo.GetSavingTypes(*req)
+	resp, err := svc.services.RepoProduct.GetProductReferences(*req)
 	if err != nil {
-		utils.Log(" GetSavingType", svcName, err)
+		utils.Log(" GetProductReferences", svcName, err)
 		if err == sql.ErrNoRows {
 			result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.RC_SUCCESS[0], configs.RC_SUCCESS[1], configs.RC_SUCCESS[1], respSvc)
 			return ctx.JSON(http.StatusOK, result)
@@ -93,24 +96,28 @@ func (svc savingServices) GetSavingTypes(ctx echo.Context) error {
 	respSvc.RecordsTotal = count
 	respSvc.RecordsFiltered = count
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
-		configs.RC_SUCCESS[0], configs.RC_SUCCESS[1], configs.RC_SUCCESS[1],
-		respSvc)
+		configs.RC_SUCCESS[0],
+		configs.RC_SUCCESS[1],
+		configs.RC_SUCCESS[1],
+		resp)
 	return ctx.JSON(http.StatusOK, result)
 }
-func (svc savingServices) DropSavingType(ctx echo.Context) error {
+func (svc providerServices) DropProductReference(ctx echo.Context) error {
 	var (
-		svcName = "DropSavingType"
+		svcName = "DropProductReference"
 	)
-	req := new(models.ReqGetSavingType)
+	req := new(models.ReqGetProductReference)
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		utils.Log(" ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
+
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_VALIDATION_FAILED[0], configs.RC_VALIDATION_FAILED[1], err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	err = svc.services.SavingRepo.DropSavingType(req.Filter.ID, nil)
+	err = svc.services.RepoProduct.DropProductReference(*req)
 	if err != nil {
-		utils.Log(" DropSavingType", svcName, err)
+		utils.Log(" DropProductReference", svcName, err)
+
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_SYSTEM_ERROR[0],
 			configs.RC_SYSTEM_ERROR[1],
 			configs.RC_SYSTEM_ERROR[1], nil)
@@ -118,36 +125,42 @@ func (svc savingServices) DropSavingType(ctx echo.Context) error {
 	}
 
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
-		configs.RC_SUCCESS[0], configs.RC_SUCCESS[1], configs.RC_SUCCESS[1],
+		configs.RC_SUCCESS[0],
+		configs.RC_SUCCESS[1],
+		configs.RC_SUCCESS[1],
 		nil)
 	return ctx.JSON(http.StatusOK, result)
 }
-func (svc savingServices) UpdateSavingType(ctx echo.Context) error {
+func (svc providerServices) UpdateProductReference(ctx echo.Context) error {
 	var (
-		svcName = "UpdateSavingType"
+		svcName = "UpdateProductReference"
 		t       = time.Now()
 		dbTime  = t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	)
-	req := new(models.ReqGetSavingType)
+	req := new(models.ReqGetProductReference)
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		utils.Log(" ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
+
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_VALIDATION_FAILED[0], configs.RC_VALIDATION_FAILED[1], err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	req.Filter.SavingTypeName = strings.ToUpper(req.Filter.SavingTypeName)
+	req.Filter.ProductReferenceName = strings.ToUpper(req.Filter.ProductReferenceName)
 	req.Filter.UpdatedAt = dbTime
 	req.Filter.UpdatedBy = "sys"
-	err = svc.services.SavingRepo.UpdateSavingType(*req, nil)
+	_, err = svc.services.RepoProduct.UpdateProductReference(*req)
 	if err != nil {
-		utils.Log(" UpdateSavingType", svcName, err)
+		utils.Log(" UpdateProductReference", svcName, err)
+
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_SYSTEM_ERROR[0],
 			configs.RC_SYSTEM_ERROR[1],
 			configs.RC_SYSTEM_ERROR[1], nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
-		configs.RC_SUCCESS[0], configs.RC_SUCCESS[1], configs.RC_SUCCESS[1],
+		configs.RC_SUCCESS[0],
+		configs.RC_SUCCESS[1],
+		configs.RC_SUCCESS[1],
 		nil)
 	return ctx.JSON(http.StatusOK, result)
 }

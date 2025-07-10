@@ -181,6 +181,7 @@ reference_number,
 		log.Println("GetSavingTransaction :: ", err.Error())
 		return result, err
 	}
+
 	return result, nil
 }
 func (ctx savingRepository) GetSavingTransactions(req models.ReqGetSavingTransaction) (result []models.RespGetSavingTransaction, err error) {
@@ -233,6 +234,9 @@ reference_number,
 	if err != nil {
 		log.Println("GetSavingTransactions :: ", err.Error())
 		return result, err
+	}
+	if len(result) == 0 {
+		return result, sql.ErrNoRows
 	}
 	return result, nil
 

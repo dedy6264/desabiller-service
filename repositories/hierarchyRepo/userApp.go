@@ -5,7 +5,6 @@ import (
 	"desabiller/configs"
 	"desabiller/models"
 	"desabiller/utils"
-	"log"
 	"strconv"
 	"time"
 )
@@ -32,12 +31,11 @@ func (ctx hierarchy) AddUserApp(req models.ReqGetUserApp, tx *sql.Tx) (err error
 				`
 	query = utils.QuerySupport(query)
 	if tx != nil {
-		_, err = tx.Exec(query, req.Filter.Username, req.Filter.Password, req.Filter.Name, req.Filter.Identity_type, req.Filter.Identity_number, req.Filter.Phone, req.Filter.Email, req.Filter.Gender, req.Filter.Province, req.Filter.City, req.Filter.Address, req.Filter.Account_id, req.Filter.Status, dbTime, "sys", dbTime, "sys")
+		_, err = tx.Exec(query, req.Filter.Username, req.Filter.Password, req.Filter.Name, req.Filter.IdentityType, req.Filter.IdentityNumber, req.Filter.Phone, req.Filter.Email, req.Filter.Gender, req.Filter.Province, req.Filter.City, req.Filter.Address, req.Filter.AccountID, req.Filter.Status, dbTime, "sys", dbTime, "sys")
 	} else {
-		_, err = ctx.repo.Db.Exec(query, req.Filter.Username, req.Filter.Password, req.Filter.Name, req.Filter.Identity_type, req.Filter.Identity_number, req.Filter.Phone, req.Filter.Email, req.Filter.Gender, req.Filter.Province, req.Filter.City, req.Filter.Address, req.Filter.Account_id, req.Filter.Status, dbTime, "sys", dbTime, "sys")
+		_, err = ctx.repo.Db.Exec(query, req.Filter.Username, req.Filter.Password, req.Filter.Name, req.Filter.IdentityType, req.Filter.IdentityNumber, req.Filter.Phone, req.Filter.Email, req.Filter.Gender, req.Filter.Province, req.Filter.City, req.Filter.Address, req.Filter.AccountID, req.Filter.Status, dbTime, "sys", dbTime, "sys")
 	}
 	if err != nil {
-		log.Println("Err AddUserApp :: ", err)
 		return err
 	}
 	return nil
@@ -50,7 +48,6 @@ func (ctx hierarchy) DropUserApp(id int, tx *sql.Tx) (err error) {
 		_, err = ctx.repo.Db.Exec(query, id)
 	}
 	if err != nil {
-		log.Println("DropUserApp :: ", err.Error())
 		return err
 	}
 	return nil
@@ -78,12 +75,11 @@ func (ctx hierarchy) UpdateUserApp(req models.ReqGetUserApp, tx *sql.Tx) (err er
 				`
 	query = utils.QuerySupport(query)
 	if tx != nil {
-		_, err = tx.Exec(query, req.Filter.Username, req.Filter.Password, req.Filter.Name, req.Filter.Identity_type, req.Filter.Identity_number, req.Filter.Phone, req.Filter.Email, req.Filter.Gender, req.Filter.Province, req.Filter.City, req.Filter.Address, req.Filter.Account_id, req.Filter.Status, dbTime, "sys", req.Filter.ID)
+		_, err = tx.Exec(query, req.Filter.Username, req.Filter.Password, req.Filter.Name, req.Filter.IdentityType, req.Filter.IdentityNumber, req.Filter.Phone, req.Filter.Email, req.Filter.Gender, req.Filter.Province, req.Filter.City, req.Filter.Address, req.Filter.AccountID, req.Filter.Status, dbTime, "sys", req.Filter.ID)
 	} else {
-		_, err = ctx.repo.Db.Exec(query, req.Filter.Username, req.Filter.Password, req.Filter.Name, req.Filter.Identity_type, req.Filter.Identity_number, req.Filter.Phone, req.Filter.Email, req.Filter.Gender, req.Filter.Province, req.Filter.City, req.Filter.Address, req.Filter.Account_id, req.Filter.Status, dbTime, "sys", req.Filter.ID)
+		_, err = ctx.repo.Db.Exec(query, req.Filter.Username, req.Filter.Password, req.Filter.Name, req.Filter.IdentityType, req.Filter.IdentityNumber, req.Filter.Phone, req.Filter.Email, req.Filter.Gender, req.Filter.Province, req.Filter.City, req.Filter.Address, req.Filter.AccountID, req.Filter.Status, dbTime, "sys", req.Filter.ID)
 	}
 	if err != nil {
-		log.Println("UpdateUserApp :: ", err.Error())
 		return err
 	}
 	return nil
@@ -93,14 +89,27 @@ func (ctx hierarchy) GetUserAppCount(req models.ReqGetUserApp) (result int, err 
 
 	err = ctx.repo.Db.QueryRow(query).Scan(&result)
 	if err != nil {
-		log.Println("GetCount :: ", err.Error())
 		return 0, err
 	}
 	return result, nil
 }
 func (ctx hierarchy) GetUserApps(req models.ReqGetUserApp) (result []models.UserApp, err error) {
 	query := `select ` + userapp + ` from user_apps where true `
-
+	if req.Filter.ID != 0 {
+		query += ` and id =` + strconv.Itoa(int(req.Filter.ID))
+	}
+	if req.Filter.Username != "" {
+		query += ` and username ='` + req.Filter.Username + `'`
+	}
+	if req.Filter.Email != "" {
+		query += ` and email ='` + req.Filter.Email + `'`
+	}
+	if req.Filter.Name != "" {
+		query += ` and name ='` + req.Filter.Name + `'`
+	}
+	if req.Filter.IdentityNumber != "" {
+		query += ` and identity_number ='` + req.Filter.IdentityNumber + `'`
+	}
 	if req.Order != "" {
 		query += ` ORDER BY ` + req.Order
 		if req.Sort != "" {
@@ -118,13 +127,11 @@ func (ctx hierarchy) GetUserApps(req models.ReqGetUserApp) (result []models.User
 
 	rows, err := ctx.repo.Db.Query(query)
 	if err != nil {
-		log.Println("GetUserApps :: ", err.Error())
 		return result, err
 	}
 	defer rows.Close()
 	result, err = DataRowUserApp(rows)
 	if err != nil {
-		log.Println("GetUserApps :: ", err.Error())
 		return result, err
 	}
 	if len(result) == 0 {
@@ -140,15 +147,15 @@ func DataRowUserApp(rows *sql.Rows) (result []models.UserApp, err error) {
 			&val.Username,
 			&val.Password,
 			&val.Name,
-			&val.Identity_type,
-			&val.Identity_number,
+			&val.IdentityType,
+			&val.IdentityNumber,
 			&val.Phone,
 			&val.Email,
 			&val.Gender,
 			&val.Province,
 			&val.City,
 			&val.Address,
-			&val.Account_id,
+			&val.AccountID,
 			&val.Status,
 			&val.CreatedAt,
 			&val.CreatedBy,
@@ -156,7 +163,6 @@ func DataRowUserApp(rows *sql.Rows) (result []models.UserApp, err error) {
 			&val.UpdatedBy,
 		)
 		if err != nil {
-			log.Println("DataRow :: ", err.Error())
 			return result, err
 		}
 		result = append(result, val)
@@ -165,20 +171,35 @@ func DataRowUserApp(rows *sql.Rows) (result []models.UserApp, err error) {
 }
 func (ctx hierarchy) GetUserApp(req models.ReqGetUserApp) (result models.UserApp, err error) {
 	query := `select ` + userapp + ` from user_apps where true `
+	if req.Filter.ID != 0 {
+		query += ` and id =` + strconv.Itoa(int(req.Filter.ID))
+	}
+	if req.Filter.Username != "" {
+		query += ` and username ='` + req.Filter.Username + `'`
+	}
+	if req.Filter.Email != "" {
+		query += ` and email ='` + req.Filter.Email + `'`
+	}
+	if req.Filter.Name != "" {
+		query += ` and name ='` + req.Filter.Name + `'`
+	}
+	if req.Filter.IdentityNumber != "" {
+		query += ` and identity_number ='` + req.Filter.IdentityNumber + `'`
+	}
 	err = ctx.repo.Db.QueryRow(query).Scan(
 		&result.ID,
 		&result.Username,
 		&result.Password,
 		&result.Name,
-		&result.Identity_type,
-		&result.Identity_number,
+		&result.IdentityType,
+		&result.IdentityNumber,
 		&result.Phone,
 		&result.Email,
 		&result.Gender,
 		&result.Province,
 		&result.City,
 		&result.Address,
-		&result.Account_id,
+		&result.AccountID,
 		&result.Status,
 		&result.CreatedAt,
 		&result.CreatedBy,
@@ -186,7 +207,6 @@ func (ctx hierarchy) GetUserApp(req models.ReqGetUserApp) (result models.UserApp
 		&result.UpdatedBy,
 	)
 	if err != nil {
-		log.Println("GetUserApp :: ", err.Error())
 		return result, err
 	}
 	return result, nil

@@ -302,7 +302,7 @@ func UpdateAndInsertStatusTrx(dataPayment models.RespGetTrx, dataAdvice models.R
 		err := svc.services.RepoTrx.UpdateTrx(updatePayment, Tx)
 		if err != nil {
 			// log.Println("Err ", svcName, "UpdateTrx", err)
-			// result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+			// result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_VALIDATION_FAILED[0], configs.RC_VALIDATION_FAILED[1], err.Error(), nil)
 			return err
 		}
 		err = svc.services.RepoTrx.InsertTrxStatus(models.ReqGetTrxStatus{
@@ -313,7 +313,7 @@ func UpdateAndInsertStatusTrx(dataPayment models.RespGetTrx, dataAdvice models.R
 		}, Tx)
 		if err != nil {
 			// log.Println("Err ", svcName, "InsertTrxStatus", err)
-			// result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+			// result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_VALIDATION_FAILED[0], configs.RC_VALIDATION_FAILED[1], err.Error(), nil)
 			return err
 		}
 		return nil

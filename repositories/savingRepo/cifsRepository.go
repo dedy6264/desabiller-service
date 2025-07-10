@@ -4,31 +4,16 @@ import (
 	"database/sql"
 	"desabiller/configs"
 	"desabiller/models"
+	"desabiller/utils"
 	"fmt"
-	"log"
 	"strconv"
-	"strings"
 	"time"
 )
 
-func (ctx savingRepository) GetCifCount(req models.ReqGetCif) (result int, err error) {
+func (ctx savingRepository) GetCifCount(req models.ReqGetCIF) (result int, err error) {
 	query := `select count(id) from cifs where true `
-	if req.ID != 0 {
-		query += ` and id = ` + strconv.Itoa(req.ID)
-	}
-	if req.CifNik != "" {
-		query += ` and cif_nik ='` + req.CifNik + `'`
-	}
-	if req.CifName != "" {
-		query += ` and cif_name like '%` + req.CifName + `%'`
-	}
-	if req.CifPhone != "" {
-		query += ` and cif_phone='` + req.CifPhone + `'`
-	}
-
 	err = ctx.repo.Db.QueryRow(query).Scan(&result)
 	if err != nil {
-		log.Println("GetCount :: ", err.Error())
 		return 0, err
 	}
 	return result, nil
@@ -41,53 +26,71 @@ func (ctx savingRepository) DropCif(id int, tx *sql.Tx) (err error) {
 		_, err = ctx.repo.Db.Exec(query, id)
 	}
 	if err != nil {
-		log.Println("DropCif :: ", err.Error())
 		return err
 	}
 	return nil
 }
-func (ctx savingRepository) UpdateCif(req models.ReqGetCif, tx *sql.Tx) (err error) {
+func (ctx savingRepository) UpdateCif(req models.ReqGetCIF, tx *sql.Tx) (err error) {
 	t := time.Now()
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	query := `update cifs set 
-				cif_name=$1,
-				cif_nik=$2,
-				cif_phone=$3,
-				cif_email=$4,
-				cif_address=$5,
-				updated_at = $6,
-				updated_by =$7
-				where id = $8
+				cif_name=?,
+				cif_no_id=?,
+				cif_type_id=?,
+				cif_id_index=?,
+				cif_phone=?,
+				cif_email=?,
+				cif_address=?,
+				updated_at = ?,
+				updated_by =?
+				where id = ?
 				`
+	query = utils.QuerySupport(query)
 	if tx != nil {
-		_, err = tx.Exec(query, req.CifName, req.CifNik, req.CifPhone,
-			req.CifEmail,
-			req.CifAddress, dbTime, "sys", req.ID)
+		_, err = tx.Exec(query, req.Filter.CifName,
+			req.Filter.CifNoID,
+			req.Filter.CifTypeID,
+			req.Filter.CifIDIndex,
+			req.Filter.CifPhone,
+			req.Filter.CifEmail,
+			req.Filter.CifAddress, dbTime, "sys", req.Filter.ID)
 	} else {
-		_, err = ctx.repo.Db.Exec(query, req.CifName, req.CifNik, req.CifPhone,
-			req.CifEmail,
-			req.CifAddress, dbTime, "sys", req.ID)
+		_, err = ctx.repo.Db.Exec(query, req.Filter.CifName,
+			req.Filter.CifNoID,
+			req.Filter.CifTypeID,
+			req.Filter.CifIDIndex,
+			req.Filter.CifPhone,
+			req.Filter.CifEmail,
+			req.Filter.CifAddress, dbTime, "sys", req.Filter.ID)
 	}
 	if err != nil {
-		log.Println("UpdateCif :: ", err.Error())
 		return err
 	}
 	return nil
 }
-func (ctx savingRepository) AddCif(req models.ReqGetCif, tx *sql.Tx) (result models.RespGetCif, err error) {
+func (ctx savingRepository) AddCif(req models.ReqGetCIF, tx *sql.Tx) (result models.CIF, err error) {
 	t := time.Now()
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
-	query := `insert into cifs (cif_name,cif_nik,cif_phone,cif_email,cif_address,created_at,updated_at, created_by,  updated_by) values ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning id,cif_name,cif_nik,cif_phone,cif_email,cif_address,created_at,updated_at, created_by,  updated_by`
+	query := `insert into cifs (cif_name,cif_no_id,
+cif_type_id,
+cif_id_index,cif_phone,cif_email,cif_address,created_at,updated_at, created_by,  updated_by) values (?,?,?,?,?,?,?,?,?,?,?) returning id,cif_name,cif_no_id,
+cif_type_id,cif_phone,cif_email,cif_address,created_at,updated_at, created_by,  updated_by`
+	query = utils.QuerySupport(query)
 	fmt.Println(query, dbTime)
 	if tx != nil {
-		err = tx.QueryRow(query, req.CifName, req.CifNik, req.CifPhone,
-			req.CifEmail,
-			req.CifAddress,
-			dbTime,
-			dbTime, "sys", "sys").Scan(
+		err = tx.QueryRow(query, req.Filter.CifName,
+			req.Filter.CifNoID,
+			req.Filter.CifTypeID,
+			req.Filter.CifIDIndex,
+			req.Filter.CifPhone,
+			req.Filter.CifEmail,
+			req.Filter.CifAddress,
+			req.Filter.CreatedAt,
+			req.Filter.UpdatedAt, req.Filter.CreatedBy, req.Filter.UpdatedBy).Scan(
 			&result.ID,
 			&result.CifName,
-			&result.CifNik,
+			&result.CifNoID,
+			&result.CifTypeID,
 			&result.CifPhone,
 			&result.CifEmail,
 			&result.CifAddress,
@@ -97,14 +100,19 @@ func (ctx savingRepository) AddCif(req models.ReqGetCif, tx *sql.Tx) (result mod
 			&result.UpdatedAt,
 		)
 	} else {
-		err = ctx.repo.Db.QueryRow(query, req.CifName, req.CifNik, req.CifPhone,
-			req.CifEmail,
-			req.CifAddress,
-			dbTime,
-			dbTime, "sys", "sys").Scan(
+		err = ctx.repo.Db.QueryRow(query, req.Filter.CifName,
+			req.Filter.CifNoID,
+			req.Filter.CifTypeID,
+			req.Filter.CifIDIndex,
+			req.Filter.CifPhone,
+			req.Filter.CifEmail,
+			req.Filter.CifAddress,
+			req.Filter.CreatedAt,
+			req.Filter.UpdatedAt, req.Filter.CreatedBy, req.Filter.UpdatedBy).Scan(
 			&result.ID,
 			&result.CifName,
-			&result.CifNik,
+			&result.CifNoID,
+			&result.CifTypeID,
 			&result.CifPhone,
 			&result.CifEmail,
 			&result.CifAddress,
@@ -116,33 +124,34 @@ func (ctx savingRepository) AddCif(req models.ReqGetCif, tx *sql.Tx) (result mod
 	}
 
 	if err != nil {
-		log.Println("AddCif :: ", err.Error())
 		return result, err
 	}
 	return result, nil
 }
-func (ctx savingRepository) GetCif(req models.ReqGetCif) (result models.RespGetCif, err error) {
+func (ctx savingRepository) GetCif(req models.ReqGetCIF) (result models.CIF, err error) {
 	query := `select id,
 cif_name,
-cif_nik,
+cif_no_id,
+cif_type_id,
 cif_phone,
 cif_email,
 cif_address,created_at, created_by, updated_at, updated_by from cifs where true`
-	if req.ID != 0 {
-		query += ` and id = ` + strconv.Itoa(req.ID)
+	if req.Filter.ID != 0 {
+		query += ` and id = ` + strconv.Itoa(int(req.Filter.ID))
 	}
-	if req.CifNik != "" {
-		query += ` and cif_nik ='` + req.CifNik + `'`
+	if req.Filter.CifNoID != "" {
+		query += ` and cif_no_id ='` + req.Filter.CifNoID + `'`
 	}
-	if req.CifName != "" {
-		query += ` and cif_name like '%` + req.CifName + `%'`
+	if req.Filter.CifName != "" {
+		query += ` and cif_name like '%` + req.Filter.CifName + `%'`
 	}
-	if req.CifPhone != "" {
-		query += ` and cif_phone='` + req.CifPhone + `'`
+	if req.Filter.CifPhone != "" {
+		query += ` and cif_phone='` + req.Filter.CifPhone + `'`
 	}
 	err = ctx.repo.Db.QueryRow(query).Scan(&result.ID,
 		&result.CifName,
-		&result.CifNik,
+		&result.CifNoID,
+		&result.CifTypeID,
 		&result.CifPhone,
 		&result.CifEmail,
 		&result.CifAddress,
@@ -151,60 +160,62 @@ cif_address,created_at, created_by, updated_at, updated_by from cifs where true`
 		&result.UpdatedAt,
 		&result.UpdatedBy)
 	if err != nil {
-		log.Println("GetCif :: ", err.Error())
 		return result, err
 	}
 	return result, nil
 }
-func (ctx savingRepository) GetCifs(req models.ReqGetCif) (result []models.RespGetCif, err error) {
+func (ctx savingRepository) GetCifs(req models.ReqGetCIF) (result []models.CIF, err error) {
 	query := `select id,
 cif_name,
-cif_nik,
+cif_no_id,
+cif_type_id,
 cif_phone,
 cif_email,
 cif_address,created_at, created_by, updated_at, updated_by from cifs where true `
-	if req.ID != 0 {
-		query += ` and id = ` + strconv.Itoa(req.ID)
+	if req.Filter.ID != 0 {
+		query += ` and id = ` + strconv.Itoa(int(req.Filter.ID))
 	}
-	if req.CifNik != "" {
-		query += ` and cif_nik ='` + req.CifNik + `'`
+	if req.Filter.CifNoID != "" {
+		query += ` and cif_no_id ='` + req.Filter.CifNoID + `'`
 	}
-	if req.CifName != "" {
-		query += ` and cif_name like '%` + strings.ToUpper(req.CifName) + `%'`
+	if req.Filter.CifName != "" {
+		query += ` and cif_name like '%` + req.Filter.CifName + `%'`
 	}
-	if req.CifPhone != "" {
-		query += ` and cif_phone='` + req.CifPhone + `'`
+	if req.Filter.CifPhone != "" {
+		query += ` and cif_phone='` + req.Filter.CifPhone + `'`
 	}
-	if req.Filter.Length != 0 {
-		query += ` limit  ` + strconv.Itoa(req.Filter.Length) + `  offset  ` + strconv.Itoa(req.Filter.Start)
+	if req.Lenght != 0 {
+		query += ` limit  ` + strconv.Itoa(int(req.Lenght)) + `  offset  ` + strconv.Itoa(int(req.Start))
 	} else {
-		if req.Filter.OrderBy != "" {
-			query += `  order by '` + req.Filter.OrderBy + `' asc`
+		if req.Order != "" {
+			query += `  order by '` + req.Order + `' asc`
 		} else {
 			query += `  order by cif_name asc`
 		}
 	}
 	rows, err := ctx.repo.Db.Query(query)
 	if err != nil {
-		log.Println("GetCifs :: ", err.Error())
 		return result, err
 	}
 	defer rows.Close()
 	result, err = CifDataRow(rows)
 	if err != nil {
-		log.Println("GetCifs :: ", err.Error())
 		return result, err
+	}
+	if len(result) == 0 {
+		return result, sql.ErrNoRows
 	}
 	return result, nil
 
 }
-func CifDataRow(rows *sql.Rows) (result []models.RespGetCif, err error) {
+func CifDataRow(rows *sql.Rows) (result []models.CIF, err error) {
 	for rows.Next() {
-		var val models.RespGetCif
+		var val models.CIF
 		err := rows.Scan(
 			&val.ID,
 			&val.CifName,
-			&val.CifNik,
+			&val.CifNoID,
+			&val.CifTypeID,
 			&val.CifPhone,
 			&val.CifEmail,
 			&val.CifAddress,
@@ -214,7 +225,6 @@ func CifDataRow(rows *sql.Rows) (result []models.RespGetCif, err error) {
 			&val.UpdatedBy,
 		)
 		if err != nil {
-			log.Println("CifDataRow :: ", err.Error())
 			return result, err
 		}
 		result = append(result, val)

@@ -33,13 +33,11 @@ func TokenJWTDecode(ctx echo.Context) (data models.DataToken) {
 	data.MerchantOutletName = claims["outletName"].(string)
 	return data
 }
-func TokenJwtGenerate(mID, oID int, oName string) (tkn string, err error) {
+func TokenJwtGenerate(uaid int) (tkn string, err error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	// claims["snDevice"] = snDev
-	claims["outletName"] = oName
-	claims["outletId"] = oID
-	claims["merchantId"] = mID
+	claims["userAppId"] = uaid
 	// claims["clientId"] = cID
 	//claims["exp"] = time.Now().Add(time.Minute * 5).Unix()
 	claims["exp"] = time.Now().Add(time.Hour * 5).Unix()

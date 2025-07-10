@@ -13,7 +13,7 @@ a.product_reference_name,
 a.product_reference_code
 from product_references as a 
 join product_helpers as b on b.product_reference_id=a.id
-where b.no_prefix=$1
+where b.product_prefix=$1
 `
 	err = ctx.repo.Db.QueryRow(query, subscriberId).Scan(
 		&result.ProductReferenceId,

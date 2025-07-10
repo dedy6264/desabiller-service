@@ -25,7 +25,6 @@ var ( //application response code
 	INQUIRY_FAILED_CODE  = "19"
 
 	VALIDATE_ERROR_CODE = "34"
-	DB_NOT_FOUND        = "82"
 )
 var ( //application response desc
 	SUCCESS_MSG = "SUCCESS"

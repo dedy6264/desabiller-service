@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"log"
 	"strconv"
 	"strings"
 )
@@ -28,4 +29,11 @@ func QuerySupport(query string) string {
 		query = strings.Replace(query, "?", "$"+strconv.Itoa(i+1), 1)
 	}
 	return query
+}
+func Log(desc, svcname string, err error) {
+	if err == nil {
+		log.Println("Err-" + svcname + "-" + desc)
+		return
+	}
+	log.Println("Err-" + svcname + "-" + desc + "-" + err.Error())
 }

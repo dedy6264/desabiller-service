@@ -4,8 +4,9 @@ import (
 	"desabiller/configs"
 	"desabiller/helpers"
 	"desabiller/models"
-	"log"
+	"desabiller/utils"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo"
 )
@@ -13,62 +14,65 @@ import (
 func (svc savingServices) AddAccount(ctx echo.Context) error {
 	var (
 		svcName = "AddAccount"
+		t       = time.Now()
+		dbTime  = t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	)
-	req := new(models.ReqGetAccount)
+	req := new(models.ReqGetAccountSaving)
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
-		log.Println("Err ", svcName, err)
+		utils.Log(" ", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "FAILED", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	if req.CifID == 0 {
-		log.Println("Err ", svcName, err)
+	if req.Filter.CifID == 0 {
+		utils.Log(" ", svcName, nil)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
 			"CIF is empty", "CIF is empty",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	if req.AccountNumber == "" {
-		log.Println("Err ", svcName, err)
+	if req.Filter.AccountNumber == "" {
+		utils.Log(" ", svcName, nil)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
 			"Account Number is empty", "Account Number is empty",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	if req.SavingSegmentID == 0 {
-		log.Println("Err ", svcName, err)
+	if req.Filter.SavingSegmentID == 0 {
+		utils.Log(" ", svcName, nil)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
 			"Segment is empty", "Segment is empty",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	if req.AccountPin != "" {
-		req.AccountPin, err = helpers.PassEncrypt(req.AccountPin)
+	if req.Filter.AccountPin != "" {
+		req.Filter.AccountPin, err = helpers.PassEncrypt(req.Filter.AccountPin)
 		if err != nil {
-			log.Println("Err ", svcName, "AddAccount", err)
+			utils.Log(" PassEncrypt", svcName, err)
 			result := helpers.ResponseJSON(configs.FALSE_VALUE,
-				configs.VALIDATE_ERROR_CODE,
-				"failed", "failed",
-				err)
+				configs.RC_SYSTEM_ERROR[0],
+				configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
 			return ctx.JSON(http.StatusOK, result)
 		}
 	}
+	req.Filter.CreatedAt = dbTime
+	req.Filter.UpdatedAt = dbTime
+	req.Filter.CreatedBy = "sys"
+	req.Filter.UpdatedBy = "sys"
 	_, err = svc.services.SavingRepo.AddAccount(*req, nil)
 	if err != nil {
-		log.Println("Err ", svcName, "AddAccount", err)
+		utils.Log(" AddAccount", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.VALIDATE_ERROR_CODE,
-			"failed", "failed",
-			nil)
+			configs.RC_SYSTEM_ERROR[0],
+			configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
-		configs.SUCCESS_CODE,
-		configs.SUCCESS_MSG, configs.SUCCESS_MSG,
+		configs.RC_SUCCESS[0], configs.RC_SUCCESS[1], configs.RC_SUCCESS[1],
 		nil)
 	return ctx.JSON(http.StatusOK, result)
 }
@@ -77,31 +81,32 @@ func (svc savingServices) GetAccounts(ctx echo.Context) error {
 		svcName = "GetAccount"
 		respSvc models.ResponseList
 	)
-	req := new(models.ReqGetAccount)
+	req := new(models.ReqGetAccountSaving)
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
-		log.Println("Err ", svcName, err)
+		utils.Log(" ", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	count, err := svc.services.SavingRepo.GetAccountCount(*req)
 	if err != nil {
-		log.Println("Err ", svcName, "GetAccountCount", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", err.Error(), nil)
+		utils.Log(" GetAccountCount", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_SYSTEM_ERROR[0],
+			configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	resp, err := svc.services.SavingRepo.GetAccounts(*req)
 	if err != nil {
-		log.Println("Err ", svcName, "GetAccount", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", err.Error(), nil)
+		utils.Log(" GetAccounts", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_SYSTEM_ERROR[0],
+			configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	respSvc.Data = resp
 	respSvc.RecordsTotal = count
 	respSvc.RecordsFiltered = count
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
-		configs.SUCCESS_CODE,
-		configs.SUCCESS_MSG, configs.SUCCESS_MSG,
+		configs.RC_SUCCESS[0], configs.RC_SUCCESS[1], configs.RC_SUCCESS[1],
 		respSvc)
 	return ctx.JSON(http.StatusOK, result)
 }
@@ -109,59 +114,60 @@ func (svc savingServices) DropAccount(ctx echo.Context) error {
 	var (
 		svcName = "DropAccount"
 	)
-	req := new(models.ReqGetAccount)
+	req := new(models.ReqGetAccountSaving)
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
-		log.Println("Err ", svcName, err)
+		utils.Log(" ", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	err = svc.services.SavingRepo.DropAccount(req.ID, nil)
+	err = svc.services.SavingRepo.DropAccount(int(req.Filter.ID), nil)
 	if err != nil {
-		log.Println("Err ", svcName, "DropAccount", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", "failed", nil)
+		utils.Log(" DropAccount", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_SYSTEM_ERROR[0],
+			configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
-		configs.SUCCESS_CODE,
-		configs.SUCCESS_MSG,
-		configs.SUCCESS_MSG,
+		configs.RC_SUCCESS[0], configs.RC_SUCCESS[1], configs.RC_SUCCESS[1],
 		nil)
 	return ctx.JSON(http.StatusOK, result)
 }
 func (svc savingServices) UpdateAccount(ctx echo.Context) error {
 	var (
 		svcName = "UpdateAccount"
+		t       = time.Now()
+		dbTime  = t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	)
-	req := new(models.ReqGetAccount)
+	req := new(models.ReqGetAccountSaving)
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
-		log.Println("Err ", svcName, err)
+		utils.Log(" ", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	if req.AccountPin != "" {
-		req.AccountPin, err = helpers.PassEncrypt(req.AccountPin)
+	if req.Filter.AccountPin != "" {
+		req.Filter.AccountPin, err = helpers.PassEncrypt(req.Filter.AccountPin)
 		if err != nil {
-			log.Println("Err ", svcName, "AddAccount", err)
+			utils.Log(" PassEncrypt", svcName, err)
 			result := helpers.ResponseJSON(configs.FALSE_VALUE,
-				configs.VALIDATE_ERROR_CODE,
-				"failed", "Failed",
-				nil)
+				configs.RC_SYSTEM_ERROR[0],
+				configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
 			return ctx.JSON(http.StatusOK, result)
 		}
 	}
+	req.Filter.UpdatedAt = dbTime
+	req.Filter.UpdatedBy = "sys"
 	err = svc.services.SavingRepo.UpdateAccount(*req, nil)
 	if err != nil {
-		log.Println("Err ", svcName, "UpdateAccount", err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.DB_NOT_FOUND, "Failed", "failed", nil)
+		utils.Log(" UpdateAccount", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_SYSTEM_ERROR[0],
+			configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
-		configs.SUCCESS_CODE,
-		configs.SUCCESS_MSG,
-		configs.SUCCESS_MSG,
+		configs.RC_SUCCESS[0], configs.RC_SUCCESS[1], configs.RC_SUCCESS[1],
 		nil)
 	return ctx.JSON(http.StatusOK, result)
 }

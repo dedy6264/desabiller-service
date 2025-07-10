@@ -114,7 +114,7 @@ func (svc userActivity) UpdateMerchantOutlet(ctx echo.Context) error {
 //		_, err := helpers.BindValidate(req, ctx)
 //		if err != nil {
 //			log.Println("Err ", svcName, err)
-//			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+//			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_VALIDATION_FAILED[0], configs.RC_VALIDATION_FAILED[1], err.Error(), nil)
 //			return ctx.JSON(http.StatusOK, result)
 //		}
 //		if req.ClientName == "" {
@@ -216,7 +216,7 @@ func (svc userActivity) UpdateMerchantOutlet(ctx echo.Context) error {
 //		_, err := helpers.BindValidate(req, ctx)
 //		if err != nil {
 //			log.Println("Err ", svcName, err)
-//			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, err.Error(), nil)
+//			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_VALIDATION_FAILED[0], configs.RC_VALIDATION_FAILED[1], err.Error(), nil)
 //			return ctx.JSON(http.StatusOK, result)
 //		}
 //		err = svc.services.RepoHierarchy.DropMerchantOutlet(*req)

@@ -1,17 +1,13 @@
 package productrepo
 
 import (
-	"desabiller/configs"
+	"database/sql"
 	"desabiller/models"
-	"log"
+	"desabiller/utils"
 	"strconv"
-	"time"
 )
 
-func (ctx product) AddProductCategory(req models.ReqGetProductCategory) (result models.RespGetProductCategory, err error) {
-	t := time.Now()
-
-	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
+func (ctx product) AddProductCategory(req models.ReqGetProductCategory) (result models.ProductCategory, err error) {
 	query := ` insert into product_categories (
 		product_category_name,
 		created_at,
@@ -19,19 +15,17 @@ func (ctx product) AddProductCategory(req models.ReqGetProductCategory) (result 
 		created_by,
 		updated_by)
 		values(
-			$1,$2,$3,$4,$5
+			?,?,?,?,?
 		)  `
-	_, err = ctx.repo.Db.Exec(query, req.ProductCategoryName, dbTime, dbTime, "sys", "sys")
+	query = utils.QuerySupport(query)
+	_, err = ctx.repo.Db.Exec(query, req.Filter.ProductCategoryName, req.Filter.CreatedAt, req.Filter.UpdatedAt, req.Filter.CreatedBy, req.Filter.UpdatedBy)
 	if err != nil {
-		log.Println("Error failed ", err.Error())
 		return result, err
 	}
 	return result, nil
 }
-func (ctx product) GetProductCategories(req models.ReqGetProductCategory) (result []models.RespGetProductCategory, err error) {
-	var (
-		limit, offset int
-	)
+func (ctx product) GetProductCategories(req models.ReqGetProductCategory) (result []models.ProductCategory, err error) {
+
 	query := `select
 	id,
 product_category_name,
@@ -42,35 +36,27 @@ updated_by
 from product_categories 
 where true
 `
-	if req.ProductCategoryName != "" {
-		query += ` and product_category_name= '` + req.ProductCategoryName + `'`
+	if req.Filter.ProductCategoryName != "" {
+		query += ` and product_category_name= '` + req.Filter.ProductCategoryName + `'`
 	}
-	if req.ID != 0 {
-		query += ` and id = ` + strconv.Itoa(req.ID)
+	if req.Filter.ID != 0 {
+		query += ` and id = ` + strconv.Itoa(int(req.Filter.ID))
 	}
-	if req.Filter.Length != 0 {
-		offset = req.Filter.Start * req.Filter.Length
-		limit = req.Filter.Length
+	if req.Lenght != 0 {
+		query += ` limit  ` + strconv.Itoa(int(req.Lenght)) + `  offset  ` + strconv.Itoa(int(req.Start))
 	} else {
-		limit = 10
-	}
-	if req.Filter.Length != 0 {
-		query += ` limit  ` + strconv.Itoa(limit) + `  offset  ` + strconv.Itoa(offset)
-	} else {
-		if req.Filter.OrderBy != "" {
-			query += `  order by ` + req.Filter.OrderBy + ` asc`
+		if req.Order != "" {
+			query += `  order by '` + req.Order + `' asc`
 		} else {
 			query += `  order by product_category_name asc`
 		}
-		query += ` limit 100 offset 0`
 	}
 	rows, err := ctx.repo.Db.Query(query)
 	if err != nil {
-		log.Println(" GetProductCategory :: Failed : ", err.Error())
 		return result, err
 	}
 	defer rows.Close()
-	var val models.RespGetProductCategory
+	var val models.ProductCategory
 	for rows.Next() {
 		err := rows.Scan(&val.ID, &val.ProductCategoryName, &val.CreatedAt, &val.UpdatedAt, &val.CreatedBy, &val.UpdatedBy)
 		if err != nil {
@@ -78,20 +64,22 @@ where true
 		}
 		result = append(result, val)
 	}
+	if len(result) == 0 {
+		return result, sql.ErrNoRows
+	}
 	return result, nil
 }
-func (ctx product) UpdateProductCategory(req models.ReqGetProductCategory) (result models.RespGetProductCategory, err error) {
-	t := time.Now()
-	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
+func (ctx product) UpdateProductCategory(req models.ReqGetProductCategory) (result models.ProductCategory, err error) {
+
 	query := ` update product_categories set
-	product_category_name=$1,
-	updated_at = $2,
-	updated_by =$3
-	where id = $4 returning id
+	product_category_name=?,
+	updated_at = ?,
+	updated_by =?
+	where id = ? returning id
 	`
-	_, err = ctx.repo.Db.Exec(query, req.ProductCategoryName, dbTime, "sys", req.ID)
+	query = utils.QuerySupport(query)
+	_, err = ctx.repo.Db.Exec(query, req.Filter.ProductCategoryName, req.Filter.UpdatedAt, req.Filter.UpdatedBy, req.Filter.ID)
 	if err != nil {
-		log.Println(" UpdateProductCategory :: Failed : ", err.Error())
 		return result, err
 	}
 	return result, nil
@@ -100,14 +88,13 @@ func (ctx product) DropProductCategory(req models.ReqGetProductCategory) (err er
 	query := `delete from product_categories
 					where id = $1 returning id
 					`
-	_, err = ctx.repo.Db.Exec(query, req.ID)
+	_, err = ctx.repo.Db.Exec(query, req.Filter.ID)
 	if err != nil {
-		log.Println("UpdateProductCategory :: ", err)
 		return err
 	}
 	return nil
 }
-func (ctx product) GetProductCategory(req models.ReqGetProductCategory) (result models.RespGetProductCategory, err error) {
+func (ctx product) GetProductCategory(req models.ReqGetProductCategory) (result models.ProductCategory, err error) {
 	query := `select
 	id,
 product_category_name,
@@ -118,11 +105,11 @@ updated_by
 from product_categories 
 where true
 `
-	if req.ProductCategoryName != "" {
-		query += ` and product_category_name= '` + req.ProductCategoryName + `'`
+	if req.Filter.ProductCategoryName != "" {
+		query += ` and product_category_name= '` + req.Filter.ProductCategoryName + `'`
 	}
-	if req.ID != 0 {
-		query += ` and id = ` + strconv.Itoa(req.ID)
+	if req.Filter.ID != 0 {
+		query += ` and id = ` + strconv.Itoa(int(req.Filter.ID))
 	}
 	err = ctx.repo.Db.QueryRow(query).Scan(
 		&result.ID,
@@ -133,7 +120,6 @@ where true
 		&result.UpdatedBy,
 	)
 	if err != nil {
-		log.Println(" GetProductCategory :: Failed : ", err.Error())
 		return result, err
 	}
 	return result, nil
@@ -143,17 +129,16 @@ func (ctx product) GetProductCategoryCount(req models.ReqGetProductCategory) (re
 from product_categories 
 where true
 `
-	if req.ProductCategoryName != "" {
-		query += ` and product_category_name= '` + req.ProductCategoryName + `'`
+	if req.Filter.ProductCategoryName != "" {
+		query += ` and product_category_name= '` + req.Filter.ProductCategoryName + `'`
 	}
-	if req.ID != 0 {
-		query += ` and id = ` + strconv.Itoa(req.ID)
+	if req.Filter.ID != 0 {
+		query += ` and id = ` + strconv.Itoa(int(req.Filter.ID))
 	}
 	err = ctx.repo.Db.QueryRow(query).Scan(
 		&result,
 	)
 	if err != nil {
-		log.Println(" GetProductCategory :: Failed : ", err.Error())
 		return result, err
 	}
 	return result, nil

@@ -15,8 +15,8 @@ func (svc trxService) TriggerDebet(
 	var (
 		subSvcName = "TriggerKredit"
 	)
-	resp, err := svc.services.SavingRepo.GetAccount(models.ReqGetAccount{
-		AccountNumber: accountNumber,
+	resp, err := svc.services.SavingRepo.GetAccount(models.ReqGetAccountSaving{
+		Filter: models.Account{AccountNumber: accountNumber},
 	})
 	if err != nil {
 		log.Println(subSvcName+" ", err)
@@ -27,13 +27,15 @@ func (svc trxService) TriggerDebet(
 	}
 	{
 		err = helpers.DBTransaction(svc.services.RepoDB, func(Tx *sql.Tx) error {
-			err = svc.services.SavingRepo.UpdateAccount(models.ReqGetAccount{
-				ID:              resp.ID,
-				CifID:           resp.CifID,
-				AccountNumber:   resp.AccountNumber,
-				Balance:         resp.Balance,
-				SavingSegmentID: resp.SavingSegmentID,
-				AccountPin:      resp.AccountPin,
+			err = svc.services.SavingRepo.UpdateAccount(models.ReqGetAccountSaving{
+				Filter: models.Account{
+					ID:              int64(resp.ID),
+					CifID:           int64(resp.CifID),
+					AccountNumber:   resp.AccountNumber,
+					Balance:         resp.Balance,
+					SavingSegmentID: int64(resp.SavingSegmentID),
+					AccountPin:      resp.AccountPin,
+				},
 			}, Tx)
 			if err != nil {
 				log.Println(subSvcName+" FAILED ", err)
@@ -79,8 +81,8 @@ func (svc trxService) TriggerKredit(
 	var (
 		subSvcName = "TriggerKredit"
 	)
-	resp, err := svc.services.SavingRepo.GetAccount(models.ReqGetAccount{
-		AccountNumber: accountNumber,
+	resp, err := svc.services.SavingRepo.GetAccount(models.ReqGetAccountSaving{
+		Filter: models.Account{AccountNumber: accountNumber},
 	})
 	if err != nil {
 		log.Println(subSvcName+" ", err)
@@ -108,13 +110,15 @@ func (svc trxService) TriggerKredit(
 	//--->db transaction untuk update amount dan insert saving transaction
 	{
 		err = helpers.DBTransaction(svc.services.RepoDB, func(Tx *sql.Tx) error {
-			err = svc.services.SavingRepo.UpdateAccount(models.ReqGetAccount{
-				ID:              resp.ID,
-				CifID:           resp.CifID,
-				AccountNumber:   resp.AccountNumber,
-				Balance:         resp.Balance,
-				SavingSegmentID: resp.SavingSegmentID,
-				AccountPin:      resp.AccountPin,
+			err = svc.services.SavingRepo.UpdateAccount(models.ReqGetAccountSaving{
+				Filter: models.Account{
+					ID:              int64(resp.ID),
+					CifID:           int64(resp.CifID),
+					AccountNumber:   resp.AccountNumber,
+					Balance:         resp.Balance,
+					SavingSegmentID: int64(resp.SavingSegmentID),
+					AccountPin:      resp.AccountPin,
+				},
 			}, Tx)
 			if err != nil {
 				log.Println(subSvcName+" FAILED ", err)

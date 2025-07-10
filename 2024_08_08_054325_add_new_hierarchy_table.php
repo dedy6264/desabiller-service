@@ -29,11 +29,13 @@ class AddNewHierarchyTable extends Migration
             $table->id();
             $table->string('product_reference_name');//089.0888,08213
             $table->string('product_reference_code');
-            // $table->timestamps();
+            $table->string('created_by')->nullable();
+            $table->string('updated_by')->nullable();
+            $table->timestamps();
         });
          Schema::create('product_helpers', function (Blueprint $table) {
             $table->id();
-            $table->string('no_prefix');//089.0888,08213
+            $table->string('product_prefix');//089.0888,08213
             $table->unsignedInteger('product_reference_id');
             $table->foreign('product_reference_id')->references('id')->on('product_references');
             $table->timestamps();
@@ -131,7 +133,9 @@ class AddNewHierarchyTable extends Migration
         Schema::create('cifs', function (Blueprint $table) {
             $table->id();
             $table->string("cif_name");
-            $table->string("cif_nik")->unique();
+            $table->string("cif_no_id");
+            $table->string("cif_type_id");
+            $table->string("cif_id_index")->unique();
             $table->string("cif_phone");
             $table->string("cif_email");
             $table->string("cif_address")->nullable();

@@ -4,226 +4,162 @@ import (
 	"database/sql"
 	"desabiller/configs"
 	"desabiller/models"
-	"fmt"
+	"desabiller/utils"
 	"strconv"
 	"time"
 )
 
 // baru sampe sini mau update product reference code, perlu nambah field ti tb trx
 const insertQueryPos = `
-product_category_id,
-product_category_name,
-product_type_id,
-product_type_name,
+produproduct_provider_name,
+product_provider_code,
+product_provider_price,
+product_provider_admin_fee,
+product_provider_merchant_fee,
 product_id,
 product_name,
 product_code,
 product_price,
 product_admin_fee,
 product_merchant_fee,
-provider_id,
-provider_name,
-product_provider_id,
-product_provider_name,
-product_provider_code,
-product_provider_price,
-product_provider_admin_fee,
-product_provider_merchant_fee,
+product_category_id,
+product_category_name,
+product_type_id,
+product_type_name,
+reference_number,
+provider_reference_number,
 status_code,
 status_message,
 status_desc,
-reference_number,
-provider_status_code,
-provider_status_message,
-provider_status_desc,
-provider_reference_number,
-client_id,
-client_name,
-group_id,
-group_name,
-merchant_id,
-merchant_name,
-merchant_outlet_id,
-merchant_outlet_name,
-merchant_outlet_username,
+status_code_detail,
+status_message_detail,
+status_desc_detail,
+product_reference_id,
+product_reference_code,
 customer_id,
-other_msg,
-total_trx_amount,
+other_reff,
+other_customer_info,
+saving_account_name,
+saving_account_id,
+saving_account_number,
+transaction_total_amount,
+user_app_id,
+username,
 created_at,
 updated_at,
 created_by,
-updated_by,
-product_reference_id,
-product_reference_code
+updated_by
 `
 const getQueryPos = `
 id,
-product_category_id,
-product_category_name,
-product_type_id,
-product_type_name,
-product_reference_id,
-product_reference_code,
+product_provider_name,
+product_provider_code,
+product_provider_price,
+product_provider_admin_fee,
+product_provider_merchant_fee,
 product_id,
 product_name,
 product_code,
 product_price,
 product_admin_fee,
 product_merchant_fee,
-provider_id,
-provider_name,
-product_provider_id,
-product_provider_name,
-product_provider_code,
-product_provider_price,
-product_provider_admin_fee,
-product_provider_merchant_fee,
+product_category_id,
+product_category_name,
+product_type_id,
+product_type_name,
+reference_number,
+provider_reference_number,
 status_code,
 status_message,
 status_desc,
-reference_number,
-provider_status_code,
-provider_status_message,
-provider_status_desc,
-provider_reference_number,
-client_id,
-client_name,
-group_id,
-group_name,
-merchant_id,
-merchant_name,
-merchant_outlet_id,
-merchant_outlet_name,
-merchant_outlet_username,
+status_code_detail,
+status_message_detail,
+status_desc_detail,
+COALESCE(product_reference_id,0) as product_reference_id,
+COALESCE(product_reference_code,'') as product_reference_code,
 customer_id,
-other_msg,
-total_trx_amount,
+other_reff,
+other_customer_info,
+saving_account_name,
+saving_account_id,
+saving_account_number,
+transaction_total_amount,
+user_app_id,
+username,
 created_at,
 updated_at,
 created_by,
-updated_by,
-COALESCE(product_reference_id,0) as product_reference_id,
-COALESCE(product_reference_code,'') as product_reference_code`
+updated_by`
 
-func (ctx trxRepository) GetTrx(req models.ReqGetTrx) (result models.RespGetTrx, err error) {
+func (ctx trxRepository) GetTrx(req models.ReqGetTransaction) (result models.RespGetTrx, err error) {
 	query := ` select ` + getQueryPos +
-		` from biller_trxs where true `
-	if req.Id != 0 {
-		query += ` and id= ` + strconv.Itoa(req.Id)
+		` from transactions where true `
+	if req.Filter.ID != 0 {
+		query += ` and id= ` + strconv.Itoa(int(req.Filter.ID))
 	}
-	if req.ProductCategoryId != 0 {
-		query += ` and product_category_id= ` + strconv.Itoa(req.ProductCategoryId)
+	if req.Filter.ProductCategoryID != 0 {
+		query += ` and product_category_id= ` + strconv.Itoa(int(req.Filter.ProductCategoryID))
 	}
-	if req.ProductName != "" {
-		query += ` and product_name= '` + req.ProductName + `'`
+	if req.Filter.ProductName != "" {
+		query += ` and product_name= '` + req.Filter.ProductName + `'`
 	}
-	if req.StatusCode != "" {
-		query += ` and status_code= '` + req.StatusCode + `'`
+	if req.Filter.StatusCode != "" {
+		query += ` and status_code= '` + req.Filter.StatusCode + `'`
 	}
-	if req.ReferenceNumber != "" {
-		query += ` and reference_number= '` + req.ReferenceNumber + `'`
+	if req.Filter.ReferenceNumber != "" {
+		query += ` and reference_number= '` + req.Filter.ReferenceNumber + `'`
 	}
-	if req.ClientId != 0 {
-		query += ` and client_id= ` + strconv.Itoa(req.ClientId)
-	}
-	if req.GroupId != 0 {
-		query += ` and group_id= ` + strconv.Itoa(req.GroupId)
-	}
-	if req.MerchantId != 0 {
-		query += ` and merchant_id= ` + strconv.Itoa(req.MerchantId)
-	}
-	if req.MerchantOutletId != 0 {
-		query += ` and merchantOutlet_id= ` + strconv.Itoa(req.MerchantOutletId)
-	}
-	if req.CustomerId != "" {
-		query += ` and customer_id= '` + req.CustomerId + `'`
+	if req.Filter.CustomerID != "" {
+		query += ` and customer_id= '` + req.Filter.CustomerID + `'`
 	}
 	err = ctx.repo.Db.QueryRow(query).Scan(
 		&result.Id,
-		&result.ProductCategoryId,
-		&result.ProductCategoryName,
-		&result.ProductTypeId,
-		&result.ProductTypeName,
-		&result.ProductReferenceId,
-		&result.ProductReferenceCode,
-		&result.ProductId,
-		&result.ProductName,
-		&result.ProductCode,
-		&result.ProductPrice,
-		&result.ProductAdminFee,
-		&result.ProductMerchantFee,
-		&result.ProviderId,
-		&result.ProviderName,
-		&result.ProductProviderId,
 		&result.ProductProviderName,
 		&result.ProductProviderCode,
 		&result.ProductProviderPrice,
 		&result.ProductProviderAdminFee,
 		&result.ProductProviderMerchantFee,
+		&result.ProductID,
+		&result.ProductName,
+		&result.ProductCode,
+		&result.ProductPrice,
+		&result.ProductAdminFee,
+		&result.ProductMerchantFee,
+		&result.ProductCategoryID,
+		&result.ProductCategoryName,
+		&result.ProductTypeID,
+		&result.ProductTypeName,
+		&result.ReferenceNumber,
+		&result.ProviderReferenceNumber,
 		&result.StatusCode,
 		&result.StatusMessage,
 		&result.StatusDesc,
-		&result.ReferenceNumber,
-		&result.ProviderStatusCode,
-		&result.ProviderStatusMessage,
-		&result.ProviderStatusDesc,
-		&result.ProviderReferenceNumber,
-		&result.ClientId,
-		&result.ClientName,
-		&result.GroupId,
-		&result.GroupName,
-		&result.MerchantId,
-		&result.MerchantName,
-		&result.MerchantOutletId,
-		&result.MerchantOutletName,
-		&result.MerchantOutletUsername,
-		&result.CustomerId,
-		&result.OtherMsg,
-		&result.TotalTrxAmount,
+		&result.StatusCodeDetail,
+		&result.StatusMessageDetail,
+		&result.StatusDescDetail,
+		&result.ProductReferenceID,
+		&result.ProductReferenceCode,
+		&result.CustomerID,
+		&result.OtherReff,
+		&result.OtherCustomerInfo,
+		&result.SavingAccountName,
+		&result.SavingAccountID,
+		&result.SavingAccountNumber,
+		&result.TransactionTotalAmount,
+		&result.UserAppID,
+		&result.Username,
 		&result.CreatedAt,
 		&result.CreatedBy,
 		&result.UpdatedAt,
 		&result.UpdatedBy,
-		&result.ProductReferenceId,
-		&result.ProductReferenceCode,
 	)
 	if err != nil {
 		return result, err
 	}
 	return result, nil
 }
-func (ctx trxRepository) GetTrxCount(req models.ReqGetTrx) (result int, err error) {
-	query := ` select count(id) from biller_trxs where true `
-	if req.Id != 0 {
-		query += ` and id= ` + strconv.Itoa(req.Id)
-	}
-	if req.ProductCategoryId != 0 {
-		query += ` and product_category_id= ` + strconv.Itoa(req.ProductCategoryId)
-	}
-	if req.ProductName != "" {
-		query += ` and product_name= '` + req.ProductName + `'`
-	}
-	if req.StatusCode != "" {
-		query += ` and status_code= '` + req.StatusCode + `'`
-	}
-	if req.ReferenceNumber != "" {
-		query += ` and reference_Number= '` + req.ReferenceNumber + `'`
-	}
-	if req.ClientId != 0 {
-		query += ` and client_id= ` + strconv.Itoa(req.ClientId)
-	}
-	if req.GroupId != 0 {
-		query += ` and group_id= ` + strconv.Itoa(req.GroupId)
-	}
-	if req.MerchantId != 0 {
-		query += ` and merchant_id= ` + strconv.Itoa(req.MerchantId)
-	}
-	if req.MerchantOutletId != 0 {
-		query += ` and merchant_outlet_id= ` + strconv.Itoa(req.MerchantOutletId)
-	}
-	if req.CustomerId != "" {
-		query += ` and customer_id= '` + req.CustomerId + `'`
-	}
+func (ctx trxRepository) GetTrxCount(req models.ReqGetTransaction) (result int, err error) {
+	query := ` select count(*) from transactions where true `
 	err = ctx.repo.Db.QueryRow(query).Scan(
 		&result,
 	)
@@ -232,64 +168,39 @@ func (ctx trxRepository) GetTrxCount(req models.ReqGetTrx) (result int, err erro
 	}
 	return result, nil
 }
-func (ctx trxRepository) GetTrxs(req models.ReqGetTrx) (result []models.RespGetTrx, err error) {
+func (ctx trxRepository) GetTrxs(req models.ReqGetTransaction) (result []models.RespGetTrx, err error) {
 	// var (
 	// 	limit, offset int
 	// )
 	query := ` select ` + getQueryPos +
 		` from biller_trxs where true `
-	if req.Id != 0 {
-		query += ` and id= ` + strconv.Itoa(req.Id)
+	if req.Filter.ID != 0 {
+		query += ` and id= ` + strconv.Itoa(int(req.Filter.ID))
 	}
-	if req.ProductCategoryId != 0 {
-		query += ` and product_category_id= ` + strconv.Itoa(req.ProductCategoryId)
+	if req.Filter.ProductCategoryID != 0 {
+		query += ` and product_category_id= ` + strconv.Itoa(int(req.Filter.ProductCategoryID))
 	}
-	if req.ProductName != "" {
-		query += ` and product_name= '` + req.ProductName + `'`
+	if req.Filter.ProductName != "" {
+		query += ` and product_name= '` + req.Filter.ProductName + `'`
 	}
-	if req.StatusCode != "" {
-		query += ` and status_code= '` + req.StatusCode + `'`
+	if req.Filter.StatusCode != "" {
+		query += ` and status_code= '` + req.Filter.StatusCode + `'`
 	}
-	if req.ReferenceNumber != "" {
-		query += ` and reference_number= '` + req.ReferenceNumber + `'`
+	if req.Filter.ReferenceNumber != "" {
+		query += ` and reference_number= '` + req.Filter.ReferenceNumber + `'`
 	}
-	if req.ClientId != 0 {
-		query += ` and client_id= ` + strconv.Itoa(req.ClientId)
+	if req.Filter.CustomerID != "" {
+		query += ` and customer_id= '` + req.Filter.CustomerID + `'`
 	}
-	if req.GroupId != 0 {
-		query += ` and group_id= ` + strconv.Itoa(req.GroupId)
-	}
-	if req.MerchantId != 0 {
-		query += ` and merchant_id= ` + strconv.Itoa(req.MerchantId)
-	}
-	if req.MerchantOutletId != 0 {
-		query += ` and merchantOutlet_id= ` + strconv.Itoa(req.MerchantOutletId)
-	}
-	if req.CustomerId != "" {
-		query += ` and customer_id= '` + req.CustomerId + `'`
-	}
-	if req.Filter.Length != 0 {
-		query += ` order by updated_at desc limit  ` + strconv.Itoa(req.Filter.Length) + `  offset  ` + strconv.Itoa(req.Filter.Start)
+	if req.Lenght != 0 {
+		query += ` order by updated_at desc limit  ` + strconv.Itoa(int(req.Lenght)) + `  offset  ` + strconv.Itoa(int(req.Start))
 	} else {
-		if req.Filter.OrderBy != "" {
-			query += `  order by '` + req.Filter.OrderBy + `' asc`
+		if req.Order != "" {
+			query += `  order by '` + req.Order + `' asc`
 		} else {
 			query += `  order by id asc`
 		}
 	}
-
-	// if limit != 0 {
-	// 	query += ` limit  ` + strconv.Itoa(limit) + ` offset ` + strconv.Itoa(offset)
-	// }
-	// if req.Filter.Length != 0 {
-	// 	offset = req.Filter.Start * req.Filter.Length
-	// 	limit = req.Filter.Length
-	// } else {
-	// 	limit = 10
-	// }
-	// query += ` limit  ` + strconv.Itoa(limit) + ` offset ` + strconv.Itoa(offset)
-
-	fmt.Println(query)
 	rows, err := ctx.repo.Db.Query(query)
 	if err != nil {
 		return result, err
@@ -300,52 +211,44 @@ func (ctx trxRepository) GetTrxs(req models.ReqGetTrx) (result []models.RespGetT
 		var val models.RespGetTrx
 		err = rows.Scan(
 			&val.Id,
-			&val.ProductCategoryId,
-			&val.ProductCategoryName,
-			&val.ProductTypeId,
-			&val.ProductTypeName,
-			&val.ProductReferenceId,
-			&val.ProductReferenceCode,
-			&val.ProductId,
-			&val.ProductName,
-			&val.ProductCode,
-			&val.ProductPrice,
-			&val.ProductAdminFee,
-			&val.ProductMerchantFee,
-			&val.ProviderId,
-			&val.ProviderName,
-			&val.ProductProviderId,
 			&val.ProductProviderName,
 			&val.ProductProviderCode,
 			&val.ProductProviderPrice,
 			&val.ProductProviderAdminFee,
 			&val.ProductProviderMerchantFee,
+			&val.ProductID,
+			&val.ProductName,
+			&val.ProductCode,
+			&val.ProductPrice,
+			&val.ProductAdminFee,
+			&val.ProductMerchantFee,
+			&val.ProductCategoryID,
+			&val.ProductCategoryName,
+			&val.ProductTypeID,
+			&val.ProductTypeName,
+			&val.ReferenceNumber,
+			&val.ProviderReferenceNumber,
 			&val.StatusCode,
 			&val.StatusMessage,
 			&val.StatusDesc,
-			&val.ReferenceNumber,
-			&val.ProviderStatusCode,
-			&val.ProviderStatusMessage,
-			&val.ProviderStatusDesc,
-			&val.ProviderReferenceNumber,
-			&val.ClientId,
-			&val.ClientName,
-			&val.GroupId,
-			&val.GroupName,
-			&val.MerchantId,
-			&val.MerchantName,
-			&val.MerchantOutletId,
-			&val.MerchantOutletName,
-			&val.MerchantOutletUsername,
-			&val.CustomerId,
-			&val.OtherMsg,
-			&val.TotalTrxAmount,
-			&val.CreatedAt,
-			&val.UpdatedAt,
-			&val.CreatedBy,
-			&val.UpdatedBy,
-			&val.ProductReferenceId,
+			&val.StatusCodeDetail,
+			&val.StatusMessageDetail,
+			&val.StatusDescDetail,
+			&val.ProductReferenceID,
 			&val.ProductReferenceCode,
+			&val.CustomerID,
+			&val.OtherReff,
+			&val.OtherCustomerInfo,
+			&val.SavingAccountName,
+			&val.SavingAccountID,
+			&val.SavingAccountNumber,
+			&val.TransactionTotalAmount,
+			&val.UserAppID,
+			&val.Username,
+			&val.CreatedAt,
+			&val.CreatedBy,
+			&val.UpdatedAt,
+			&val.UpdatedBy,
 		)
 		val.Index = n
 		n++
@@ -354,111 +257,98 @@ func (ctx trxRepository) GetTrxs(req models.ReqGetTrx) (result []models.RespGetT
 		}
 		result = append(result, val)
 	}
+	if len(result) == 0 {
+		return result, sql.ErrNoRows
+	}
 	return result, nil
 }
-func (ctx trxRepository) InsertTrx(req models.ReqGetTrx, tx *sql.Tx) (err error) {
-	query := ` insert into biller_trxs (` + insertQueryPos + `) values (
-		$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,
-		$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,
-		$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,
-		$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,
-		$41,$42,$43,$44) returning id`
+func (ctx trxRepository) InsertTrx(req models.ReqGetTransaction, tx *sql.Tx) (err error) {
+	query := ` insert into transactions (` + insertQueryPos + `) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) returning id`
+	query = utils.QuerySupport(query)
 	if tx != nil {
 		_, err = tx.Exec(query,
-			req.ProductCategoryId,
-			req.ProductCategoryName,
-			req.ProductTypeId,
-			req.ProductTypeName,
-			req.ProductId,
-			req.ProductName,
-			req.ProductCode,
-			req.ProductPrice,
-			req.ProductAdminFee,
-			req.ProductMerchantFee,
-			req.ProviderId,
-			req.ProviderName,
-			req.ProductProviderId,
-			req.ProductProviderName,
-			req.ProductProviderCode,
-			req.ProductProviderPrice,
-			req.ProductProviderAdminFee,
-			req.ProductProviderMerchantFee,
-			req.StatusCode,
-			req.StatusMessage,
-			req.StatusDesc,
-			req.ReferenceNumber,
-			req.ProviderStatusCode,
-			req.ProviderStatusMessage,
-			req.ProviderStatusDesc,
-			req.ProviderReferenceNumber,
-			req.ClientId,
-			req.ClientName,
-			req.GroupId,
-			req.GroupName,
-			req.MerchantId,
-			req.MerchantName,
-			req.MerchantOutletId,
-			req.MerchantOutletName,
-			req.MerchantOutletUsername,
-			req.CustomerId,
-			req.OtherMsg,
-			req.TotalTrxAmount,
+			req.Filter.ProductProviderName,
+			req.Filter.ProductProviderCode,
+			req.Filter.ProductProviderPrice,
+			req.Filter.ProductProviderAdminFee,
+			req.Filter.ProductProviderMerchantFee,
+			req.Filter.ProductID,
+			req.Filter.ProductName,
+			req.Filter.ProductCode,
+			req.Filter.ProductPrice,
+			req.Filter.ProductAdminFee,
+			req.Filter.ProductMerchantFee,
+			req.Filter.ProductCategoryID,
+			req.Filter.ProductCategoryName,
+			req.Filter.ProductTypeID,
+			req.Filter.ProductTypeName,
+			req.Filter.ReferenceNumber,
+			req.Filter.ProviderReferenceNumber,
+			req.Filter.StatusCode,
+			req.Filter.StatusMessage,
+			req.Filter.StatusDesc,
+			req.Filter.StatusCodeDetail,
+			req.Filter.StatusMessageDetail,
+			req.Filter.StatusDescDetail,
+			req.Filter.ProductReferenceID,
+			req.Filter.ProductReferenceCode,
+			req.Filter.CustomerID,
+			req.Filter.OtherReff,
+			req.Filter.OtherCustomerInfo,
+			req.Filter.SavingAccountName,
+			req.Filter.SavingAccountID,
+			req.Filter.SavingAccountNumber,
+			req.Filter.TransactionTotalAmount,
+			req.Filter.UserAppID,
+			req.Filter.Username,
 			req.Filter.CreatedAt,
-			req.Filter.CreatedAt,
-			req.MerchantOutletUsername,
-			req.MerchantOutletUsername,
-			req.ProductReferenceId,
-			req.ProductReferenceCode,
+			req.Filter.CreatedBy,
+			req.Filter.UpdatedAt,
+			req.Filter.UpdatedBy,
 		)
 		if err != nil {
 			return err
 		}
 	} else {
 		_, err = ctx.repo.Db.Exec(query,
-			req.ProductCategoryId,
-			req.ProductCategoryName,
-			req.ProductTypeId,
-			req.ProductTypeName,
-			req.ProductId,
-			req.ProductName,
-			req.ProductCode,
-			req.ProductPrice,
-			req.ProductAdminFee,
-			req.ProductMerchantFee,
-			req.ProviderId,
-			req.ProviderName,
-			req.ProductProviderId,
-			req.ProductProviderName,
-			req.ProductProviderCode,
-			req.ProductProviderPrice,
-			req.ProductProviderAdminFee,
-			req.ProductProviderMerchantFee,
-			req.StatusCode,
-			req.StatusMessage,
-			req.StatusDesc,
-			req.ReferenceNumber,
-			req.ProviderStatusCode,
-			req.ProviderStatusMessage,
-			req.ProviderStatusDesc,
-			req.ProviderReferenceNumber,
-			req.ClientId,
-			req.ClientName,
-			req.GroupId,
-			req.GroupName,
-			req.MerchantId,
-			req.MerchantName,
-			req.MerchantOutletId,
-			req.MerchantOutletName,
-			req.MerchantOutletUsername,
-			req.CustomerId,
-			req.OtherMsg,
-			req.TotalTrxAmount,
+			req.Filter.ProductProviderName,
+			req.Filter.ProductProviderCode,
+			req.Filter.ProductProviderPrice,
+			req.Filter.ProductProviderAdminFee,
+			req.Filter.ProductProviderMerchantFee,
+			req.Filter.ProductID,
+			req.Filter.ProductName,
+			req.Filter.ProductCode,
+			req.Filter.ProductPrice,
+			req.Filter.ProductAdminFee,
+			req.Filter.ProductMerchantFee,
+			req.Filter.ProductCategoryID,
+			req.Filter.ProductCategoryName,
+			req.Filter.ProductTypeID,
+			req.Filter.ProductTypeName,
+			req.Filter.ReferenceNumber,
+			req.Filter.ProviderReferenceNumber,
+			req.Filter.StatusCode,
+			req.Filter.StatusMessage,
+			req.Filter.StatusDesc,
+			req.Filter.StatusCodeDetail,
+			req.Filter.StatusMessageDetail,
+			req.Filter.StatusDescDetail,
+			req.Filter.ProductReferenceID,
+			req.Filter.ProductReferenceCode,
+			req.Filter.CustomerID,
+			req.Filter.OtherReff,
+			req.Filter.OtherCustomerInfo,
+			req.Filter.SavingAccountName,
+			req.Filter.SavingAccountID,
+			req.Filter.SavingAccountNumber,
+			req.Filter.TransactionTotalAmount,
+			req.Filter.UserAppID,
+			req.Filter.Username,
 			req.Filter.CreatedAt,
-			req.Filter.CreatedAt,
-			req.MerchantOutletUsername,
-			req.MerchantOutletUsername,
-			req.ProductReferenceId,
-			req.ProductReferenceCode,
+			req.Filter.CreatedBy,
+			req.Filter.UpdatedAt,
+			req.Filter.UpdatedBy,
 		)
 		if err != nil {
 			return err
@@ -466,82 +356,126 @@ func (ctx trxRepository) InsertTrx(req models.ReqGetTrx, tx *sql.Tx) (err error)
 	}
 	return nil
 }
-func (ctx trxRepository) UpdateTrx(req models.ReqGetTrx, tx *sql.Tx) (err error) {
+func (ctx trxRepository) UpdateTrx(req models.ReqGetTransaction, tx *sql.Tx) (err error) {
 	t := time.Now()
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	query := ` update biller_trxs set
-			product_price=$1,
-			product_admin_fee=$2,
-			product_merchant_fee=$3,
-			product_provider_price=$4,
-			product_provider_admin_fee=$5,
-			product_provider_merchant_fee=$6,
-			status_code=$7,
-			status_message=$8,
-			status_desc=$9,
-			reference_number=$10,
-			provider_status_code=$11,
-			provider_status_message=$12,
-			provider_status_desc=$13,
-			provider_reference_number=$14,
-			customer_id=$15,
-			other_msg=$16,
-			updated_at=$17,
-			updated_by=$18,
-			total_trx_amount=$19,
-			product_reference_id=$20,
-			product_reference_code=$21
-			where reference_number=$22
+			product_provider_name=?,
+product_provider_code=?,
+product_provider_price=?,
+product_provider_admin_fee=?,
+product_provider_merchant_fee=?,
+product_id=?,
+product_name=?,
+product_code=?,
+product_price=?,
+product_admin_fee=?,
+product_merchant_fee=?,
+product_category_id=?,
+product_category_name=?,
+product_type_id=?,
+product_type_name=?,
+reference_number=?,
+provider_reference_number=?,
+status_code=?,
+status_message=?,
+status_desc=?,
+status_code_detail=?,
+status_message_detail=?,
+status_desc_detail=?,
+COALESCE(product_reference_id,0) as product_reference_id=?,
+COALESCE(product_reference_code,'') as product_reference_code=?,
+customer_id=?,
+other_reff=?,
+other_customer_info=?,
+saving_account_name=?,
+saving_account_id=?,
+saving_account_number=?,
+transaction_total_amount=?,
+user_app_id=?,
+username=?,
+updated_at=?,
+updated_by=?
+			where reference_number=?
 	`
+	query = utils.QuerySupport(query)
 	if tx != nil {
 		_, err = tx.Exec(query,
-			req.ProductPrice,
-			req.ProductAdminFee,
-			req.ProductMerchantFee,
-			req.ProductProviderPrice,
-			req.ProductProviderAdminFee,
-			req.ProductProviderMerchantFee,
-			req.StatusCode,
-			req.StatusMessage,
-			req.StatusDesc,
-			req.ReferenceNumber,
-			req.ProviderStatusCode,
-			req.ProviderStatusMessage,
-			req.ProviderStatusDesc,
-			req.ProviderReferenceNumber,
-			req.CustomerId,
-			req.OtherMsg,
+			req.Filter.ProductProviderName,
+			req.Filter.ProductProviderCode,
+			req.Filter.ProductProviderPrice,
+			req.Filter.ProductProviderAdminFee,
+			req.Filter.ProductProviderMerchantFee,
+			req.Filter.ProductID,
+			req.Filter.ProductName,
+			req.Filter.ProductCode,
+			req.Filter.ProductPrice,
+			req.Filter.ProductAdminFee,
+			req.Filter.ProductMerchantFee,
+			req.Filter.ProductCategoryID,
+			req.Filter.ProductCategoryName,
+			req.Filter.ProductTypeID,
+			req.Filter.ProductTypeName,
+			req.Filter.ReferenceNumber,
+			req.Filter.ProviderReferenceNumber,
+			req.Filter.StatusCode,
+			req.Filter.StatusMessage,
+			req.Filter.StatusDesc,
+			req.Filter.StatusCodeDetail,
+			req.Filter.StatusMessageDetail,
+			req.Filter.StatusDescDetail,
+			req.Filter.ProductReferenceID,
+			req.Filter.ProductReferenceCode,
+			req.Filter.CustomerID,
+			req.Filter.OtherReff,
+			req.Filter.OtherCustomerInfo,
+			req.Filter.SavingAccountName,
+			req.Filter.SavingAccountID,
+			req.Filter.SavingAccountNumber,
+			req.Filter.TransactionTotalAmount,
+			req.Filter.UserAppID,
+			req.Filter.Username,
 			dbTime,
-			req.MerchantOutletUsername,
-			req.TotalTrxAmount,
-			req.ProductReferenceId,
-			req.ProductReferenceCode,
-			req.ReferenceNumber,
+			req.Filter.UpdatedBy,
 		)
 	} else {
 		_, err = ctx.repo.Db.Exec(query,
-			req.ProductPrice,
-			req.ProductAdminFee,
-			req.ProductMerchantFee,
-			req.ProductProviderPrice,
-			req.ProductProviderAdminFee,
-			req.ProductProviderMerchantFee,
-			req.StatusCode,
-			req.StatusMessage,
-			req.StatusDesc,
-			req.ReferenceNumber,
-			req.ProviderStatusCode,
-			req.ProviderStatusMessage,
-			req.ProviderStatusDesc,
-			req.ProviderReferenceNumber,
-			req.CustomerId,
-			req.OtherMsg,
+			req.Filter.ProductProviderName,
+			req.Filter.ProductProviderCode,
+			req.Filter.ProductProviderPrice,
+			req.Filter.ProductProviderAdminFee,
+			req.Filter.ProductProviderMerchantFee,
+			req.Filter.ProductID,
+			req.Filter.ProductName,
+			req.Filter.ProductCode,
+			req.Filter.ProductPrice,
+			req.Filter.ProductAdminFee,
+			req.Filter.ProductMerchantFee,
+			req.Filter.ProductCategoryID,
+			req.Filter.ProductCategoryName,
+			req.Filter.ProductTypeID,
+			req.Filter.ProductTypeName,
+			req.Filter.ReferenceNumber,
+			req.Filter.ProviderReferenceNumber,
+			req.Filter.StatusCode,
+			req.Filter.StatusMessage,
+			req.Filter.StatusDesc,
+			req.Filter.StatusCodeDetail,
+			req.Filter.StatusMessageDetail,
+			req.Filter.StatusDescDetail,
+			req.Filter.ProductReferenceID,
+			req.Filter.ProductReferenceCode,
+			req.Filter.CustomerID,
+			req.Filter.OtherReff,
+			req.Filter.OtherCustomerInfo,
+			req.Filter.SavingAccountName,
+			req.Filter.SavingAccountID,
+			req.Filter.SavingAccountNumber,
+			req.Filter.TransactionTotalAmount,
+			req.Filter.UserAppID,
+			req.Filter.Username,
 			dbTime,
-			req.MerchantOutletUsername,
-			req.TotalTrxAmount,
-			req.ProductReferenceId,
-			req.ProductReferenceCode,
-			req.ReferenceNumber,
+			req.Filter.UpdatedBy,
 		)
 	}
 

@@ -6,11 +6,10 @@ import (
 	"desabiller/services"
 	auth "desabiller/services/authService"
 	helperservices "desabiller/services/helperServices"
-
-	// helperservices "desabiller/services/helperServices"
 	hierarchyservicego "desabiller/services/hierarchyService"
-	providerservice "desabiller/services/providerServices"
 	savingservices "desabiller/services/savingServices"
+	trxservice "desabiller/services/trxService"
+	useractivityservice "desabiller/services/userActivityService"
 	"log"
 
 	// nfeatureassignmentsservice "desabiller/services/nFeaturesService/featureAssignmentService"
@@ -20,6 +19,7 @@ import (
 	// merchantservicego "desabiller/services/nHierarchyService/merchantService"
 	// useroutlettservicego "desabiller/services/nHierarchyService/userOutletService"
 	// nuserdashboardservice "desabiller/services/nUserDashboardService"
+	providerservice "desabiller/services/providerServices"
 
 	// trxservice "desabiller/services/trxService"
 
@@ -31,21 +31,48 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 	providerSvc := providerservice.NewApiProviderServices(service)
 	admSvc := auth.ApiAdministration(service)
 	hierachySvc := hierarchyservicego.RepoHierarchy(service)
-	// userAct := useractivityservice.NewApiUserActivityService(service)
+	userAct := useractivityservice.NewApiUserActivityService(service)
 	helperSvc := helperservices.NewApiHelperService(service)
-	// trxSvc := trxservice.NewRepoTrxService(service)
+	trxSvc := trxservice.NewRepoTrxService(service)
 	savingSvc := savingservices.NewApiSavingServices(service)
-	kk := e.Group("/login")
-	kk.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
-		log.Println("[Start]")
-		log.Println("EndPoint :", c.Path())
-		log.Println("Header :", c.Request().Header)
-		log.Println("Body :", string(reqBody))
-		log.Println("Response :", string(resBody))
-		log.Println("[End]")
-	}))
-	kk.POST("/", admSvc.Login)
 	{
+		private := e.Group("/private")
+		private.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
+			if subtle.ConstantTimeCompare([]byte(pss), []byte("joe")) == 1 &&
+				subtle.ConstantTimeCompare([]byte(pwd), []byte("secret")) == 1 {
+				return true, nil
+			}
+			return false, nil
+		}))
+		private.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+			log.Println("[Start]")
+			log.Println("EndPoint :", c.Path())
+			log.Println("Header :", c.Request().Header)
+			log.Println("Body :", string(reqBody))
+			log.Println("Response :", string(resBody))
+			log.Println("[End]")
+		}))
+
+		savingSegment := private.Group("/savingSegment")
+		savingSegment.POST("/add", savingSvc.AddSavingSegment)
+		savingSegment.POST("/update", savingSvc.UpdateSavingSegment)
+		savingSegment.POST("/drop", savingSvc.DropSavingSegment)
+		savingSegment.POST("/gets", savingSvc.GetSavingSegments)
+
+		savingType := private.Group("/savingType")
+		savingType.POST("/add", savingSvc.AddSavingType)
+		savingType.POST("/update", savingSvc.UpdateSavingType)
+		savingType.POST("/drop", savingSvc.DropSavingType)
+		savingType.POST("/gets", savingSvc.GetSavingTypes)
+
+		account := private.Group("/account")
+		account.POST("/add", savingSvc.AddAccount)
+		account.POST("/update", savingSvc.UpdateAccount)
+		account.POST("/drop", savingSvc.DropAccount)
+		account.POST("/gets", savingSvc.GetAccounts)
+	}
+	{
+		//dashboard
 		userapp := e.Group("/user-app")
 		userapp.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
 			if subtle.ConstantTimeCompare([]byte(pss), []byte("joe")) == 1 &&
@@ -66,8 +93,7 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 		userapp.POST("/add", hierachySvc.AddUserApp)
 		userapp.POST("/drop", hierachySvc.DropUserApp)
 		userapp.POST("/update", hierachySvc.UpdateUserApp)
-	}
-	{
+
 		aa := e.Group("/cif")
 		aa.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
 			if subtle.ConstantTimeCompare([]byte(pss), []byte("joe")) == 1 &&
@@ -88,15 +114,16 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 		aa.POST("/update", savingSvc.UpdateCif)
 		aa.POST("/drop", savingSvc.DropCif)
 		aa.POST("/gets", savingSvc.GetCifs)
-		bb := e.Group("/saving-type")
-		bb.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
+
+		gg := e.Group("/category")
+		gg.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
 			if subtle.ConstantTimeCompare([]byte(pss), []byte("joe")) == 1 &&
 				subtle.ConstantTimeCompare([]byte(pwd), []byte("secret")) == 1 {
 				return true, nil
 			}
 			return false, nil
 		}))
-		bb.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+		gg.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
 			log.Println("[Start]")
 			log.Println("EndPoint :", c.Path())
 			log.Println("Header :", c.Request().Header)
@@ -104,19 +131,19 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 			log.Println("Response :", string(resBody))
 			log.Println("[End]")
 		}))
-		bb.POST("/add", savingSvc.AddSavingType)
-		bb.POST("/update", savingSvc.UpdateSavingType)
-		bb.POST("/drop", savingSvc.DropSavingType)
-		bb.POST("/gets", savingSvc.GetSavingTypes)
-		cc := e.Group("/saving-segment")
-		cc.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
+		gg.POST("/add", providerSvc.AddProductCategory)
+		gg.POST("/gets", providerSvc.GetProductCategories)
+		gg.POST("/drop", providerSvc.DropProductCategory)
+		gg.POST("/update", providerSvc.UpdateProductCategory)
+		hh := e.Group("/type")
+		hh.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
 			if subtle.ConstantTimeCompare([]byte(pss), []byte("joe")) == 1 &&
 				subtle.ConstantTimeCompare([]byte(pwd), []byte("secret")) == 1 {
 				return true, nil
 			}
 			return false, nil
 		}))
-		cc.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+		hh.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
 			log.Println("[Start]")
 			log.Println("EndPoint :", c.Path())
 			log.Println("Header :", c.Request().Header)
@@ -124,19 +151,20 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 			log.Println("Response :", string(resBody))
 			log.Println("[End]")
 		}))
-		cc.POST("/add", savingSvc.AddSavingSegment)
-		cc.POST("/update", savingSvc.UpdateSavingSegment)
-		cc.POST("/drop", savingSvc.DropSavingSegment)
-		cc.POST("/gets", savingSvc.GetSavingSegments)
-		dd := e.Group("/account")
-		dd.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
+		hh.POST("/add", providerSvc.AddProductType)
+		hh.POST("/gets", providerSvc.GetProductTypes)
+		hh.POST("/drop", providerSvc.DropProductType)
+		hh.POST("/update", providerSvc.UpdateProductType)
+
+		jj := e.Group("/product")
+		jj.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
 			if subtle.ConstantTimeCompare([]byte(pss), []byte("joe")) == 1 &&
 				subtle.ConstantTimeCompare([]byte(pwd), []byte("secret")) == 1 {
 				return true, nil
 			}
 			return false, nil
 		}))
-		dd.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+		jj.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
 			log.Println("[Start]")
 			log.Println("EndPoint :", c.Path())
 			log.Println("Header :", c.Request().Header)
@@ -144,76 +172,11 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 			log.Println("Response :", string(resBody))
 			log.Println("[End]")
 		}))
-		dd.POST("/add", savingSvc.AddAccount)
-		dd.POST("/update", savingSvc.GetAccounts)
-		dd.POST("/drop", savingSvc.DropAccount)
-		dd.POST("/gets", savingSvc.UpdateAccount)
+		jj.POST("/add", providerSvc.AddProduct)
+		jj.POST("/gets", providerSvc.GetProducts)
+		jj.POST("/drop", providerSvc.DropProduct)
+		jj.POST("/update", providerSvc.UpdateProduct)
 	}
-	{
-		proType := e.Group("/product-type")
-		proType.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
-			if subtle.ConstantTimeCompare([]byte(pss), []byte("joe")) == 1 &&
-				subtle.ConstantTimeCompare([]byte(pwd), []byte("secret")) == 1 {
-				return true, nil
-			}
-			return false, nil
-		}))
-		proType.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
-			log.Println("[Start]")
-			log.Println("EndPoint :", c.Path())
-			log.Println("Header :", c.Request().Header)
-			log.Println("Body :", string(reqBody))
-			log.Println("Response :", string(resBody))
-			log.Println("[End]")
-		}))
-		proType.POST("/get", providerSvc.GetProductTypes)
-		proType.POST("/add", providerSvc.AddProductType)
-		proType.POST("/drop", providerSvc.DropProductType)
-		proType.POST("/update", providerSvc.UpdateProductType)
-
-		proCtgr := e.Group("/product-category")
-		proCtgr.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
-			if subtle.ConstantTimeCompare([]byte(pss), []byte("joe")) == 1 &&
-				subtle.ConstantTimeCompare([]byte(pwd), []byte("secret")) == 1 {
-				return true, nil
-			}
-			return false, nil
-		}))
-		proCtgr.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
-			log.Println("[Start]")
-			log.Println("EndPoint :", c.Path())
-			log.Println("Header :", c.Request().Header)
-			log.Println("Body :", string(reqBody))
-			log.Println("Response :", string(resBody))
-			log.Println("[End]")
-		}))
-		proCtgr.POST("/get", providerSvc.GetProductCategories)
-		proCtgr.POST("/add", providerSvc.AddProductCategory)
-		proCtgr.POST("/drop", providerSvc.DropProductCategory)
-		proCtgr.POST("/update", providerSvc.UpdateProductCategory)
-		proRefnce := e.Group("/product-reference")
-		proRefnce.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
-			if subtle.ConstantTimeCompare([]byte(pss), []byte("joe")) == 1 &&
-				subtle.ConstantTimeCompare([]byte(pwd), []byte("secret")) == 1 {
-				return true, nil
-			}
-			return false, nil
-		}))
-		proRefnce.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
-			log.Println("[Start]")
-			log.Println("EndPoint :", c.Path())
-			log.Println("Header :", c.Request().Header)
-			log.Println("Body :", string(reqBody))
-			log.Println("Response :", string(resBody))
-			log.Println("[End]")
-		}))
-		proRefnce.POST("/get", providerSvc.GetProductReferences)
-		proRefnce.POST("/add", providerSvc.AddProductReference)
-		proRefnce.POST("/drop", providerSvc.DropProductReference)
-		proRefnce.POST("/update", providerSvc.UpdateProductReference)
-
-	}
-
 	{
 		//eksternal callback
 		callback := e.Group("/callback")
@@ -225,9 +188,21 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 			log.Println("Response :", string(resBody))
 			log.Println("[End]")
 		}))
-		// callback.POST("/iak", trxSvc.IAKCallback)
+		callback.POST("/iak", trxSvc.IAKCallback)
 	}
-
+	{
+		//login
+		kk := e.Group("/login")
+		kk.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+			log.Println("[Start]")
+			log.Println("EndPoint :", c.Path())
+			log.Println("Header :", c.Request().Header)
+			log.Println("Body :", string(reqBody))
+			log.Println("Response :", string(resBody))
+			log.Println("[End]")
+		}))
+		kk.POST("/", admSvc.Login)
+	}
 	{ //user
 		ll := e.Group("/user")
 		ll.Use(middleware.JWT([]byte(configs.KEY)))
@@ -240,6 +215,8 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 			log.Println("[End]")
 		}))
 		ll.POST("/", admSvc.CekJwt)
+		ll.POST("/get", userAct.GetMerchantOutlets)
+		ll.POST("/update", userAct.UpdateMerchantOutlet)
 	}
 	{
 		//BILLER transaksi
@@ -253,9 +230,9 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 			log.Println("Response :", string(resBody))
 			log.Println("[End]")
 		}))
-		// mm.POST("/inquiry", trxSvc.InquiryBiller)
-		// mm.POST("/payment", trxSvc.PaymentBiller)
-		// mm.POST("/advice", trxSvc.Advice)
+		mm.POST("/inquiry", trxSvc.InquiryBiller)
+		mm.POST("/payment", trxSvc.PaymentBiller)
+		mm.POST("/advice", trxSvc.Advice)
 	}
 	{
 		//transaksi
@@ -269,8 +246,10 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 			log.Println("Response :", string(resBody))
 			log.Println("[End]")
 		}))
-		// mn.POST("/getTrxs", trxSvc.TrxBillerReports)
-		// mn.POST("/getTrx", trxSvc.TrxBillerReport)
+		mn.POST("/getTrxs", trxSvc.TrxBillerReports)
+		mn.POST("/getTrx", trxSvc.TrxBillerReport)
+		// mn.POST("/payment", trxSvc.PaymentBiller)
+		// mn.POST("/advice", trxSvc.Advice)
 	}
 	{
 		//helper

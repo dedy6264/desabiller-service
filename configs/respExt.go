@@ -38,4 +38,26 @@ var (
 	RC_TIMEOUT_RETRY         = []string{"40", "TRANSACTION TIME LIMIT REACHED, PLEASE WAIT A MOMENT."}
 	RC_BILLER_DISRUPTION     = []string{"96", "BILLER PRINCIPAL DISRUPTION"}
 	RC_SYSTEM_CUTOFF         = []string{"97", "SYSTEM CUT-OFF"}
+
+	RC_VALIDATION_FAILED        = []string{"01", "Validasi gagal"}
+	RC_FAILED_USER_EXISTING     = []string{"31", "coba dengan username/email lain"}
+	RC_FAILED_USER_NOT_FOUND    = []string{"32", "User tidak ditemukan"}
+	RC_FAILED_WRONG_PWD_USRNAME = []string{"33", "password/username salah"}
+	RC_FAILED_WRONG_OTP         = []string{"34", "OTP tidak valid	OTP salah / expired"}
+
+	RC_FAILED_DB_NOT_FOUND = []string{"82", "Not found"}
 )
+
+// Code	Message	Keterangan
+// 00	Sukses	Request berhasil
+// 		Format input salah, field kosong, email invalid
+// 02	Username/email sudah terdaftar	Saat registrasi
+// 03	User tidak ditemukan	Untuk login atau reset password
+// 04	Password salah	Login gagal
+// 05	OTP tidak valid	OTP salah / expired
+// 06	Akses ditolak	Token tidak valid / expired
+// 07	Akun tidak aktif	Akun terblokir / belum aktivasi email
+// 08	Session habis	User perlu login ulang
+// 09	Tidak diizinkan	User tidak punya izin untuk aksi tertentu
+// 10	Terlalu sering	Rate limit, pencegahan brute-force
+// 99	Sistem error	Server error, unexpected exception

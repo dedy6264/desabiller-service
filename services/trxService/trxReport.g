@@ -50,7 +50,7 @@ func (svc trxService) TrxBillerReport(ctx echo.Context) error {
 		svcName = "TrxBillerReport"
 		respSvc models.ResponseList
 	)
-	req := new(models.ReqGetTrx)
+	req := new(models.ReqGetTransaction)
 	_, err := helpers.BindValidate(req, ctx)
 	if err != nil {
 		log.Println("Err ", svcName, err)
