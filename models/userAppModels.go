@@ -28,10 +28,10 @@ type (
 		Address        string `json:"address"`
 		AccountID      int64  `json:"account_id"`
 		Status         string `json:"status"`
-		CreatedBy      string `json:createdBy`
-		UpdatedBy      string `json:updatedBy`
-		CreatedAt      string `json:createdAt`
-		UpdatedAt      string `json:updatedAt`
+		CreatedBy      string `json:"createdBy"`
+		UpdatedBy      string `json:"updatedBy"`
+		CreatedAt      string `json:"createdAt"`
+		UpdatedAt      string `json:"updatedAt"`
 	}
 
 	RespGetUserApp struct {
@@ -60,10 +60,10 @@ type (
 		CifPhone   string `json:"cif_phone"`
 		CifEmail   string `json:"cif_email"`
 		CifAddress string `json:"cif_address"`
-		CreatedBy  string `json:createdBy`
-		UpdatedBy  string `json:updatedBy`
-		CreatedAt  string `json:createdAt`
-		UpdatedAt  string `json:updatedAt`
+		CreatedBy  string `json:"createdBy"`
+		UpdatedBy  string `json:"updatedBy"`
+		CreatedAt  string `json:"createdAt"`
+		UpdatedAt  string `json:"updatedAt"`
 	}
 	ReqGetAccountSaving struct {
 		Start     int64   `json:"start" `
@@ -84,10 +84,10 @@ type (
 		AccountPin      string  `json:"account_pin"`
 		Balance         float64 `json:"balance"`
 		SavingSegmentID int64   `json:"saving_segment_id"`
-		CreatedBy       string  `json:createdBy`
-		UpdatedBy       string  `json:updatedBy`
-		CreatedAt       string  `json:createdAt`
-		UpdatedAt       string  `json:updatedAt`
+		CreatedBy       string  `json:"createdBy"`
+		UpdatedBy       string  `json:"updatedBy"`
+		CreatedAt       string  `json:"createdAt"`
+		UpdatedAt       string  `json:"updatedAt"`
 	}
 )
 type (
