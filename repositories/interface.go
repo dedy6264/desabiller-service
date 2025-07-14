@@ -44,7 +44,7 @@ type ProductRepo interface {
 	AddProductReference(req models.ReqGetProductReference) (result models.ProductReference, err error)
 	GetProductReferences(req models.ReqGetProductReference) (result []models.ProductReference, err error)
 	GetProductReferenceCount(req models.ReqGetProductReference) (result int, err error)
-	GetProduct(req models.ReqGetProductReference) (result models.ProductReference, err error)
+	GetProductReference(req models.ReqGetProductReference) (result models.ProductReference, err error)
 	UpdateProductReference(req models.ReqGetProductReference) (result models.ProductReference, err error)
 	DropProductReference(req models.ReqGetProductReference) (err error)
 
@@ -55,12 +55,12 @@ type ProductRepo interface {
 	// DropProductProvider(req models.ReqGetProductProvider) (err error)
 	// GetProductProvider(req models.ReqGetProductProvider) (result models.RespGetProductProvider, err error)
 
-	// AddProduct(req models.ReqGetProduct) (result models.RespGetProduct, err error)
-	// GetProducts(req models.ReqGetProduct) (result []models.RespGetProduct, err error)
-	// GetProductCount(req models.ReqGetProduct) (result int, err error)
-	// GetProduct(req models.ReqGetProduct) (result models.RespGetProduct, err error)
-	// UpdateProduct(req models.ReqGetProduct) (result models.RespGetProduct, err error)
-	// DropProduct(req models.ReqGetProduct) (err error)
+	AddProduct(req models.ReqGetProduct) (result models.Product, err error)
+	GetProducts(req models.ReqGetProduct) (result []models.Product, err error)
+	GetProductCount(req models.ReqGetProduct) (result int, err error)
+	GetProduct(req models.ReqGetProduct) (result models.Product, err error)
+	UpdateProduct(req models.ReqGetProduct) (result models.Product, err error)
+	DropProduct(req models.ReqGetProduct) (err error)
 }
 
 type TrxRepo interface {
@@ -110,10 +110,10 @@ type SavingRepo interface {
 	GetAccount(req models.ReqGetAccountSaving) (result models.RespGetAccount, err error)
 	GetAccounts(req models.ReqGetAccountSaving) (result []models.RespGetAccount, err error)
 
-	// GetSavingTransactionCount(req models.ReqGetSavingTransaction) (result int, err error)
-	// DropSavingTransaction(id int, tx *sql.Tx) (err error)
-	// UpdateSavingTransaction(req models.ReqGetSavingTransaction, tx *sql.Tx) (err error)
-	// AddSavingTransaction(req models.ReqGetSavingTransaction, tx *sql.Tx) (result models.RespGetSavingTransaction, err error)
-	// GetSavingTransaction(req models.ReqGetSavingTransaction) (result models.RespGetSavingTransaction, err error)
-	// GetSavingTransactions(req models.ReqGetSavingTransaction) (result []models.RespGetSavingTransaction, err error)
+	GetSavingTransactionCount(req models.ReqGetSavingTransaction) (result int, err error)
+	DropSavingTransaction(id int, tx *sql.Tx) (err error)
+	UpdateSavingTransaction(req models.ReqGetSavingTransaction, tx *sql.Tx) (err error)
+	AddSavingTransaction(req models.ReqGetSavingTransaction, tx *sql.Tx) (result models.SavingTransaction, err error)
+	GetSavingTransaction(req models.ReqGetSavingTransaction) (result models.SavingTransaction, err error)
+	GetSavingTransactions(req models.ReqGetSavingTransaction) (result []models.SavingTransaction, err error)
 }

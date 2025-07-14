@@ -8,8 +8,8 @@ type (
 		Search    string      `json:"search"`
 		Order     string      `json:"order" `
 		Sort      string      `json:"sort" `
-		StartDate string      `json:"start_date"`
-		EndDate   string      `json:"end_date"`
+		StartDate string      `json:"startDate"`
+		EndDate   string      `json:"endDate"`
 		Draw      int         `json:"draw"`
 		Filter    Transaction `json:"filter"`
 	}
@@ -27,9 +27,9 @@ type (
 		ProductAdminFee            float64 `json:"product_admin_fee"`
 		ProductMerchantFee         float64 `json:"product_merchant_fee"`
 		ProductCategoryID          int64   `json:"product_category_id"`
-		ProductCategoryName        string  `json:"product_category_name"`
+		ProductCategoryName        string  `json:"productCategoryName"`
 		ProductTypeID              int64   `json:"product_type_id"`
-		ProductTypeName            string  `json:"product_type_name"`
+		ProductTypeName            string  `json:"productTypeName"`
 		ReferenceNumber            string  `json:"reference_number"`
 		ProviderReferenceNumber    string  `json:"provider_reference_number"`
 		StatusCode                 string  `json:"status_code"`
@@ -69,9 +69,9 @@ type (
 		ProductAdminFee            float64 `json:"product_admin_fee"`
 		ProductMerchantFee         float64 `json:"product_merchant_fee"`
 		ProductCategoryID          int64   `json:"product_category_id"`
-		ProductCategoryName        string  `json:"product_category_name"`
+		ProductCategoryName        string  `json:"productCategoryName"`
 		ProductTypeID              int64   `json:"product_type_id"`
-		ProductTypeName            string  `json:"product_type_name"`
+		ProductTypeName            string  `json:"productTypeName"`
 		ReferenceNumber            string  `json:"reference_number"`
 		ProviderReferenceNumber    string  `json:"provider_reference_number"`
 		StatusCode                 string  `json:"status_code"`

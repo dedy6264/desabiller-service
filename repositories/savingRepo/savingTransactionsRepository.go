@@ -2,40 +2,16 @@ package savingrepo
 
 import (
 	"database/sql"
-	"desabiller/configs"
 	"desabiller/models"
-	"fmt"
-	"log"
+	"desabiller/utils"
 	"strconv"
-	"time"
 )
 
 func (ctx savingRepository) GetSavingTransactionCount(req models.ReqGetSavingTransaction) (result int, err error) {
 	query := `select count(id) from saving_transactions where true `
-	if req.ID != 0 {
-		query += ` and id = ` + strconv.Itoa(req.ID)
-	}
-	if req.ReferenceNumber != "" {
-		query += ` and reference_number='` + req.ReferenceNumber + `'`
-	}
-	if req.SavingReferenceNumber != "" {
-		query += ` and saving_reference_number='` + req.SavingReferenceNumber + `'`
-	}
-	if req.DcType != "" {
-		query += ` and dc_type='` + req.DcType + `'`
-	}
-	if req.TransactionCode != "" {
-		query += ` and transaction_code='` + req.TransactionCode + `'`
-	}
-	if req.AccountNumber != "" {
-		query += ` and account_number='` + req.AccountNumber + `'`
-	}
-	if req.AccountID != 0 {
-		query += ` and account_id = ` + strconv.Itoa(req.AccountID)
-	}
+
 	err = ctx.repo.Db.QueryRow(query).Scan(&result)
 	if err != nil {
-		log.Println("GetCount :: ", err.Error())
 		return 0, err
 	}
 	return result, nil
@@ -48,45 +24,42 @@ func (ctx savingRepository) DropSavingTransaction(id int, tx *sql.Tx) (err error
 		_, err = ctx.repo.Db.Exec(query, id)
 	}
 	if err != nil {
-		log.Println("DropSavingTransaction :: ", err.Error())
 		return err
 	}
 	return nil
 }
 func (ctx savingRepository) UpdateSavingTransaction(req models.ReqGetSavingTransaction, tx *sql.Tx) (err error) {
-	t := time.Now()
-	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	query := `update saving_transactions set 
-				reference_number=$1,
-				saving_reference_number=$2,
-				dc_type=$3,
-				transaction_amount=$4,
-				transaction_code=$5,
-				account_id=$6,
-				account_number=$7,
-				last_balance=$8,
-				updated_at = $9,
-				updated_by =$10
-				where id = $11
+				reference_number=?,
+				reference_number_partner=?,
+				dc_type=?,
+				transaction_amount=?,
+				transaction_code=?,
+				account_id=?,
+				account_number=?,
+				last_balance=?,
+				updated_at = ?,
+				updated_by =?
+				where id = ?
 				`
+	query = utils.QuerySupport(query)
 	if tx != nil {
-		_, err = tx.Exec(query, req.ReferenceNumber, req.SavingReferenceNumber, req.DcType,
-			req.TransactionAmount, req.TransactionCode, req.AccountID, req.AccountNumber, dbTime, "sys", req.ID)
+		_, err = tx.Exec(query, req.Filter.ReferenceNumber, req.Filter.ReferenceNumberPartner, req.Filter.DcType,
+			req.Filter.TransactionAmount, req.Filter.TransactionCode, req.Filter.AccountID, req.Filter.AccountNumber, req.Filter.UpdatedAt,
+			req.Filter.UpdatedBy, req.Filter.ID)
 	} else {
-		_, err = ctx.repo.Db.Exec(query, req.ReferenceNumber, req.SavingReferenceNumber, req.DcType,
-			req.TransactionAmount, req.TransactionCode, req.AccountID, req.AccountNumber, dbTime, "sys", req.ID)
+		_, err = ctx.repo.Db.Exec(query, req.Filter.ReferenceNumber, req.Filter.ReferenceNumberPartner, req.Filter.DcType,
+			req.Filter.TransactionAmount, req.Filter.TransactionCode, req.Filter.AccountID, req.Filter.AccountNumber, req.Filter.UpdatedAt,
+			req.Filter.UpdatedBy, req.Filter.ID)
 	}
 	if err != nil {
-		log.Println("UpdateSavingTransaction :: ", err.Error())
 		return err
 	}
 	return nil
 }
-func (ctx savingRepository) AddSavingTransaction(req models.ReqGetSavingTransaction, tx *sql.Tx) (result models.RespGetSavingTransaction, err error) {
-	t := time.Now()
-	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
+func (ctx savingRepository) AddSavingTransaction(req models.ReqGetSavingTransaction, tx *sql.Tx) (result models.SavingTransaction, err error) {
 	query := `insert into saving_transactions (reference_number,
-	saving_reference_number,
+	reference_number_partner,
 	dc_type,
 	transaction_amount,
 	transaction_code,
@@ -96,22 +69,22 @@ func (ctx savingRepository) AddSavingTransaction(req models.ReqGetSavingTransact
 	created_at,
 	updated_at,
 	 created_by,
-	  updated_by) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) returning id,reference_number,
-	saving_reference_number,
+	  updated_by) values (?,?,?,?,?,?,?,?,?,?,?,?) returning id,reference_number,
+	reference_number_partner,
 	dc_type,
 	transaction_amount,
 	transaction_code,
 	account_id,
 	account_number,
 	last_balance,created_at,updated_at, created_by,  updated_by`
-	fmt.Println(query, dbTime)
+	query = utils.QuerySupport(query)
 	if tx != nil {
-		err = tx.QueryRow(query, req.ReferenceNumber, req.SavingReferenceNumber, req.DcType,
-			req.TransactionAmount, req.TransactionCode, req.AccountID, req.AccountNumber, req.LastBalance,
-			dbTime,
-			dbTime, "sys", "sys").Scan(
+		err = tx.QueryRow(query, req.Filter.ReferenceNumber, req.Filter.ReferenceNumberPartner, req.Filter.DcType,
+			req.Filter.TransactionAmount, req.Filter.TransactionCode, req.Filter.AccountID, req.Filter.AccountNumber, req.Filter.LastBalance,
+			req.Filter.CreatedAt,
+			req.Filter.UpdatedAt, req.Filter.CreatedBy, req.Filter.UpdatedBy).Scan(
 			&result.ID,
-			&result.ReferenceNumber, &result.SavingReferenceNumber, &result.DcType,
+			&result.ReferenceNumber, &result.ReferenceNumberPartner, &result.DcType,
 			&result.TransactionAmount, &result.TransactionCode, &result.AccountID, &result.AccountNumber, &result.LastBalance,
 			&result.CreatedAt,
 			&result.UpdatedAt,
@@ -119,12 +92,12 @@ func (ctx savingRepository) AddSavingTransaction(req models.ReqGetSavingTransact
 			&result.UpdatedAt,
 		)
 	} else {
-		err = ctx.repo.Db.QueryRow(query, req.ReferenceNumber, req.SavingReferenceNumber, req.DcType,
-			req.TransactionAmount, req.TransactionCode, req.AccountID, req.AccountNumber, req.LastBalance,
-			dbTime,
-			dbTime, "sys", "sys").Scan(
+		err = ctx.repo.Db.QueryRow(query, req.Filter.ReferenceNumber, req.Filter.ReferenceNumberPartner, req.Filter.DcType,
+			req.Filter.TransactionAmount, req.Filter.TransactionCode, req.Filter.AccountID, req.Filter.AccountNumber, req.Filter.LastBalance,
+			req.Filter.CreatedAt,
+			req.Filter.UpdatedAt, req.Filter.CreatedBy, req.Filter.UpdatedBy).Scan(
 			&result.ID,
-			&result.ReferenceNumber, &result.SavingReferenceNumber, &result.DcType,
+			&result.ReferenceNumber, &result.ReferenceNumberPartner, &result.DcType,
 			&result.TransactionAmount, &result.TransactionCode, &result.AccountID, &result.AccountNumber, &result.LastBalance,
 			&result.CreatedAt,
 			&result.UpdatedAt,
@@ -134,105 +107,101 @@ func (ctx savingRepository) AddSavingTransaction(req models.ReqGetSavingTransact
 	}
 
 	if err != nil {
-		log.Println("AddSavingTransaction :: ", err.Error())
 		return result, err
 	}
 	return result, nil
 }
-func (ctx savingRepository) GetSavingTransaction(req models.ReqGetSavingTransaction) (result models.RespGetSavingTransaction, err error) {
+func (ctx savingRepository) GetSavingTransaction(req models.ReqGetSavingTransaction) (result models.SavingTransaction, err error) {
 	query := `select id,
-reference_number,
-	saving_reference_number,
+	reference_number,
+	reference_number_partner,
 	dc_type,
 	transaction_amount,
 	transaction_code,
 	account_id,
 	account_number,
 	last_balance,created_at, created_by, updated_at, updated_by from saving_transactions where true`
-	if req.ID != 0 {
-		query += ` and id = ` + strconv.Itoa(req.ID)
+	if req.Filter.ID != 0 {
+		query += ` and id = ` + strconv.Itoa(req.Filter.ID)
 	}
-	if req.ReferenceNumber != "" {
-		query += ` and reference_number='` + req.ReferenceNumber + `'`
+	if req.Filter.ReferenceNumber != "" {
+		query += ` and reference_number='` + req.Filter.ReferenceNumber + `'`
 	}
-	if req.SavingReferenceNumber != "" {
-		query += ` and saving_reference_number='` + req.SavingReferenceNumber + `'`
+	if req.Filter.ReferenceNumberPartner != "" {
+		query += ` and reference_number_partner='` + req.Filter.ReferenceNumberPartner + `'`
 	}
-	if req.DcType != "" {
-		query += ` and dc_type='` + req.DcType + `'`
+	if req.Filter.DcType != "" {
+		query += ` and dc_type='` + req.Filter.DcType + `'`
 	}
-	if req.TransactionCode != "" {
-		query += ` and transaction_code='` + req.TransactionCode + `'`
+	if req.Filter.TransactionCode != "" {
+		query += ` and transaction_code='` + req.Filter.TransactionCode + `'`
 	}
-	if req.AccountNumber != "" {
-		query += ` and account_number='` + req.AccountNumber + `'`
+	if req.Filter.AccountNumber != "" {
+		query += ` and account_number='` + req.Filter.AccountNumber + `'`
 	}
-	if req.AccountID != 0 {
-		query += ` and account_id = ` + strconv.Itoa(req.AccountID)
+	if req.Filter.AccountID != 0 {
+		query += ` and account_id = ` + strconv.Itoa(req.Filter.AccountID)
 	}
 	err = ctx.repo.Db.QueryRow(query).Scan(&result.ID,
-		&result.ReferenceNumber, &result.SavingReferenceNumber, &result.DcType,
+		&result.ReferenceNumber, &result.ReferenceNumber, &result.ReferenceNumberPartner, &result.DcType,
 		&result.TransactionAmount, &result.TransactionCode, &result.AccountID, &result.AccountNumber,
 		&result.CreatedAt,
 		&result.CreatedBy,
 		&result.UpdatedAt,
 		&result.UpdatedBy)
 	if err != nil {
-		log.Println("GetSavingTransaction :: ", err.Error())
 		return result, err
 	}
 
 	return result, nil
 }
-func (ctx savingRepository) GetSavingTransactions(req models.ReqGetSavingTransaction) (result []models.RespGetSavingTransaction, err error) {
+func (ctx savingRepository) GetSavingTransactions(req models.ReqGetSavingTransaction) (result []models.SavingTransaction, err error) {
 	query := `select id,
-reference_number,
-	saving_reference_number,
+	reference_number,
+	reference_number_partner,
 	dc_type,
 	transaction_amount,
 	transaction_code,
 	account_id,
 	account_number,
 	last_balance,created_at, created_by, updated_at, updated_by from saving_transactions where true `
-	if req.ID != 0 {
-		query += ` and id = ` + strconv.Itoa(req.ID)
+	if req.Filter.ID != 0 {
+		query += ` and id = ` + strconv.Itoa(req.Filter.ID)
 	}
-	if req.ReferenceNumber != "" {
-		query += ` and reference_number='` + req.ReferenceNumber + `'`
+	if req.Filter.ReferenceNumber != "" {
+		query += ` and reference_number='` + req.Filter.ReferenceNumber + `'`
 	}
-	if req.SavingReferenceNumber != "" {
-		query += ` and saving_reference_number='` + req.SavingReferenceNumber + `'`
+	if req.Filter.ReferenceNumberPartner != "" {
+		query += ` and reference_number_partner='` + req.Filter.ReferenceNumberPartner + `'`
 	}
-	if req.DcType != "" {
-		query += ` and dc_type='` + req.DcType + `'`
+	if req.Filter.DcType != "" {
+		query += ` and dc_type='` + req.Filter.DcType + `'`
 	}
-	if req.TransactionCode != "" {
-		query += ` and transaction_code='` + req.TransactionCode + `'`
+	if req.Filter.TransactionCode != "" {
+		query += ` and transaction_code='` + req.Filter.TransactionCode + `'`
 	}
-	if req.AccountNumber != "" {
-		query += ` and account_number='` + req.AccountNumber + `'`
+	if req.Filter.AccountNumber != "" {
+		query += ` and account_number='` + req.Filter.AccountNumber + `'`
 	}
-	if req.AccountID != 0 {
-		query += ` and account_id = ` + strconv.Itoa(req.AccountID)
+	if req.Filter.AccountID != 0 {
+		query += ` and account_id = ` + strconv.Itoa(req.Filter.AccountID)
 	}
-	if req.Filter.Length != 0 {
-		query += ` limit  ` + strconv.Itoa(req.Filter.Length) + `  offset  ` + strconv.Itoa(req.Filter.Start)
+	if req.Lenght != 0 {
+		query += ` limit  ` + strconv.Itoa(int(req.Lenght)) + `  offset  ` + strconv.Itoa(int(req.Start))
 	} else {
-		if req.Filter.OrderBy != "" {
-			query += `  order by '` + req.Filter.OrderBy + `' asc`
+		if req.Order != "" {
+			query += `  order by '` + req.Order + `' asc`
 		} else {
 			query += `  order by id asc`
 		}
 	}
 	rows, err := ctx.repo.Db.Query(query)
 	if err != nil {
-		log.Println("GetSavingTransactions :: ", err.Error())
 		return result, err
 	}
 	defer rows.Close()
 	result, err = SavingTransactionDataRow(rows)
 	if err != nil {
-		log.Println("GetSavingTransactions :: ", err.Error())
 		return result, err
 	}
 	if len(result) == 0 {
@@ -241,12 +210,12 @@ reference_number,
 	return result, nil
 
 }
-func SavingTransactionDataRow(rows *sql.Rows) (result []models.RespGetSavingTransaction, err error) {
+func SavingTransactionDataRow(rows *sql.Rows) (result []models.SavingTransaction, err error) {
 	for rows.Next() {
-		var val models.RespGetSavingTransaction
+		var val models.SavingTransaction
 		err := rows.Scan(
 			&val.ID,
-			&val.ReferenceNumber, &val.SavingReferenceNumber, &val.DcType,
+			&val.ReferenceNumber, &val.ReferenceNumber, &val.ReferenceNumberPartner, &val.DcType,
 			&val.TransactionAmount, &val.TransactionCode, &val.AccountID, &val.AccountNumber,
 			&val.CreatedAt,
 			&val.CreatedBy,
@@ -254,7 +223,6 @@ func SavingTransactionDataRow(rows *sql.Rows) (result []models.RespGetSavingTran
 			&val.UpdatedBy,
 		)
 		if err != nil {
-			log.Println("SavingTransactionDataRow :: ", err.Error())
 			return result, err
 		}
 		result = append(result, val)

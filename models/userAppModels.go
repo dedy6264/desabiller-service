@@ -8,8 +8,8 @@ type (
 		Search    string  `json:"search"`
 		Order     string  `json:"order" `
 		Sort      string  `json:"sort" `
-		StartDate string  `json:"start_date"`
-		EndDate   string  `json:"end_date"`
+		StartDate string  `json:"startDate"`
+		EndDate   string  `json:"endDate"`
 		Draw      int     `json:"draw"`
 		Filter    UserApp `json:"filter"`
 	}
@@ -28,10 +28,10 @@ type (
 		Address        string `json:"address"`
 		AccountID      int64  `json:"account_id"`
 		Status         string `json:"status"`
-		CreatedBy      string `json:"created_by"`
-		UpdatedBy      string `json:"updated_by"`
-		CreatedAt      string `json:"created_at"`
-		UpdatedAt      string `json:"updated_at"`
+		CreatedBy      string `json:createdBy`
+		UpdatedBy      string `json:updatedBy`
+		CreatedAt      string `json:createdAt`
+		UpdatedAt      string `json:updatedAt`
 	}
 
 	RespGetUserApp struct {
@@ -46,8 +46,8 @@ type (
 		Search    string `json:"search"`
 		Order     string `json:"order" `
 		Sort      string `json:"sort" `
-		StartDate string `json:"start_date"`
-		EndDate   string `json:"end_date"`
+		StartDate string `json:"startDate"`
+		EndDate   string `json:"endDate"`
 		Draw      int    `json:"draw"`
 		Filter    CIF    `json:"filter"`
 	}
@@ -60,10 +60,10 @@ type (
 		CifPhone   string `json:"cif_phone"`
 		CifEmail   string `json:"cif_email"`
 		CifAddress string `json:"cif_address"`
-		CreatedBy  string `json:"created_by"`
-		UpdatedBy  string `json:"updated_by"`
-		CreatedAt  string `json:"created_at"`
-		UpdatedAt  string `json:"updated_at"`
+		CreatedBy  string `json:createdBy`
+		UpdatedBy  string `json:updatedBy`
+		CreatedAt  string `json:createdAt`
+		UpdatedAt  string `json:updatedAt`
 	}
 	ReqGetAccountSaving struct {
 		Start     int64   `json:"start" `
@@ -72,8 +72,8 @@ type (
 		Search    string  `json:"search"`
 		Order     string  `json:"order" `
 		Sort      string  `json:"sort" `
-		StartDate string  `json:"start_date"`
-		EndDate   string  `json:"end_date"`
+		StartDate string  `json:"startDate"`
+		EndDate   string  `json:"endDate"`
 		Draw      int     `json:"draw"`
 		Filter    Account `json:"filter"`
 	}
@@ -84,10 +84,10 @@ type (
 		AccountPin      string  `json:"account_pin"`
 		Balance         float64 `json:"balance"`
 		SavingSegmentID int64   `json:"saving_segment_id"`
-		CreatedBy       string  `json:"created_by"`
-		UpdatedBy       string  `json:"updated_by"`
-		CreatedAt       string  `json:"created_at"`
-		UpdatedAt       string  `json:"updated_at"`
+		CreatedBy       string  `json:createdBy`
+		UpdatedBy       string  `json:updatedBy`
+		CreatedAt       string  `json:createdAt`
+		UpdatedAt       string  `json:updatedAt`
 	}
 )
 type (

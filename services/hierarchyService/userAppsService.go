@@ -72,7 +72,7 @@ func (svc HierarcyService) AddUserApp(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	if req.Filter.Name == "" {
-		utils.Log("", svcName, err)
+		utils.Log("", svcName, nil)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
 			"Name cannot be empty",
@@ -81,7 +81,7 @@ func (svc HierarcyService) AddUserApp(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	if req.Filter.IdentityNumber == "" {
-		utils.Log("", svcName, err)
+		utils.Log("", svcName, nil)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
 			"ID Number cannot be empty",
@@ -90,7 +90,7 @@ func (svc HierarcyService) AddUserApp(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	if req.Filter.IdentityType == "" {
-		utils.Log("", svcName, err)
+		utils.Log("", svcName, nil)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
 			"ID Type cannot be empty",
@@ -99,7 +99,7 @@ func (svc HierarcyService) AddUserApp(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	if req.Filter.Phone == "" {
-		utils.Log("", svcName, err)
+		utils.Log("", svcName, nil)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
 			"Phone Number cannot be empty",
@@ -108,7 +108,7 @@ func (svc HierarcyService) AddUserApp(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	if req.Filter.Username == "" {
-		utils.Log("", svcName, err)
+		utils.Log("", svcName, nil)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
 			"Username cannot be empty",
@@ -117,7 +117,7 @@ func (svc HierarcyService) AddUserApp(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	if req.Filter.Password == "" {
-		utils.Log("", svcName, err)
+		utils.Log("", svcName, nil)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
 			"Password cannot be empty",

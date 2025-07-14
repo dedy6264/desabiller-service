@@ -8,8 +8,8 @@ type (
 		Search    string     `json:"search"`
 		Order     string     `json:"order" `
 		Sort      string     `json:"sort" `
-		StartDate string     `json:"start_date"`
-		EndDate   string     `json:"end_date"`
+		StartDate string     `json:"startDate"`
+		EndDate   string     `json:"endDate"`
 		Draw      int        `json:"draw"`
 		Filter    SavingType `json:"filter"`
 	}
@@ -29,8 +29,8 @@ type (
 		Search    string        `json:"search"`
 		Order     string        `json:"order" `
 		Sort      string        `json:"sort" `
-		StartDate string        `json:"start_date"`
-		EndDate   string        `json:"end_date"`
+		StartDate string        `json:"startDate"`
+		EndDate   string        `json:"endDate"`
 		Draw      int           `json:"draw"`
 		Filter    SavingSegment `json:"filter"`
 	}
@@ -52,24 +52,24 @@ type (
 		Search    string            `json:"search"`
 		Order     string            `json:"order" `
 		Sort      string            `json:"sort" `
-		StartDate string            `json:"start_date"`
-		EndDate   string            `json:"end_date"`
+		StartDate string            `json:"startDate"`
+		EndDate   string            `json:"endDate"`
 		Draw      int               `json:"draw"`
 		Filter    SavingTransaction `json:"filter"`
 	}
 	SavingTransaction struct {
-		ID                    int     `json:"id"`
-		ReferenceNumber       string  `json:"referenceNumber"`
-		SavingReferenceNumber string  `json:"savingReferenceNumber"`
-		DcType                string  `json:"dcType"`
-		TransactionAmount     float64 `json:"transactionAmount"`
-		TransactionCode       string  `json:"transactionCode"`
-		AccountID             int     `json:"accountId"`
-		AccountNumber         string  `json:"accountNumber"`
-		LastBalance           float64 `json:"lastBalance"`
-		CreatedAt             string  `json:"createdAt"`
-		CreatedBy             string  `json:"createdBy"`
-		UpdatedAt             string  `json:"updatedAt"`
-		UpdatedBy             string  `json:"updatedBy"`
+		ID                     int     `json:"id"`
+		ReferenceNumber        string  `json:"referenceNumber"`
+		ReferenceNumberPartner string  `json:"referenceNumberPartner"`
+		DcType                 string  `json:"dcType"`
+		TransactionAmount      float64 `json:"transactionAmount"`
+		TransactionCode        string  `json:"transactionCode"`
+		AccountID              int     `json:"accountId"`
+		AccountNumber          string  `json:"accountNumber"`
+		LastBalance            float64 `json:"lastBalance"`
+		CreatedAt              string  `json:"createdAt"`
+		CreatedBy              string  `json:"createdBy"`
+		UpdatedAt              string  `json:"updatedAt"`
+		UpdatedBy              string  `json:"updatedBy"`
 	}
 )

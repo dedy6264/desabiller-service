@@ -71,21 +71,7 @@ type (
 		CreatedBy                  string  `json:"createdBy"`
 		UpdatedBy                  string  `json:"updatedBy"`
 	}
-	ReqGetProduct struct {
-		ID                   int       `json:"id"`
-		ProviderId           int       `json:"providerId"`
-		ProductProviderId    int       `json:"productProviderId"`
-		ProductCategoryId    int       `json:"productCategoryId"`
-		ProductTypeId        int       `json:"productTypeId"`
-		ProductName          string    `json:"productName"`
-		ProductCode          string    `json:"productCode"`
-		ProductAdminFee      float64   `json:"productAdminFee"`
-		ProductPrice         float64   `json:"productPrice"`
-		ProductMerchantFee   float64   `json:"productMerchantFee"`
-		ProductReferenceId   int       `json:"productReferenceId"`
-		ProductReferenceCode string    `json:"productReferenceCode"`
-		Filter               FilterReq `json:"filter"`
-	}
+
 	/////
 	RespGetProduct struct {
 		ID                         int     `json:"id"`

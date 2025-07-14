@@ -100,7 +100,7 @@ func (ctx product) GetProductReferenceCount(req models.ReqGetProductReference) (
 	}
 	return result, nil
 }
-func (ctx product) GetProduct(req models.ReqGetProductReference) (result models.ProductReference, err error) {
+func (ctx product) GetProductReference(req models.ReqGetProductReference) (result models.ProductReference, err error) {
 	query := `select
 	id,
 	product_reference_name,
