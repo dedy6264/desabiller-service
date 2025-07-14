@@ -164,6 +164,10 @@ func (svc HierarcyService) AddUserApp(ctx echo.Context) error {
 								CifPhone:   req.Filter.Phone,
 								CifEmail:   req.Filter.Email,
 								CifAddress: req.Filter.Address,
+								CreatedAt:  req.Filter.CreatedAt,
+								UpdatedAt:  req.Filter.CreatedAt,
+								CreatedBy:  req.Filter.CreatedBy,
+								UpdatedBy:  req.Filter.UpdatedBy,
 							},
 						}, Tx)
 						if err != nil {
@@ -177,6 +181,10 @@ func (svc HierarcyService) AddUserApp(ctx echo.Context) error {
 								AccountPin:      "",
 								Balance:         0,
 								SavingSegmentID: 2, //default 2
+								CreatedAt:       req.Filter.CreatedAt,
+								UpdatedAt:       req.Filter.CreatedAt,
+								CreatedBy:       req.Filter.CreatedBy,
+								UpdatedBy:       req.Filter.UpdatedBy,
 							},
 						}, Tx)
 						if err != nil {
@@ -199,6 +207,10 @@ func (svc HierarcyService) AddUserApp(ctx echo.Context) error {
 								City:           req.Filter.City,
 								Address:        req.Filter.Address,
 								Status:         req.Filter.Status,
+								CreatedAt:      req.Filter.CreatedAt,
+								UpdatedAt:      req.Filter.CreatedAt,
+								CreatedBy:      req.Filter.CreatedBy,
+								UpdatedBy:      req.Filter.UpdatedBy,
 							},
 						}, Tx)
 						if err != nil {

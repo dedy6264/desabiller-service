@@ -5,7 +5,6 @@ import (
 	"desabiller/configs"
 	"desabiller/models"
 	"desabiller/utils"
-	"fmt"
 	"strconv"
 	"time"
 )
@@ -69,14 +68,14 @@ func (ctx savingRepository) UpdateCif(req models.ReqGetCIF, tx *sql.Tx) (err err
 	return nil
 }
 func (ctx savingRepository) AddCif(req models.ReqGetCIF, tx *sql.Tx) (result models.CIF, err error) {
-	t := time.Now()
-	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
-	query := `insert into cifs (cif_name,cif_no_id,
-cif_type_id,
-cif_id_index,cif_phone,cif_email,cif_address,created_at,updated_at, created_by,  updated_by) values (?,?,?,?,?,?,?,?,?,?,?) returning id,cif_name,cif_no_id,
-cif_type_id,cif_phone,cif_email,cif_address,created_at,updated_at, created_by,  updated_by`
+
+	query := `insert into cifs (
+	cif_name,cif_no_id,
+	cif_type_id,
+	cif_id_index,cif_phone,cif_email,cif_address,created_at,updated_at, created_by,  updated_by) values (?,?,?,?,?,?,?,?,?,?,?) returning id,cif_name,cif_no_id,
+	cif_type_id,cif_phone,cif_email,cif_address,created_at,updated_at, created_by,  updated_by`
 	query = utils.QuerySupport(query)
-	fmt.Println(query, dbTime)
+	// fmt.Println(query, dbTime)
 	if tx != nil {
 		err = tx.QueryRow(query, req.Filter.CifName,
 			req.Filter.CifNoID,
@@ -148,7 +147,8 @@ cif_address,created_at, created_by, updated_at, updated_by from cifs where true`
 	if req.Filter.CifPhone != "" {
 		query += ` and cif_phone='` + req.Filter.CifPhone + `'`
 	}
-	err = ctx.repo.Db.QueryRow(query).Scan(&result.ID,
+	err = ctx.repo.Db.QueryRow(query).Scan(
+		&result.ID,
 		&result.CifName,
 		&result.CifNoID,
 		&result.CifTypeID,
