@@ -2,16 +2,14 @@ package trxrepo
 
 import (
 	"database/sql"
-	"desabiller/configs"
 	"desabiller/models"
 	"desabiller/utils"
 	"strconv"
-	"time"
 )
 
 // baru sampe sini mau update product reference code, perlu nambah field ti tb trx
 const insertQueryPos = `
-produproduct_provider_name,
+product_provider_name,
 product_provider_code,
 product_provider_price,
 product_provider_admin_fee,
@@ -173,7 +171,7 @@ func (ctx trxRepository) GetTrxs(req models.ReqGetTransaction) (result []models.
 	// 	limit, offset int
 	// )
 	query := ` select ` + getQueryPos +
-		` from biller_trxs where true `
+		` from transactions where true `
 	if req.Filter.ID != 0 {
 		query += ` and id= ` + strconv.Itoa(int(req.Filter.ID))
 	}
@@ -246,8 +244,8 @@ func (ctx trxRepository) GetTrxs(req models.ReqGetTransaction) (result []models.
 			&val.UserAppID,
 			&val.Username,
 			&val.CreatedAt,
-			&val.CreatedBy,
 			&val.UpdatedAt,
+			&val.CreatedBy,
 			&val.UpdatedBy,
 		)
 		val.Index = n
@@ -302,8 +300,8 @@ func (ctx trxRepository) InsertTrx(req models.ReqGetTransaction, tx *sql.Tx) (er
 			req.Filter.UserAppID,
 			req.Filter.Username,
 			req.Filter.CreatedAt,
-			req.Filter.CreatedBy,
 			req.Filter.UpdatedAt,
+			req.Filter.CreatedBy,
 			req.Filter.UpdatedBy,
 		)
 		if err != nil {
@@ -346,8 +344,8 @@ func (ctx trxRepository) InsertTrx(req models.ReqGetTransaction, tx *sql.Tx) (er
 			req.Filter.UserAppID,
 			req.Filter.Username,
 			req.Filter.CreatedAt,
-			req.Filter.CreatedBy,
 			req.Filter.UpdatedAt,
+			req.Filter.CreatedBy,
 			req.Filter.UpdatedBy,
 		)
 		if err != nil {
@@ -357,9 +355,8 @@ func (ctx trxRepository) InsertTrx(req models.ReqGetTransaction, tx *sql.Tx) (er
 	return nil
 }
 func (ctx trxRepository) UpdateTrx(req models.ReqGetTransaction, tx *sql.Tx) (err error) {
-	t := time.Now()
-	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
-	query := ` update biller_trxs set
+
+	query := ` update transactions set
 			product_provider_name=?,
 product_provider_code=?,
 product_provider_price=?,
@@ -383,8 +380,8 @@ status_desc=?,
 status_code_detail=?,
 status_message_detail=?,
 status_desc_detail=?,
-COALESCE(product_reference_id,0) as product_reference_id=?,
-COALESCE(product_reference_code,'') as product_reference_code=?,
+product_reference_id=?,
+ product_reference_code=?,
 customer_id=?,
 other_reff=?,
 other_customer_info=?,
@@ -435,8 +432,9 @@ updated_by=?
 			req.Filter.TransactionTotalAmount,
 			req.Filter.UserAppID,
 			req.Filter.Username,
-			dbTime,
+			req.Filter.UpdatedAt,
 			req.Filter.UpdatedBy,
+			req.Filter.ReferenceNumber,
 		)
 	} else {
 		_, err = ctx.repo.Db.Exec(query,
@@ -474,8 +472,9 @@ updated_by=?
 			req.Filter.TransactionTotalAmount,
 			req.Filter.UserAppID,
 			req.Filter.Username,
-			dbTime,
+			req.Filter.UpdatedAt,
 			req.Filter.UpdatedBy,
+			req.Filter.ReferenceNumber,
 		)
 	}
 

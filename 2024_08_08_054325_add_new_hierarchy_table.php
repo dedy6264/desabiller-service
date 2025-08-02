@@ -61,7 +61,7 @@ class AddNewHierarchyTable extends Migration
 
             $table->unsignedInteger('product_type_id');
             $table->foreign('product_type_id')->references('id')->on('product_types');
-            $table->string('product_type_name')->unique();
+            $table->string('product_type_name');
 
             $table->unsignedInteger('product_reference_id')->nullable() ;
             $table->string('product_reference_code')->nullable();

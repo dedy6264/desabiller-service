@@ -14,29 +14,32 @@ type (
 		Filter    UserApp `json:"filter"`
 	}
 	UserApp struct {
-		ID             int64  `json:"id" `
-		Username       string `json:"username"`
-		Password       string `json:"password"`
-		Name           string `json:"name"`
-		IdentityType   string `json:"identity_type"`
-		IdentityNumber string `json:"identity_number"`
-		Phone          string `json:"phone"`
-		Email          string `json:"email"`
-		Gender         string `json:"gender"`
-		Province       string `json:"province"`
-		City           string `json:"city"`
-		Address        string `json:"address"`
-		AccountID      int64  `json:"account_id"`
-		Status         string `json:"status"`
-		CreatedBy      string `json:"createdBy"`
-		UpdatedBy      string `json:"updatedBy"`
-		CreatedAt      string `json:"createdAt"`
-		UpdatedAt      string `json:"updatedAt"`
+		ID              int64   `json:"id" `
+		Username        string  `json:"username"`
+		Password        string  `json:"password"`
+		Name            string  `json:"name"`
+		IdentityType    string  `json:"identityType"`
+		IdentityNumber  string  `json:"identityNumber"`
+		Phone           string  `json:"phone"`
+		Email           string  `json:"email"`
+		Gender          string  `json:"gender"`
+		Province        string  `json:"province"`
+		City            string  `json:"city"`
+		Address         string  `json:"address"`
+		AccountID       int64   `json:"accountId"`
+		Status          string  `json:"status"`
+		CreatedBy       string  `json:"createdBy"`
+		UpdatedBy       string  `json:"updatedBy"`
+		CreatedAt       string  `json:"createdAt"`
+		UpdatedAt       string  `json:"updatedAt"`
+		AccountNumber   string  `json:"accountNumber"`
+		Balance         float64 `json:"balance"`
+		SavingSegmentID int64   `json:"savingSegmentId"`
 	}
 
 	RespGetUserApp struct {
-		RecordsTotal    int64     `json:"records_total"`
-		RecordsFiltered int64     `json:"records_filtered"`
+		RecordsTotal    int64     `json:"recordsTotal"`
+		RecordsFiltered int64     `json:"recordsFiltered"`
 		Data            []UserApp `json:"data"`
 	}
 	ReqGetCIF struct {
@@ -53,13 +56,13 @@ type (
 	}
 	CIF struct {
 		ID         int64  `json:"id" `
-		CifName    string `json:"cif_name"`
-		CifNoID    string `json:"cif_no_id"`
-		CifTypeID  string `json:"cif_type_id"`
-		CifIDIndex string `json:"cif_id_index"`
-		CifPhone   string `json:"cif_phone"`
-		CifEmail   string `json:"cif_email"`
-		CifAddress string `json:"cif_address"`
+		CifName    string `json:"cifName"`
+		CifNoID    string `json:"cifNoId"`
+		CifTypeID  string `json:"cifTypeId"`
+		CifIDIndex string `json:"cifIdIndex"`
+		CifPhone   string `json:"cifPhone"`
+		CifEmail   string `json:"cifEmail"`
+		CifAddress string `json:"cifAddress"`
 		CreatedBy  string `json:"createdBy"`
 		UpdatedBy  string `json:"updatedBy"`
 		CreatedAt  string `json:"createdAt"`
@@ -79,11 +82,11 @@ type (
 	}
 	Account struct {
 		ID              int64   `json:"id" `
-		CifID           int64   `json:"cif_id"`
-		AccountNumber   string  `json:"account_number"`
-		AccountPin      string  `json:"account_pin"`
+		CifID           int64   `json:"cifId"`
+		AccountNumber   string  `json:"accountNumber"`
+		AccountPin      string  `json:"accountPin"`
 		Balance         float64 `json:"balance"`
-		SavingSegmentID int64   `json:"saving_segment_id"`
+		SavingSegmentID int64   `json:"savingSegmentId"`
 		CreatedBy       string  `json:"createdBy"`
 		UpdatedBy       string  `json:"updatedBy"`
 		CreatedAt       string  `json:"createdAt"`
@@ -105,17 +108,17 @@ type (
 		Username       string `json:"username"`
 		Password       string `json:"password"`
 		Name           string `json:"name"`
-		IdentityType   string `json:"identity_type"`
-		IdentityNumber string `json:"identity_number"`
+		IdentityType   string `json:"identityType"`
+		IdentityNumber string `json:"identityNumber"`
 		Phone          string `json:"phone"`
 		Email          string `json:"email"`
 		Gender         string `json:"gender"`
 		Province       string `json:"province"`
 		City           string `json:"city"`
 		Address        string `json:"address"`
-		AccountID      int64  `json:"account_id"`
+		AccountID      int64  `json:"accountId"`
 		Status         string `json:"status"`
-		AccountNumber  string `json:"account_number"`
+		AccountNumber  string `json:"accountNumber"`
 		IsSetPin       string `json:"isSetPin"`
 	}
 )

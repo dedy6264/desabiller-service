@@ -20,9 +20,7 @@ type (
 		Url                     string `json:"url"`
 		ProductReferenceCode    string `json:"productReferenceCode"`
 	}
-	ReqAviceTrx struct {
-		ReferenceNumber string `json:"referenceNumber" validate:"required"`
-	}
+	
 	ReqGetTrx struct {
 		Id                         int       `json:"id"` //
 		ProductReferenceId         int       `json:"productReferenceId"`
@@ -87,31 +85,8 @@ type (
 		UpdatedAt               string `json:"updatedAt"`
 		UpdatedBy               string `json:"updatedBy"`
 	}
-	ReqPaymentTrx struct {
-		PaymentMethodId         string `json:"paymentMethodId"`
-		PaymentMethodName       string `json:"paymentMethodName"`
-		ReferenceNumber         string `json:"referenceNumber"`
-		ProviderReferenceNumber string `json:"providerReferenceNumber"`
-		AccountNumber           string `json:"accountNumber"`
-		AccountPIN              string `json:"accounrPin"`
-	}
-	RespPayment struct { //jelasin produknya
-		CreatedAt              string      `json:"createdAt"`
-		MerchantOutletName     string      `json:"merchantOutletName"`
-		MerchantOutletUsername string      `json:"merchantOutletUsername"`
-		ReferenceNumber        string      `json:"referenceNumber"`
-		ProductName            string      `json:"productName"`
-		ProductCode            string      `json:"productCode"`
-		ProductCategoryId      int         `json:"productCategoryId"`
-		ProductCategoryName    string      `json:"productCategoryName"`
-		SubscriberNumber       string      `json:"subscriberNumber"`
-		ProductPrice           float64     `json:"productPrice"`
-		ProductAdminFee        float64     `json:"productAdminFee"`
-		ProductMerchantFee     float64     `json:"productMerchantFee"`
-		TotalTrxAmount         float64     `json:"totalTrxAmount"`
-		BillInfo               interface{} `json:"billInfo"` //jelasin tagihan/detil produk
-
-	}
+	
+	
 	RespInquiry struct {
 		StatusMessage          string      `json:"statusMessage"`
 		CreatedAt              string      `json:"createdAt"`
@@ -127,15 +102,7 @@ type (
 		TotalTrxAmount         float64     `json:"totalTrxAmount"`
 		BillInfo               interface{} `json:"billInfo"` //jelasin tagihan/detil produk
 	}
-	ReqInquiry struct {
-		ProductCode     string          `json:"productCode"`
-		AdditionalField AdditionalField `json:"additionalField"`
-	}
-	AdditionalField struct {
-		Periode          int    `json:"periode"`
-		SubscriberNumber string `json:"SubscriberNumber"`
-		SubscriberName   string `json:"SubscriberName"`
-	}
+	
 
 	BillInfoBPJS struct {
 		BillDesc struct {

@@ -29,6 +29,9 @@ type (
 	RespGetAccount struct {
 		ID              int     `json:"id"`
 		CifID           int     `json:"cifId"`
+		CifName         string  `json:"cifName"`
+		CifPhone        string  `json:"cifPhone"`
+		CifEmail        string  `json:"cifEmail"`
 		AccountNumber   string  `json:"accountNumber"`
 		Balance         float64 `json:"balance"`
 		SavingSegmentID int     `json:"savingSegmentId"`

@@ -1,0 +1,31 @@
+1. function service utama format:
+    errorLog
+    response
+    return response
+2. function child, worker, helper
+    return result & err
+
+
+
+
+Needed:
+1. Api Login(done)
+    -token
+2. Api get user (done)
+    -Data User:
+        a. username
+        b. name
+        c. identity_type
+        d. identity_number
+        e. phone
+        f. email
+        g. gender
+3. Api history
+    -list data trx success, Pending & failed
+4. Api trx detail
+    -data trx
+5. api advice
+    -advice by trx number
+6. api inquiry
+7. api utils - get operator
+8. api payment

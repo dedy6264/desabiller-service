@@ -5,6 +5,7 @@ import (
 	"desabiller/configs"
 	"desabiller/models"
 	"desabiller/utils"
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -170,22 +171,40 @@ func DataRowUserApp(rows *sql.Rows) (result []models.UserApp, err error) {
 	return result, nil
 }
 func (ctx hierarchy) GetUserApp(req models.ReqGetUserApp) (result models.UserApp, err error) {
-	query := `select ` + userapp + ` from user_apps where true `
+	query := `select 
+	a.id, 
+	a.username,
+	a.password,
+	a.name,
+	a.identity_type,
+	a.identity_number,
+	a.phone,
+	a.email,
+	a.gender,
+	a.province,
+	a.city,
+	a.address,
+	a.account_id,
+	a.status, a.created_at, a.created_by, a.updated_at, a.updated_by,
+	b.account_number, b.balance, b.saving_segment_id
+	from user_apps as a
+	join accounts as b on b.id=a.account_id where true `
 	if req.Filter.ID != 0 {
-		query += ` and id =` + strconv.Itoa(int(req.Filter.ID))
+		query += ` and a.id =` + strconv.Itoa(int(req.Filter.ID))
 	}
 	if req.Filter.Username != "" {
-		query += ` and username ='` + req.Filter.Username + `'`
+		query += ` and a.username ='` + req.Filter.Username + `'`
 	}
 	if req.Filter.Email != "" {
-		query += ` and email ='` + req.Filter.Email + `'`
+		query += ` and a.email ='` + req.Filter.Email + `'`
 	}
 	if req.Filter.Name != "" {
-		query += ` and name ='` + req.Filter.Name + `'`
+		query += ` and a.name ='` + req.Filter.Name + `'`
 	}
 	if req.Filter.IdentityNumber != "" {
-		query += ` and identity_number ='` + req.Filter.IdentityNumber + `'`
+		query += ` and a.identity_number ='` + req.Filter.IdentityNumber + `'`
 	}
+	fmt.Println("GetUserApp query: ", query)
 	err = ctx.repo.Db.QueryRow(query).Scan(
 		&result.ID,
 		&result.Username,
@@ -205,6 +224,9 @@ func (ctx hierarchy) GetUserApp(req models.ReqGetUserApp) (result models.UserApp
 		&result.CreatedBy,
 		&result.UpdatedAt,
 		&result.UpdatedBy,
+		&result.AccountNumber,
+		&result.Balance,
+		&result.SavingSegmentID,
 	)
 	if err != nil {
 		return result, err

@@ -8,6 +8,7 @@ import (
 	"desabiller/utils"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo"
 )
@@ -15,6 +16,8 @@ import (
 func (svc providerServices) AddProduct(ctx echo.Context) error {
 	var (
 		svcName = "AddProduct"
+		t       = time.Now()
+		dbTime  = t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	)
 	req := new(models.ReqGetProduct)
 	_, err := helpers.BindValidate(req, ctx)
@@ -33,6 +36,10 @@ func (svc providerServices) AddProduct(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	req.Filter.ProductName = strings.ToUpper(req.Filter.ProductName)
+	req.Filter.CreatedAt = dbTime
+	req.Filter.UpdatedAt = dbTime
+	req.Filter.CreatedBy = "sys"
+	req.Filter.UpdatedBy = "sys"
 	_, err = svc.services.RepoProduct.AddProduct(*req)
 	if err != nil {
 		utils.Log("AddProduct", svcName, err)
@@ -102,6 +109,8 @@ func (svc providerServices) DropProduct(ctx echo.Context) error {
 func (svc providerServices) UpdateProduct(ctx echo.Context) error {
 	var (
 		svcName = "UpdateProduct"
+		t       = time.Now()
+		dbTime  = t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	)
 	req := new(models.ReqGetProduct)
 	_, err := helpers.BindValidate(req, ctx)
@@ -111,6 +120,8 @@ func (svc providerServices) UpdateProduct(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	req.Filter.ProductName = strings.ToUpper(req.Filter.ProductName)
+	req.Filter.UpdatedAt = dbTime
+	req.Filter.UpdatedBy = "sys"
 	_, err = svc.services.RepoProduct.UpdateProduct(*req)
 	if err != nil {
 		utils.Log("UpdateProduct", svcName, err)

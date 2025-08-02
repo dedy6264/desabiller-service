@@ -7,6 +7,7 @@ type (
 		PaymentStatusMsg           string                 `json:"paymentStatusMsg"`
 		PaymentStatusDetail        string                 `json:"paymentStatusDetail"`
 		PaymentStatusDescDetail    string                 `json:"paymentStatusDescDetail"`
+		PaymentStatusMsgDetail     string                 `json:"paymentStatusMsgDetail"`
 		TrxReferenceNumber         string                 `json:"trxReferenceNumber"`
 		TrxProviderReferenceNumber string                 `json:"trxProviderReferenceNumber"`
 		TotalTrxAmount             float64                `json:"totalTrxAmount"`

@@ -28,7 +28,6 @@ func setupConnection() (*sql.DB, error) {
 	if err != nil {
 		return db, errors.New("Connection closed: Failed Connect Database")
 	}
-
 	return db, nil
 }
 

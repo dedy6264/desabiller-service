@@ -138,6 +138,7 @@ func (svc savingServices) UpdateAccount(ctx echo.Context) error {
 	var (
 		svcName = "UpdateAccount"
 		t       = time.Now()
+		pin     string
 		dbTime  = t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	)
 	req := new(models.ReqGetAccountSaving)
@@ -148,7 +149,7 @@ func (svc savingServices) UpdateAccount(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	if req.Filter.AccountPin != "" {
-		req.Filter.AccountPin, err = helpers.PassEncrypt(req.Filter.AccountPin)
+		pin, err = helpers.PassEncrypt(req.Filter.AccountPin)
 		if err != nil {
 			utils.Log(" PassEncrypt", svcName, err)
 			result := helpers.ResponseJSON(configs.FALSE_VALUE,
@@ -159,7 +160,18 @@ func (svc savingServices) UpdateAccount(ctx echo.Context) error {
 	}
 	req.Filter.UpdatedAt = dbTime
 	req.Filter.UpdatedBy = "sys"
-	err = svc.services.SavingRepo.UpdateAccount(*req, nil)
+	err = svc.services.SavingRepo.UpdateAccount(models.ReqGetAccountSaving{
+		Filter: models.Account{
+			ID:              req.Filter.ID,
+			CifID:           req.Filter.CifID,
+			AccountNumber:   req.Filter.AccountNumber,
+			AccountPin:      pin,
+			Balance:         req.Filter.Balance,
+			SavingSegmentID: req.Filter.SavingSegmentID,
+			UpdatedAt:       req.Filter.UpdatedAt,
+			UpdatedBy:       req.Filter.UpdatedBy,
+		},
+	}, nil)
 	if err != nil {
 		utils.Log(" UpdateAccount", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_SYSTEM_ERROR[0],

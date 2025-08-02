@@ -5,6 +5,7 @@ import (
 	"desabiller/helpers"
 	"desabiller/models"
 	"desabiller/utils"
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -99,5 +100,38 @@ func (svc AdministrationService) Login(ctx echo.Context) error {
 	result := helpers.ResponseJSON(false, configs.RC_SUCCESS[0],
 		configs.RC_SUCCESS[1],
 		configs.RC_SUCCESS[1], resultSvc)
+	return ctx.JSON(http.StatusOK, result)
+}
+func (svc AdministrationService) GetToken(ctx echo.Context) error {
+	var (
+		svcName    = "GetToken"
+		url        = configs.DevUrl + "/api/getToken"
+		respWorker models.GetToken
+	)
+	sign := helpers.SignatureGenerator()
+	respByte, _, err := utils.WorkerPostWithSignature(url, sign, nil, "json")
+	if err != nil {
+		utils.Log("WorkerPostWithSignature", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_FAILED[0], configs.RC_FAILED[1], "Failed", nil)
+		return ctx.JSON(http.StatusOK, result)
+	} else {
+		err = json.Unmarshal(respByte, &respWorker)
+		if err != nil {
+			utils.Log("Unmarshal", svcName, err)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_INQUIRY_FAILED[0], configs.RC_INQUIRY_FAILED[1], "Failed", nil)
+			return ctx.JSON(http.StatusOK, result)
+		}
+		//converter
+		// code, msg, _ := helpers.ResponseConverter(respWorker.ResponseCode, respWorker.ResponseMessage, true)
+		// statusCode = code
+		// statusMsg = "INQUIRY"
+		// statusDesc = msg
+		// statusCodeDetail = respWorker.ResponseCode
+		// statusMsgDetail = respWorker.ResponseMessage
+		// statusDescDetail = respWorker.ResponseMessage
+	}
+	result := helpers.ResponseJSON(false, configs.RC_SUCCESS[0],
+		configs.RC_SUCCESS[1],
+		configs.RC_SUCCESS[1], nil)
 	return ctx.JSON(http.StatusOK, result)
 }

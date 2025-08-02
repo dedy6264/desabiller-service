@@ -21,15 +21,13 @@ var (
 	// MONGOHost  = GetEnv("MONGO_HOST")
 	// MONGOPort  = GetEnv("MONGO_PORT")
 	// MONGODBDEV = MONGO_DB_DEV
-	APPPort            = GetEnv("APP_PORT")
-	IakApiKey          = GetEnv("IAK_API_KEY")
-	IakMD5Key          = GetEnv("IAK_MD5_KEY")
-	IakProdUrlPostpaid = GetEnv("IAK_PROD_URL_POSTPAID")
-	IakProdUrlPrepaid  = GetEnv("IAK_PROD_URL_PREPAID")
-	IakDevUrlPostpaid  = GetEnv("IAK_DEV_URL_POSTPAID")
-	IakDevUrlPrepaid   = GetEnv("IAK_DEV_URL_PREPAID")
-	IakUsername        = GetEnv("IAK_USERNAME")
-	TrxPaymentPending  = GetEnv("TRX_PAYMENT_PENDING")
+	APPPort = GetEnv("APP_PORT")
+
+	ProdUrl  = GetEnv("PROVIDER_PROD_URL")
+	DevUrl   = GetEnv("PROVIDER_DEV_URL")
+	LocalUrl = GetEnv("PROVIDER_LOCAL_URL")
+
+	TrxPaymentPending = GetEnv("TRX_PAYMENT_PENDING")
 )
 
 func GetEnv(key string, value ...string) string {

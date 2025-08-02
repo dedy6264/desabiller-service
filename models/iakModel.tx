@@ -22,8 +22,8 @@ type (
 		Data struct {
 			RefID       string `json:"ref_id"`
 			Status      string `json:"status"`
-			ProductCode string `json:"product_code"`
-			CustomerID  string `json:"customer_id"`
+			ProductCode string `json:"productCode"`
+			CustomerID  string `json:"customerId"`
 			Price       string `json:"price"`
 			Message     string `json:"message"`
 			Sn          string `json:"sn"`
@@ -36,24 +36,24 @@ type (
 	}
 
 	ReqPaymentPrepaidIak struct {
-		CustomerId  string `json:"customer_id"`
-		ProductCode string `json:"product_code"`
+		CustomerId  string `json:"customerId"`
+		ProductCode string `json:"productCode"`
 		RefId       string `json:"ref_id"`
 		Username    string `json:"username"`
 		Sign        string `json:"sign"`
 	}
 	ReqInqIak struct {
 		Commands             string `json:"commands"`
-		ProductCode          string `json:"product_code"`
-		CustomerId           string `json:"customer_id"`
+		ProductCode          string `json:"productCode"`
+		CustomerId           string `json:"customerId"`
 		RefId                string `json:"ref_id"`
 		Url                  string `json:"url"`
 		Month                string `json:"month"`
 		ProductReferenceCode string `json:"productReferenceCode"`
 	}
 	ReqPaymentIak struct {
-		ProductCode string `json:"product_code"`
-		CustomerId  string `json:"customer_id"`
+		ProductCode string `json:"productCode"`
+		CustomerId  string `json:"customerId"`
 		RefId       string `json:"ref_id"`
 	}
 	ReqCheckStatusPostpaidIak struct {
@@ -96,8 +96,8 @@ type (
 		Data struct {
 			RefID       string `json:"ref_id"`
 			Status      int    `json:"status"`
-			ProductCode string `json:"product_code"`
-			CustomerID  string `json:"customer_id"`
+			ProductCode string `json:"productCode"`
+			CustomerID  string `json:"customerId"`
 			Price       int    `json:"price"`
 			Message     string `json:"message"`
 			Balance     int    `json:"balance"`
@@ -213,8 +213,8 @@ type (
 		Data struct {
 			RefID       string `json:"ref_id"`
 			Status      int    `json:"status"`
-			ProductCode string `json:"product_code"`
-			CustomerID  string `json:"customer_id"`
+			ProductCode string `json:"productCode"`
+			CustomerID  string `json:"customerId"`
 			Price       int    `json:"price"`
 			Message     string `json:"message"`
 			Sn          string `json:"sn"`

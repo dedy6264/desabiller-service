@@ -76,14 +76,13 @@ type (
 	}
 	Product struct {
 		ID                         int     `json:"id"`
-		ProviderID                 int     `json:"providerId"`
-		ProductProviderID          int     `json:"productProviderId"`
 		ProductProviderName        string  `json:"productProviderName"`
 		ProductProviderCode        string  `json:"productProviderCode"`
 		ProductProviderPrice       float64 `json:"productProviderPrice"`
 		ProductProviderAdminFee    float64 `json:"productProviderAdminFee"`
 		ProductProviderMerchantFee float64 `json:"productProviderMerchantFee"`
 		ProductCategoryID          int     `json:"productCategoryId"`
+		ProductCategoryName        string  `json:"productCategoryName"`
 		ProductTypeID              int     `json:"productTypeId"`
 		ProductTypeName            string  `json:"productTypeName"`
 		ProductName                string  `json:"productName"`

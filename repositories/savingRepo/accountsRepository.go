@@ -5,6 +5,8 @@ import (
 	"desabiller/configs"
 	"desabiller/models"
 	"desabiller/utils"
+	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -33,6 +35,8 @@ func (ctx savingRepository) DropAccount(id int, tx *sql.Tx) (err error) {
 func (ctx savingRepository) UpdateAccount(req models.ReqGetAccountSaving, tx *sql.Tx) (err error) {
 	t := time.Now()
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
+	dd, _ := json.Marshal(req.Filter)
+	fmt.Println("UpdateAccount dbTime: ", string(dd))
 	if req.Filter.AccountPin == "" {
 		query := `update accounts set 
 					cif_id=?,
@@ -44,6 +48,8 @@ func (ctx savingRepository) UpdateAccount(req models.ReqGetAccountSaving, tx *sq
 					where id = ?
 					`
 		query = utils.QuerySupport(query)
+		fmt.Println("UpdateAccount query: ", query)
+
 		if tx != nil {
 			_, err = tx.Exec(query,
 				req.Filter.CifID,
@@ -69,7 +75,7 @@ func (ctx savingRepository) UpdateAccount(req models.ReqGetAccountSaving, tx *sq
 		where id = ?
 		`
 		query = utils.QuerySupport(query)
-
+		fmt.Println("UpdateAccount query: ", query)
 		if tx != nil {
 			_, err = tx.Exec(query, req.Filter.CifID,
 				req.Filter.AccountNumber,
@@ -172,19 +178,31 @@ cif_id,account_number,balance,saving_segment_id,COALESCE(account_pin,'') as acco
 	return result, nil
 }
 func (ctx savingRepository) GetAccounts(req models.ReqGetAccountSaving) (result []models.RespGetAccount, err error) {
-	query := `select id,
-cif_id,account_number,balance,saving_segment_id,created_at, created_by, updated_at, updated_by from accounts where true `
+	query := `select 
+	a.id,
+	a.cif_id,
+	b.cif_name,
+	b.cif_phone,
+	b.cif_email,
+	a.account_number,
+	a.balance,
+	a.saving_segment_id,
+	a.created_at,
+	a.created_by,
+	a.updated_at,
+	a.updated_by from accounts as a
+	join cifs as b on b.id = a.cif_id where true `
 	if req.Filter.ID != 0 {
-		query += ` and id = ` + strconv.Itoa(int(req.Filter.ID))
+		query += ` and a.id = ` + strconv.Itoa(int(req.Filter.ID))
 	}
 	if req.Filter.CifID != 0 {
-		query += ` and cif_id =` + strconv.Itoa(int(req.Filter.CifID))
+		query += ` and a.cif_id =` + strconv.Itoa(int(req.Filter.CifID))
 	}
 	if req.Filter.SavingSegmentID != 0 {
-		query += ` and saving_segment_id =` + strconv.Itoa(int(req.Filter.SavingSegmentID))
+		query += ` and a.saving_segment_id =` + strconv.Itoa(int(req.Filter.SavingSegmentID))
 	}
 	if req.Filter.AccountNumber != "" {
-		query += ` and account_number='` + req.Filter.AccountNumber + `'`
+		query += ` and a.account_number='` + req.Filter.AccountNumber + `'`
 	}
 	if req.Lenght != 0 {
 		query += ` limit  ` + strconv.Itoa(int(req.Lenght)) + `  offset  ` + strconv.Itoa(int(req.Start))
@@ -192,9 +210,10 @@ cif_id,account_number,balance,saving_segment_id,created_at, created_by, updated_
 		if req.Order != "" {
 			query += `  order by '` + req.Order + `' asc`
 		} else {
-			query += `  order by id asc`
+			query += `  order by a.id asc`
 		}
 	}
+	fmt.Println("GetAccounts query: ", query)
 	rows, err := ctx.repo.Db.Query(query)
 	if err != nil {
 		return result, err
@@ -216,6 +235,9 @@ func AccountDataRow(rows *sql.Rows) (result []models.RespGetAccount, err error) 
 		err := rows.Scan(
 			&val.ID,
 			&val.CifID,
+			&val.CifName,
+			&val.CifPhone,
+			&val.CifEmail,
 			&val.AccountNumber,
 			&val.Balance,
 			&val.SavingSegmentID,

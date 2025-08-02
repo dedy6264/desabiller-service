@@ -4,6 +4,7 @@ import (
 	"desabiller/configs"
 	"desabiller/models"
 	iakworkerservice "desabiller/services/IAKWorkerService"
+	"desabiller/utils"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,36 +13,33 @@ import (
 )
 
 func (svc trxService) InqProviderSwitcher(req models.ProviderInqRequest) (respWorker models.ResponseWorkerInquiry, err error) {
-	switch req.ProviderName {
-	case "IAK":
-		switch req.ProductReferenceId {
-		case 8:
-			respWorker, err = iakworkerservice.IakBPJSWorkerInquiry(models.ReqInqIak{
-				ProductCode: req.ProductCode,
-				CustomerId:  req.SubscriberNumber,
-				RefId:       req.ReferenceNumber,
-				Url:         req.Url,
-				Month:       strconv.Itoa(req.Periode),
-			})
-		case 9:
-			respWorker, err = iakworkerservice.IakPLNPostpaidWorkerInquiry(models.ReqInqIak{
-				ProductCode: req.ProductCode,
-				CustomerId:  req.SubscriberNumber,
-				RefId:       req.ReferenceNumber,
-				Url:         req.Url,
-				Month:       strconv.Itoa(req.Periode),
-			})
-		case 10:
-			respWorker, err = iakworkerservice.IakPLNPrepaidWorkerInquiry(models.ReqInqIak{
-				ProductCode: req.ProductCode,
-				CustomerId:  req.SubscriberNumber,
-				RefId:       req.ReferenceNumber,
-				Url:         req.Url,
-				Month:       strconv.Itoa(req.Periode),
-			})
-		default:
-			err = errors.New("invalid product clan")
-		}
+	switch req.ProductReferenceId {
+	case 8:
+		respWorker, err = iakworkerservice.IakBPJSWorkerInquiry(models.ReqInqIak{
+			ProductCode: req.ProductCode,
+			CustomerId:  req.SubscriberNumber,
+			RefId:       req.ReferenceNumber,
+			Url:         req.Url,
+			Month:       strconv.Itoa(req.Periode),
+		})
+	// case 9:
+	// 	respWorker, err = iakworkerservice.IakPLNPostpaidWorkerInquiry(models.ReqInqIak{
+	// 		ProductCode: req.ProductCode,
+	// 		CustomerId:  req.SubscriberNumber,
+	// 		RefId:       req.ReferenceNumber,
+	// 		Url:         req.Url,
+	// 		Month:       strconv.Itoa(req.Periode),
+	// 	})
+	// case 10:
+	// 	respWorker, err = iakworkerservice.IakPLNPrepaidWorkerInquiry(models.ReqInqIak{
+	// 		ProductCode: req.ProductCode,
+	// 		CustomerId:  req.SubscriberNumber,
+	// 		RefId:       req.ReferenceNumber,
+	// 		Url:         req.Url,
+	// 		Month:       strconv.Itoa(req.Periode),
+	// 	})
+	default:
+		err = errors.New("invalid product clan")
 	}
 	return
 }
@@ -98,4 +96,21 @@ func (svc trxService) CheckStatusProviderSwitcher(req models.ProviderInqRequest)
 	}
 	fmt.Println(req.ProductReferenceId)
 	return
+}
+func (svc trxService) InqWorker(req models.ProviderInqRequest) {
+	type ReqProvider struct {
+		ProductCode             string `json:"productCode"`
+		ReferenceNumber         string `json:"referenceNumber"`
+		ReferenceNumberMerchant string `json:"referenceNumber_merchant"`
+		CustomerID              string `json:"customerId"`
+		Periode                 string `json:"periode"`
+	}
+	reqworker := ReqProvider{
+		ProductCode:             req.ProductCode,
+		ReferenceNumberMerchant: req.ReferenceNumber,
+		CustomerID:              req.SubscriberNumber,
+		Periode:                 strconv.Itoa(req.Periode),
+	}
+	resp, _, err := utils.WorkerPostWithBearer(req.Url, "", reqworker, "json")
+
 }

@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"desabiller/models"
 	"desabiller/utils"
-	"log"
 	"strconv"
 )
 
@@ -20,6 +19,7 @@ const fieldInsert = `
 		product_provider_admin_fee,
 		product_provider_merchant_fee,
 		product_category_id,
+		product_category_name,
 		product_type_id,
 		product_type_name,
 		product_reference_id,
@@ -34,7 +34,7 @@ func (ctx product) AddProduct(req models.ReqGetProduct) (result models.Product, 
 	query := ` insert into products (
 		` + fieldInsert + `
 		)
-		values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)  `
+		values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)  `
 	query = utils.QuerySupport(query)
 	_, err = ctx.repo.Db.Exec(query,
 		req.Filter.ProductName,
@@ -48,6 +48,7 @@ func (ctx product) AddProduct(req models.ReqGetProduct) (result models.Product, 
 		req.Filter.ProductProviderAdminFee,
 		req.Filter.ProductProviderMerchantFee,
 		req.Filter.ProductCategoryID,
+		req.Filter.ProductCategoryName,
 		req.Filter.ProductTypeID,
 		req.Filter.ProductTypeName,
 		req.Filter.ProductReferenceID,
@@ -59,14 +60,13 @@ func (ctx product) AddProduct(req models.ReqGetProduct) (result models.Product, 
 		req.Filter.UpdatedAt,
 	)
 	if err != nil {
-		log.Println("Error failed ", err.Error())
 		return result, err
 	}
 	return result, nil
 }
 func (ctx product) GetProducts(req models.ReqGetProduct) (result []models.Product, err error) {
 
-	query := `select
+	query := `select id,
 	` + fieldInsert + `
 	from products 
 	where true
@@ -83,18 +83,14 @@ func (ctx product) GetProducts(req models.ReqGetProduct) (result []models.Produc
 	if req.Filter.ProductTypeID != 0 {
 		query += ` and product_type_id = ` + strconv.Itoa(req.Filter.ProductTypeID)
 	}
-	if req.Filter.ProviderID != 0 {
-		query += ` and provider_id = ` + strconv.Itoa(req.Filter.ProviderID)
-	}
+
 	if req.Filter.ProductReferenceID != 0 {
 		query += ` and product_reference_id = ` + strconv.Itoa(req.Filter.ProductReferenceID)
 	}
 	if req.Filter.ProductReferenceCode != "" {
 		query += ` and product_reference_code = '` + req.Filter.ProductReferenceCode + `'`
 	}
-	if req.Filter.ProductProviderID != 0 {
-		query += ` and product_provider_id = ` + strconv.Itoa(req.Filter.ProductProviderID)
-	}
+
 	if req.Lenght != 0 {
 		query += ` limit  ` + strconv.Itoa(int(req.Lenght)) + `  offset  ` + strconv.Itoa(int(req.Start))
 	} else {
@@ -113,6 +109,7 @@ func (ctx product) GetProducts(req models.ReqGetProduct) (result []models.Produc
 	for rows.Next() {
 		var val models.Product
 		err := rows.Scan(
+			&val.ID,
 			&val.ProductName,
 			&val.ProductCode,
 			&val.ProductPrice,
@@ -155,7 +152,7 @@ func (ctx product) GetProductCount(req models.ReqGetProduct) (result int, err er
 	return result, nil
 }
 func (ctx product) GetProduct(req models.ReqGetProduct) (result models.Product, err error) {
-	query := `select` + fieldInsert + `
+	query := `select id,` + fieldInsert + ` from products 
 	where true
 	`
 	if req.Filter.ID != 0 {
@@ -164,25 +161,24 @@ func (ctx product) GetProduct(req models.ReqGetProduct) (result models.Product, 
 	if req.Filter.ProductName != "" {
 		query += ` and product_name = '` + req.Filter.ProductName + `'`
 	}
+	if req.Filter.ProductCode != "" {
+		query += ` and product_code = '` + req.Filter.ProductCode + `'`
+	}
 	if req.Filter.ProductCategoryID != 0 {
 		query += ` and product_category_id = ` + strconv.Itoa(req.Filter.ProductCategoryID)
 	}
 	if req.Filter.ProductTypeID != 0 {
 		query += ` and product_type_id = ` + strconv.Itoa(req.Filter.ProductTypeID)
 	}
-	if req.Filter.ProviderID != 0 {
-		query += ` and provider_id = ` + strconv.Itoa(req.Filter.ProviderID)
-	}
+
 	if req.Filter.ProductReferenceID != 0 {
 		query += ` and product_reference_id = ` + strconv.Itoa(req.Filter.ProductReferenceID)
 	}
 	if req.Filter.ProductReferenceCode != "" {
 		query += ` and product_reference_code = '` + req.Filter.ProductReferenceCode + `'`
 	}
-	if req.Filter.ProductProviderID != 0 {
-		query += ` and product_provider_id = ` + strconv.Itoa(req.Filter.ProductProviderID)
-	}
 	err = ctx.repo.Db.QueryRow(query).Scan(
+		&result.ID,
 		&result.ProductName,
 		&result.ProductCode,
 		&result.ProductPrice,
@@ -194,6 +190,7 @@ func (ctx product) GetProduct(req models.ReqGetProduct) (result models.Product, 
 		&result.ProductProviderAdminFee,
 		&result.ProductProviderMerchantFee,
 		&result.ProductCategoryID,
+		&result.ProductCategoryName,
 		&result.ProductTypeID,
 		&result.ProductTypeName,
 		&result.ProductReferenceID,
@@ -222,6 +219,7 @@ func (ctx product) UpdateProduct(req models.ReqGetProduct) (result models.Produc
 	product_provider_admin_fee=?,
 	product_provider_merchant_fee=?,
 	product_category_id=?,
+	product_category_name=?,
 	product_type_id=?,
 	product_type_name=?,
 	product_reference_id=?,
@@ -244,6 +242,7 @@ func (ctx product) UpdateProduct(req models.ReqGetProduct) (result models.Produc
 		req.Filter.ProductProviderAdminFee,
 		req.Filter.ProductProviderMerchantFee,
 		req.Filter.ProductCategoryID,
+		req.Filter.ProductCategoryName,
 		req.Filter.ProductTypeID,
 		req.Filter.ProductTypeName,
 		req.Filter.ProductReferenceID,

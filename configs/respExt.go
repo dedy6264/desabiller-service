@@ -44,6 +44,8 @@ var (
 	RC_FAILED_USER_NOT_FOUND    = []string{"32", "User tidak ditemukan"}
 	RC_FAILED_WRONG_PWD_USRNAME = []string{"33", "password/username salah"}
 	RC_FAILED_WRONG_OTP         = []string{"34", "OTP tidak valid	OTP salah / expired"}
+	RC_FAILED_WRONG_PIN         = []string{"35", "PIN tidak valid	PIN salah "}
+	RC_FAILED_UNSET_PIN         = []string{"36", "PIN belum di setel"}
 
 	RC_FAILED_DB_NOT_FOUND = []string{"82", "Not found"}
 )

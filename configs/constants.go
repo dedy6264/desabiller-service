@@ -17,12 +17,15 @@ const (
 	// KEY         = "MKPRetailDev2022"
 	KEY = "Des@Biller120824"
 
-	ENDPOINT_IAK_PREPAID         = "/api/top-up"
-	ENDPOINT_IAK_INQ_PLN_PREPAID = "/v1/legacy/index"
-	ENDPOINT_IAK_POSTPAID        = "/api/v1/bill/check"
-	TRX_TYPE_CREDIT              = "C"
-	TRX_TYPE_DEBET               = "D"
-	TRX_CODE_PURCHASING          = "100"
-	TRX_CODE_PAYMENT             = "150"
-	TRX_CODE_REVERSAL            = "300"
+	ENDPOINT_PROVIDER_INQUIRY = "/api/v1/inquiry"
+	ENDPOINT_PROVIDER_PAYMENT = "/api/v1/payment"
+
+	TRX_TYPE_CREDIT     = "C"
+	TRX_TYPE_DEBET      = "D"
+	TRX_CODE_PURCHASING = "100"
+	TRX_CODE_PAYMENT    = "150"
+	TRX_CODE_REVERSAL   = "300"
+	CID                 = 1
+	MKEY                = ""
+	TOKEN               = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXJjaGFudF9pZCI6IjEiLCJleHAiOjE3NTQxMTE2MTB9.9XfmskCFEBhMvTaMGNKQVUHiesnxpPO0pWC22Ajth5M"
 )

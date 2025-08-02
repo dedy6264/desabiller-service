@@ -105,10 +105,10 @@ type (
 		UpdatedBy              string `json:"updatedBy"`
 	}
 	DataToken struct {
-		MerchantOutletId       int    `json:"merchantOutletId"`
-		MerchantOutletUsername string `json:"merchantOutletUsername"`
-		MerchantOutletName     string `json:"merchantOutletName"`
-		MerchantId             int    `json:"merchantId"`
+		// MerchantOutletId       int    `json:"merchantOutletId"`
+		// MerchantOutletUsername string `json:"merchantOutletUsername"`
+		// MerchantOutletName     string `json:"merchantOutletName"`
+		UserAppId int `json:"userAppId"`
 	}
 	// //userOutlet
 	// ReqGetListUserOutlet struct {

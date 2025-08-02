@@ -4,12 +4,14 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/md5"
+	"crypto/sha1"
 	"desabiller/configs"
 	"desabiller/models"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -28,9 +30,9 @@ import (
 func TokenJWTDecode(ctx echo.Context) (data models.DataToken) {
 	user := ctx.Get("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
-	data.MerchantId = int(claims["merchantId"].(float64))
-	data.MerchantOutletId = int(claims["outletId"].(float64))
-	data.MerchantOutletName = claims["outletName"].(string)
+	data.UserAppId = int(claims["userAppId"].(float64))
+	// data.MerchantOutletId = int(claims["outletId"].(float64))
+	// data.MerchantOutletName = claims["outletName"].(string)
 	return data
 }
 func TokenJwtGenerate(uaid int) (tkn string, err error) {
@@ -47,6 +49,13 @@ func TokenJwtGenerate(uaid int) (tkn string, err error) {
 		return tkn, err
 	}
 	return t, nil
+}
+func SignatureGenerator() string {
+	stringToSHA1 := strconv.Itoa(configs.CID) + configs.MKEY
+	var sha = sha1.New()
+	sha.Write([]byte(stringToSHA1))
+	var encrypted = hex.EncodeToString(sha.Sum(nil))
+	return encrypted
 }
 
 // func TokenJwtGenerateDashboard(uID int) (tkn string, err error) {
@@ -86,6 +95,7 @@ func PassEncrypt(pswrd string) (result string, err error) {
 }
 func PassCheck(reqpswrd string, pssword string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(reqpswrd), []byte(pssword))
+	fmt.Println("::::::CHECK", reqpswrd, pssword)
 	fmt.Println("::::::CHECK", err)
 	return err
 }
