@@ -67,6 +67,7 @@ type TrxRepo interface {
 	GetTrx(req models.ReqGetTransaction) (result models.RespGetTrx, err error)
 	GetTrxCount(req models.ReqGetTransaction) (result int, err error)
 	GetTrxs(req models.ReqGetTransaction) (result []models.RespGetTrx, err error)
+	GetPaymentTrxs(req models.ReqGetTransaction) (result []models.RespGetTrx, err error)
 	InsertTrx(req models.ReqGetTransaction, tx *sql.Tx) (err error)
 	UpdateTrx(req models.ReqGetTransaction, tx *sql.Tx) (err error)
 

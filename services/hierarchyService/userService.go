@@ -14,8 +14,11 @@ func (svc HierarcyService) GetUser(ctx echo.Context) error {
 	var (
 		svcName = "GetUser"
 		respSvc models.ResponseList
+		data    models.DataToken
 	)
-	data := helpers.TokenJWTDecode(ctx)
+	if ctx.Get("user") != nil {
+		data = helpers.TokenJWTDecode(ctx)
+	}
 	resUserApp, err := svc.service.RepoHierarchy.GetUserApp(models.ReqGetUserApp{
 		Filter: models.UserApp{
 			ID: int64(data.UserAppId),

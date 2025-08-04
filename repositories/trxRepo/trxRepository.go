@@ -110,6 +110,9 @@ func (ctx trxRepository) GetTrx(req models.ReqGetTransaction) (result models.Res
 	if req.Filter.CustomerID != "" {
 		query += ` and customer_id= '` + req.Filter.CustomerID + `'`
 	}
+	if req.Filter.UserAppID != 0 {
+		query += ` and user_app_id='` + strconv.Itoa(int(req.Filter.UserAppID)) + `'`
+	}
 	err = ctx.repo.Db.QueryRow(query).Scan(
 		&result.Id,
 		&result.ProductProviderName,
@@ -158,11 +161,108 @@ func (ctx trxRepository) GetTrx(req models.ReqGetTransaction) (result models.Res
 }
 func (ctx trxRepository) GetTrxCount(req models.ReqGetTransaction) (result int, err error) {
 	query := ` select count(*) from transactions where true `
+	if req.Filter.UserAppID != 0 {
+		query += ` and user_app_id='` + strconv.Itoa(int(req.Filter.UserAppID)) + `'`
+	}
 	err = ctx.repo.Db.QueryRow(query).Scan(
 		&result,
 	)
 	if err != nil {
 		return result, err
+	}
+	return result, nil
+}
+func (ctx trxRepository) GetPaymentTrxs(req models.ReqGetTransaction) (result []models.RespGetTrx, err error) {
+	// var (
+	// 	limit, offset int
+	// )
+	query := ` select ` + getQueryPos +
+		` from transactions where true and status_code in ('00','02','03') `
+	if req.Filter.ID != 0 {
+		query += ` and id= ` + strconv.Itoa(int(req.Filter.ID))
+	}
+	if req.Filter.ProductCategoryID != 0 {
+		query += ` and product_category_id= ` + strconv.Itoa(int(req.Filter.ProductCategoryID))
+	}
+	if req.Filter.ProductName != "" {
+		query += ` and product_name= '` + req.Filter.ProductName + `'`
+	}
+	if req.Filter.ReferenceNumber != "" {
+		query += ` and reference_number= '` + req.Filter.ReferenceNumber + `'`
+	}
+	if req.Filter.CustomerID != "" {
+		query += ` and customer_id= '` + req.Filter.CustomerID + `'`
+	}
+	if req.Filter.UserAppID != 0 {
+		query += ` and user_app_id='` + strconv.Itoa(int(req.Filter.UserAppID)) + `'`
+	}
+	if req.Lenght != 0 {
+		query += ` order by updated_at desc limit  ` + strconv.Itoa(int(req.Lenght)) + `  offset  ` + strconv.Itoa(int(req.Start))
+	} else {
+		if req.Order != "" {
+			query += `  order by '` + req.Order + `' asc`
+		} else {
+			query += `  order by id asc`
+		}
+	}
+	rows, err := ctx.repo.Db.Query(query)
+	if err != nil {
+		return result, err
+	}
+	defer rows.Close()
+	n := 1
+	for rows.Next() {
+		var val models.RespGetTrx
+		err = rows.Scan(
+			&val.Id,
+			&val.ProductProviderName,
+			&val.ProductProviderCode,
+			&val.ProductProviderPrice,
+			&val.ProductProviderAdminFee,
+			&val.ProductProviderMerchantFee,
+			&val.ProductID,
+			&val.ProductName,
+			&val.ProductCode,
+			&val.ProductPrice,
+			&val.ProductAdminFee,
+			&val.ProductMerchantFee,
+			&val.ProductCategoryID,
+			&val.ProductCategoryName,
+			&val.ProductTypeID,
+			&val.ProductTypeName,
+			&val.ReferenceNumber,
+			&val.ProviderReferenceNumber,
+			&val.StatusCode,
+			&val.StatusMessage,
+			&val.StatusDesc,
+			&val.StatusCodeDetail,
+			&val.StatusMessageDetail,
+			&val.StatusDescDetail,
+			&val.ProductReferenceID,
+			&val.ProductReferenceCode,
+			&val.CustomerID,
+			&val.OtherReff,
+			&val.OtherCustomerInfo,
+			&val.SavingAccountName,
+			&val.SavingAccountID,
+			&val.SavingAccountNumber,
+			&val.TransactionTotalAmount,
+			&val.UserAppID,
+			&val.Username,
+			&val.CreatedAt,
+			&val.UpdatedAt,
+			&val.CreatedBy,
+			&val.UpdatedBy,
+		)
+		val.Index = n
+		n++
+		if err != nil {
+			return result, err
+		}
+		result = append(result, val)
+	}
+	if len(result) == 0 {
+		return result, sql.ErrNoRows
 	}
 	return result, nil
 }
@@ -189,6 +289,9 @@ func (ctx trxRepository) GetTrxs(req models.ReqGetTransaction) (result []models.
 	}
 	if req.Filter.CustomerID != "" {
 		query += ` and customer_id= '` + req.Filter.CustomerID + `'`
+	}
+	if req.Filter.UserAppID != 0 {
+		query += ` and user_app_id='` + strconv.Itoa(int(req.Filter.UserAppID)) + `'`
 	}
 	if req.Lenght != 0 {
 		query += ` order by updated_at desc limit  ` + strconv.Itoa(int(req.Lenght)) + `  offset  ` + strconv.Itoa(int(req.Start))

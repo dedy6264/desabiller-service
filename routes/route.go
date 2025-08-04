@@ -307,9 +307,9 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 	}
 	{
 		//transaksi
-		mn := e.Group("/trx")
-		mn.Use(middleware.JWT([]byte(configs.KEY)))
-		mn.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+		mobileTrx := e.Group("/trx")
+		mobileTrx.Use(middleware.JWT([]byte(configs.KEY)))
+		mobileTrx.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
 			log.Println("[Start]")
 			log.Println("EndPoint :", c.Path())
 			log.Println("Header :", c.Request().Header)
@@ -317,8 +317,9 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 			log.Println("Response :", string(resBody))
 			log.Println("[End]")
 		}))
-		mn.POST("/getTrxs", trxSvc.TrxBillerReports)
-		mn.POST("/getTrx", trxSvc.TrxBillerReport)
+		mobileTrx.POST("/getHistory", trxSvc.HistoryTrxBillerReports)
+		mobileTrx.POST("/getTrx", trxSvc.TrxBillerReport)
+		mobileTrx.POST("/getTrxs", trxSvc.TrxBillerReports)
 	}
 	{
 		//helper

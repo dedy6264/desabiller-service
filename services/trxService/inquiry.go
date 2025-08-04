@@ -17,6 +17,7 @@ import (
 func (svc trxService) InquiryBiller(ctx echo.Context) error {
 	var (
 		svcName = "InquiryBiller"
+		data    models.DataToken
 		// respSvc models.ResponseList
 		respUserApp models.UserApp
 		referenceNumber, url,
@@ -69,7 +70,9 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		}
 	}
 	//get user app data
-	data := helpers.TokenJWTDecode(ctx)
+	if ctx.Get("user") != nil {
+		data = helpers.TokenJWTDecode(ctx)
+	}
 	respUserApp, err = svc.services.RepoHierarchy.GetUserApp(models.ReqGetUserApp{
 		Filter: models.UserApp{
 			ID: int64(data.UserAppId),
