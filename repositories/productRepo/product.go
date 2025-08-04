@@ -121,6 +121,7 @@ func (ctx product) GetProducts(req models.ReqGetProduct) (result []models.Produc
 			&val.ProductProviderAdminFee,
 			&val.ProductProviderMerchantFee,
 			&val.ProductCategoryID,
+			&val.ProductCategoryName,
 			&val.ProductTypeID,
 			&val.ProductTypeName,
 			&val.ProductReferenceID,

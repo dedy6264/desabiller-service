@@ -5,6 +5,7 @@ import (
 	"desabiller/configs"
 	"desabiller/helpers"
 	"desabiller/models"
+	"encoding/json"
 	"errors"
 	"log"
 	"time"
@@ -101,6 +102,8 @@ func (svc trxService) TriggerKredit(
 		log.Println(subSvcName+" ", err)
 		return err
 	}
+	a, _ := json.Marshal(resp)
+	log.Println(pin+" Account ", string(a))
 	if resp.AccountPin == "" { //set pin dlu
 		log.Println(subSvcName+" Pin Set before ", err)
 		return errors.New("UNSETPIN")

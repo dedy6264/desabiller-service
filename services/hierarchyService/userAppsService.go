@@ -330,6 +330,16 @@ func (svc HierarcyService) UpdateUserApp(ctx echo.Context) error {
 	req.Filter.Name = strings.ToUpper(req.Filter.Name)
 	req.Filter.UpdatedAt = dbTime
 	req.Filter.UpdatedBy = "sys"
+	req.Filter.Password, err = helpers.PswEnc(req.Filter.Password)
+	if err != nil {
+		utils.Log("Generate Password ", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE,
+			configs.RC_SYSTEM_ERROR[0],
+			configs.RC_SYSTEM_ERROR[1],
+			configs.RC_SYSTEM_ERROR[1],
+			nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
 	err = svc.service.RepoHierarchy.UpdateUserApp(*req, nil)
 	if err != nil {
 		log.Println("Err ", svcName, "UpdateUserApp", err)

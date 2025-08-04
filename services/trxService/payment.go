@@ -6,6 +6,7 @@ import (
 	"desabiller/models"
 	"desabiller/utils"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -74,6 +75,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	//----->> trigger kredit
+	fmt.Println("PIN:::", req.AccountPIN)
 	err = svc.TriggerKredit(respInqTrx.TransactionTotalAmount, respInqTrx.SavingAccountNumber, req.AccountPIN, respInqTrx.ReferenceNumber, configs.TRX_CODE_PAYMENT)
 	if err != nil {
 		switch err.Error() {
@@ -222,16 +224,16 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 	}
 
 	responsePayment := models.RespPayment{
-		ReferenceNumber:     respInqTrx.ReferenceNumber,
-		ProductName:         respInqTrx.ProductName,
-		ProductCategoryId:   int(respInqTrx.ProductCategoryID),
-		ProductCategoryName: respInqTrx.ProductCategoryName,
-		SubscriberNumber:    respInqTrx.CustomerID,
-		ProductPrice:        respInqTrx.ProductPrice,
-		ProductAdminFee:     respInqTrx.ProductAdminFee,
-		ProductMerchantFee:  respInqTrx.ProductMerchantFee,
-		TotalTrxAmount:      respInqTrx.TransactionTotalAmount,
-		BillInfo:            respProvider.Result.BillInfo,
+		ReferenceNumber:        respInqTrx.ReferenceNumber,
+		ProductName:            respInqTrx.ProductName,
+		ProductCategoryId:      int(respInqTrx.ProductCategoryID),
+		ProductCategoryName:    respInqTrx.ProductCategoryName,
+		SubscriberNumber:       respInqTrx.CustomerID,
+		ProductPrice:           respInqTrx.ProductPrice,
+		ProductAdminFee:        respInqTrx.ProductAdminFee,
+		ProductMerchantFee:     respInqTrx.ProductMerchantFee,
+		TransactionTotalAmount: respInqTrx.TransactionTotalAmount,
+		BillInfo:               respProvider.Result.BillInfo,
 	}
 	if statusCode != configs.RC_PENDING[0] && statusCode != configs.RC_SUCCESS[0] {
 		svc.TriggerDebet(respInqTrx.TransactionTotalAmount, respInqTrx.SavingAccountNumber, req.AccountPIN, respInqTrx.ReferenceNumber, configs.TRX_CODE_REVERSAL)

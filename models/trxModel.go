@@ -126,12 +126,12 @@ type (
 		ReferenceNumber string `json:"referenceNumber"`
 		ProductName     string `json:"productName"`
 		// ProductCode        string      `json:"productCode"`
-		SubscriberNumber   string      `json:"subscriberNumber"`
-		ProductPrice       float64     `json:"productPrice"`
-		ProductAdminFee    float64     `json:"productAdminFee"`
-		ProductMerchantFee float64     `json:"productMerchantFee"`
-		TotalTrxAmount     float64     `json:"totalTrxAmount"`
-		BillInfo           interface{} `json:"billInfo"` //jelasin tagihan/detil produk
+		SubscriberNumber       string      `json:"subscriberNumber"`
+		ProductPrice           float64     `json:"productPrice"`
+		ProductAdminFee        float64     `json:"productAdminFee"`
+		ProductMerchantFee     float64     `json:"productMerchantFee"`
+		TransactionTotalAmount float64     `json:"transactionTotalAmount"`
+		BillInfo               interface{} `json:"billInfo"` //jelasin tagihan/detil produk
 	}
 	//////////////////
 	ReqPaymentTrx struct {
@@ -140,21 +140,21 @@ type (
 		ReferenceNumber         string `json:"referenceNumber"`
 		ProviderReferenceNumber string `json:"providerReferenceNumber"`
 		AccountNumber           string `json:"accountNumber"`
-		AccountPIN              string `json:"accounrPin"`
+		AccountPIN              string `json:"accountPin"`
 	}
 	RespPayment struct { //jelasin produknya
 		CreatedAt       string `json:"createdAt"`
 		ReferenceNumber string `json:"referenceNumber"`
 		ProductName     string `json:"productName"`
 		// ProductCode         string      `json:"productCode"`
-		ProductCategoryId   int         `json:"productCategoryId"`
-		ProductCategoryName string      `json:"productCategoryName"`
-		SubscriberNumber    string      `json:"subscriberNumber"`
-		ProductPrice        float64     `json:"productPrice"`
-		ProductAdminFee     float64     `json:"productAdminFee"`
-		ProductMerchantFee  float64     `json:"productMerchantFee"`
-		TotalTrxAmount      float64     `json:"totalTrxAmount"`
-		BillInfo            interface{} `json:"billInfo"` //jelasin tagihan/detil produk
+		ProductCategoryId      int         `json:"productCategoryId"`
+		ProductCategoryName    string      `json:"productCategoryName"`
+		SubscriberNumber       string      `json:"subscriberNumber"`
+		ProductPrice           float64     `json:"productPrice"`
+		ProductAdminFee        float64     `json:"productAdminFee"`
+		ProductMerchantFee     float64     `json:"productMerchantFee"`
+		TransactionTotalAmount float64     `json:"transactionTotalAmount"`
+		BillInfo               interface{} `json:"billInfo"` //jelasin tagihan/detil produk
 	}
 )
 type (
@@ -167,8 +167,8 @@ type (
 		Amount                  float64 `json:"amount"`
 	}
 	ReqPaymentProvider struct {
-		ReferenceNumber         string `json:"referenceNumber"`
-		ReferenceNumberMerchant string `json:"referenceNumber_merchant"`
+		ReferenceNumber         string `json:"reference_number"`
+		ReferenceNumberMerchant string `json:"reference_number_merchant"`
 	}
 )
 type (

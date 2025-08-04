@@ -312,12 +312,12 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		ReferenceNumber: referenceNumber,
 		ProductName:     respProduct.ProductName,
 		// ProductCode:            dataInquiry.ProductCode,
-		SubscriberNumber:   req.AdditionalField.SubscriberNumber,
-		ProductPrice:       productPrice,
-		ProductAdminFee:    productAdminFee,
-		ProductMerchantFee: productMerchantFee,
-		TotalTrxAmount:     transactionTotalAmount,
-		BillInfo:           billInfo,
+		SubscriberNumber:       req.AdditionalField.SubscriberNumber,
+		ProductPrice:           productPrice,
+		ProductAdminFee:        productAdminFee,
+		ProductMerchantFee:     productMerchantFee,
+		TransactionTotalAmount: transactionTotalAmount,
+		BillInfo:               billInfo,
 	}
 	result = helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMsg, statusDesc, respInquiry)
 	return ctx.JSON(http.StatusOK, result)

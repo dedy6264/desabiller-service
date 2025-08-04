@@ -142,7 +142,7 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		PaymentStatusMsgDetail:     statusMsgDetail,
 		TrxReferenceNumber:         respTrx.ReferenceNumber,
 		TrxProviderReferenceNumber: reqprovider.ReferenceNumber,
-		TotalTrxAmount:             respTrx.TransactionTotalAmount,
+		TransactionTotalAmount:     respTrx.TransactionTotalAmount,
 		AdminFee:                   respTrx.ProductAdminFee,
 		BillInfo: map[string]interface{}{
 			"billDesc": string(billInfo),
@@ -178,7 +178,7 @@ func (svc trxService) Advice(ctx echo.Context) error {
 	// 	}
 	// 	respProvider.TrxReferenceNumber = resp.ReferenceNumber
 	// 	respProvider.TrxProviderReferenceNumber = resp.ProviderReferenceNumber
-	// 	respProvider.TotalTrxAmount = resp.TotalTrxAmount
+	// 	respProvider.TransactionTotalAmount = resp.TransactionTotalAmount
 	// 	respProvider.BillInfo = billInfo
 	// 	statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus, "PAY")
 	// 	if statusCode == configs.PENDING_CODE {
@@ -216,7 +216,7 @@ func (svc trxService) Advice(ctx echo.Context) error {
 	// 	}
 	// 	respProvider.TrxReferenceNumber = resp.ReferenceNumber
 	// 	respProvider.TrxProviderReferenceNumber = resp.ProviderReferenceNumber
-	// 	respProvider.TotalTrxAmount = resp.TotalTrxAmount
+	// 	respProvider.TransactionTotalAmount = resp.TransactionTotalAmount
 	// 	err = UpdateAndInsertStatusTrx(resp, respProvider, svc)
 	// 	if err != nil {
 	// 		log.Println("Err UpdateAndInsertStatusTrx", svcName, err)
@@ -266,7 +266,7 @@ func (svc trxService) Advice(ctx echo.Context) error {
 	// 	}
 	// 	respProvider.TrxReferenceNumber = resp.ReferenceNumber
 	// 	respProvider.TrxProviderReferenceNumber = resp.ProviderReferenceNumber
-	// 	respProvider.TotalTrxAmount = resp.TotalTrxAmount
+	// 	respProvider.TransactionTotalAmount = resp.TransactionTotalAmount
 	// 	respProvider.BillInfo = billInfo
 	// 	statusCode = helpers.ErrorCodeGateway(respProvider.PaymentStatus, "PAY")
 	// 	if statusCode == configs.PENDING_CODE {
@@ -304,7 +304,7 @@ func (svc trxService) Advice(ctx echo.Context) error {
 	// 	}
 	// 	respProvider.TrxReferenceNumber = resp.ReferenceNumber
 	// 	respProvider.TrxProviderReferenceNumber = resp.ProviderReferenceNumber
-	// 	respProvider.TotalTrxAmount = resp.TotalTrxAmount
+	// 	respProvider.TransactionTotalAmount = resp.TransactionTotalAmount
 	// 	err = UpdateAndInsertStatusTrx(resp, respProvider, svc)
 	// 	if err != nil {
 	// 		log.Println("Err UpdateAndInsertStatusTrx", svcName, err)

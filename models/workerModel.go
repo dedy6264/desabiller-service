@@ -10,7 +10,7 @@ type (
 		PaymentStatusMsgDetail     string                 `json:"paymentStatusMsgDetail"`
 		TrxReferenceNumber         string                 `json:"trxReferenceNumber"`
 		TrxProviderReferenceNumber string                 `json:"trxProviderReferenceNumber"`
-		TotalTrxAmount             float64                `json:"totalTrxAmount"`
+		TransactionTotalAmount     float64                `json:"transactionTotalAmount"`
 		TrxAmount                  float64                `json:"trxAmount"`
 		AdminFee                   float64                `json:"adminFee"`
 		BillInfo                   map[string]interface{} `json:"billInfo"`
@@ -24,7 +24,7 @@ type (
 		InquiryStatusDescDetail    string                 `json:"inquiryStatusDescDetail"`
 		TrxReferenceNumber         string                 `json:"trxReferenceNumber"`
 		TrxProviderReferenceNumber string                 `json:"trxProviderReferenceNumber"`
-		TotalTrxAmount             float64                `json:"totalTrxAmount"`
+		TransactionTotalAmount     float64                `json:"transactionTotalAmount"`
 		TrxAmount                  float64                `json:"trxAmount"`
 		SubscriberName             string                 `json:"subscriberName"`
 		SubscriberNumber           string                 `json:"subscriberNumber"`

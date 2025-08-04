@@ -5,6 +5,7 @@ import (
 	"desabiller/configs"
 	"desabiller/services"
 	auth "desabiller/services/authService"
+	helperservices "desabiller/services/helperServices"
 	trxservice "desabiller/services/trxService"
 
 	// helperservices "desabiller/services/helperServices"
@@ -33,7 +34,7 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 	hierachySvc := hierarchyservicego.RepoHierarchy(service)
 
 	// userAct := useractivityservice.NewApiUserActivityService(service)
-	// helperSvc := helperservices.NewApiHelperService(service)
+	helperSvc := helperservices.NewApiHelperService(service)
 	trxSvc := trxservice.NewRepoTrxService(service)
 	savingSvc := savingservices.NewApiSavingServices(service)
 	login := e.Group("/login")
@@ -237,13 +238,14 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 		proRefnce.POST("/update", providerSvc.UpdateProductReference)
 
 		product := e.Group("/product")
-		product.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
-			if subtle.ConstantTimeCompare([]byte(pss), []byte("joe")) == 1 &&
-				subtle.ConstantTimeCompare([]byte(pwd), []byte("secret")) == 1 {
-				return true, nil
-			}
-			return false, nil
-		}))
+		// product.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
+		// 	if subtle.ConstantTimeCompare([]byte(pss), []byte("joe")) == 1 &&
+		// 		subtle.ConstantTimeCompare([]byte(pwd), []byte("secret")) == 1 {
+		// 		return true, nil
+		// 	}
+		// 	return false, nil
+		// }))
+		product.Use(middleware.JWT([]byte(configs.KEY)))
 		product.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
 			log.Println("[Start]")
 			log.Println("EndPoint :", c.Path())
@@ -318,24 +320,18 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 		mn.POST("/getTrxs", trxSvc.TrxBillerReports)
 		mn.POST("/getTrx", trxSvc.TrxBillerReport)
 	}
-	// {
-	// 	//helper
-	// 	helper := e.Group("/helper")
-	// 	helper.Use(middleware.BasicAuth(func(pss, pwd string, ctx echo.Context) (bool, error) {
-	// 		if subtle.ConstantTimeCompare([]byte(pss), []byte("joe")) == 1 &&
-	// 			subtle.ConstantTimeCompare([]byte(pwd), []byte("secret")) == 1 {
-	// 			return true, nil
-	// 		}
-	// 		return false, nil
-	// 	}))
-	// 	helper.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
-	// 		log.Println("[Start]")
-	// 		log.Println("EndPoint :", c.Path())
-	// 		log.Println("Header :", c.Request().Header)
-	// 		log.Println("Body :", string(reqBody))
-	// 		log.Println("Response :", string(resBody))
-	// 		log.Println("[End]")
-	// 	}))
-	// 	helper.POST("/getReference", helperSvc.GetOperatorService)
-	// }
+	{
+		//helper
+		helper := e.Group("/helper")
+		helper.Use(middleware.JWT([]byte(configs.KEY)))
+		helper.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+			log.Println("[Start]")
+			log.Println("EndPoint :", c.Path())
+			log.Println("Header :", c.Request().Header)
+			log.Println("Body :", string(reqBody))
+			log.Println("Response :", string(resBody))
+			log.Println("[End]")
+		}))
+		helper.POST("/getReference", helperSvc.GetOperatorService)
+	}
 }

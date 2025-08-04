@@ -27,5 +27,5 @@ const (
 	TRX_CODE_REVERSAL   = "300"
 	CID                 = 1
 	MKEY                = ""
-	TOKEN               = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXJjaGFudF9pZCI6IjEiLCJleHAiOjE3NTQxMTE2MTB9.9XfmskCFEBhMvTaMGNKQVUHiesnxpPO0pWC22Ajth5M"
+	TOKEN               = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXJjaGFudF9pZCI6IjEiLCJleHAiOjE3NTQyOTc0NDZ9.Ao2zQAsvQrHgqGaXuvEBTG7eASp8luWvmx1Yc8yJUNU"
 )

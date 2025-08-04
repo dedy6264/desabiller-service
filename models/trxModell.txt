@@ -62,7 +62,7 @@ type (
 		MerchantOutletUsername     string    `json:"merchantOutletUsername"`
 		CustomerId                 string    `json:"customerId"` //
 		OtherMsg                   string    `json:"otherMsg"`
-		TotalTrxAmount             float64   `json:"totalTrxAmount"`
+		TransactionTotalAmount             float64   `json:"transactionTotalAmount"`
 		Filter                     FilterReq `json:"filter"`
 	}
 
@@ -99,7 +99,7 @@ type (
 		ProductPrice           float64     `json:"productPrice"`
 		ProductAdminFee        float64     `json:"productAdminFee"`
 		ProductMerchantFee     float64     `json:"productMerchantFee"`
-		TotalTrxAmount         float64     `json:"totalTrxAmount"`
+		TransactionTotalAmount         float64     `json:"transactionTotalAmount"`
 		BillInfo               interface{} `json:"billInfo"` //jelasin tagihan/detil produk
 	}
 	

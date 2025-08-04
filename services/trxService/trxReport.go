@@ -84,7 +84,7 @@ func (svc trxService) TrxBillerReport(ctx echo.Context) error {
 	// 	ProductAdminFee:        respInqTrx.ProductAdminFee,
 	// 	MerchantOutletName:     respInqTrx.MerchantOutletName,
 	// 	MerchantOutletUsername: respInqTrx.MerchantOutletUsername,
-	// 	TotalTrxAmount:         respInqTrx.ProductPrice + respInqTrx.ProductAdminFee,
+	// 	TransactionTotalAmount:         respInqTrx.ProductPrice + respInqTrx.ProductAdminFee,
 	// }
 	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.SUCCESS_CODE, configs.SUCCESS_MSG, configs.SUCCESS_MSG, respSvc)
 	return ctx.JSON(http.StatusOK, result)

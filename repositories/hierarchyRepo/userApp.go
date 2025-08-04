@@ -5,6 +5,7 @@ import (
 	"desabiller/configs"
 	"desabiller/models"
 	"desabiller/utils"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
@@ -75,8 +76,26 @@ func (ctx hierarchy) UpdateUserApp(req models.ReqGetUserApp, tx *sql.Tx) (err er
 				where id = ? 
 				`
 	query = utils.QuerySupport(query)
+	a, _ := json.Marshal(req.Filter)
+	fmt.Println("UpdateUserApp query: ", string(a))
 	if tx != nil {
-		_, err = tx.Exec(query, req.Filter.Username, req.Filter.Password, req.Filter.Name, req.Filter.IdentityType, req.Filter.IdentityNumber, req.Filter.Phone, req.Filter.Email, req.Filter.Gender, req.Filter.Province, req.Filter.City, req.Filter.Address, req.Filter.AccountID, req.Filter.Status, dbTime, "sys", req.Filter.ID)
+		_, err = tx.Exec(query,
+			req.Filter.Username,
+			req.Filter.Password,
+			req.Filter.Name,
+			req.Filter.IdentityType,
+			req.Filter.IdentityNumber,
+			req.Filter.Phone,
+			req.Filter.Email,
+			req.Filter.Gender,
+			req.Filter.Province,
+			req.Filter.City,
+			req.Filter.Address,
+			req.Filter.AccountID,
+			req.Filter.Status,
+			dbTime,
+			"sys",
+			req.Filter.ID)
 	} else {
 		_, err = ctx.repo.Db.Exec(query, req.Filter.Username, req.Filter.Password, req.Filter.Name, req.Filter.IdentityType, req.Filter.IdentityNumber, req.Filter.Phone, req.Filter.Email, req.Filter.Gender, req.Filter.Province, req.Filter.City, req.Filter.Address, req.Filter.AccountID, req.Filter.Status, dbTime, "sys", req.Filter.ID)
 	}

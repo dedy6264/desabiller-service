@@ -101,7 +101,7 @@ func (svc trxService) InqWorker(req models.ProviderInqRequest) {
 	type ReqProvider struct {
 		ProductCode             string `json:"productCode"`
 		ReferenceNumber         string `json:"referenceNumber"`
-		ReferenceNumberMerchant string `json:"referenceNumber_merchant"`
+		ReferenceNumberMerchant string `json:"referenceNumberMerchant"`
 		CustomerID              string `json:"customerId"`
 		Periode                 string `json:"periode"`
 	}

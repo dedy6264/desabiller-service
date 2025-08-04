@@ -22,7 +22,7 @@ func ResponseConverter(respCode, respDesc string, inq bool) (statusCode, statusM
 				statusDesc = statusMsg
 			}
 		} else {
-			if ok, _ := InArray(respCode, []string{"03", "11", "05", "39", "08", "09", "10", "401", "12", "13", "14", "15", "16", "19", "20", "21", "22", "24", "25", "26", "27", "28", "29", "30", "36", "37", "38", "40", "96"}); ok {
+			if ok, _ := InArray(respCode, []string{"03", "11", "05", "08", "09", "10", "401", "12", "13", "14", "15", "16", "19", "20", "21", "22", "24", "25", "26", "27", "28", "29", "30", "36", "37", "38", "40", "96"}); ok {
 				statusCode = configs.RC_FAILED[0]
 				statusMsg = "PAYMENT " + configs.RC_FAILED[1]
 			} else if ok, _ := InArray(respCode, []string{"02", "06", "07"}); ok {
@@ -31,7 +31,7 @@ func ResponseConverter(respCode, respDesc string, inq bool) (statusCode, statusM
 			} else if ok, _ := InArray(respCode, []string{"17"}); ok {
 				statusCode = configs.RC_ALREADY_PAID[0]
 				statusMsg = configs.RC_ALREADY_PAID[1]
-			} else {
+			} else { //"39",
 				statusCode = configs.RC_PENDING[0]
 				statusMsg = configs.RC_PENDING[1]
 				statusDesc = statusMsg
