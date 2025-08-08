@@ -42,6 +42,36 @@ type (
 		RecordsFiltered int64     `json:"recordsFiltered"`
 		Data            []UserApp `json:"data"`
 	}
+	ReqGetOtp struct {
+		Start     int64  `json:"start" `
+		Lenght    int64  `json:"length"`
+		Columns   string `json:"columns"`
+		Search    string `json:"search"`
+		Order     string `json:"order" `
+		Sort      string `json:"sort" `
+		StartDate string `json:"startDate"`
+		EndDate   string `json:"endDate"`
+		Draw      int    `json:"draw"`
+		Filter    Otp    `json:"filter"`
+	}
+	Otp struct {
+		ID              int64  `json:"id" `
+		UserAppID       int64  `json:"iserAppID"`
+		Username        string `json:"username"`
+		Otp             string `json:"otp"`
+		ExpiredDuration int64  `json:"expiredDuration"`
+		Phone           string `json:"phone"`
+		CreatedBy       string `json:"createdBy"`
+		UpdatedBy       string `json:"updatedBy"`
+		CreatedAt       string `json:"createdAt"`
+		UpdatedAt       string `json:"updatedAt"`
+	}
+
+	RespGetOtp struct {
+		RecordsTotal    int64 `json:"recordsTotal"`
+		RecordsFiltered int64 `json:"recordsFiltered"`
+		Data            []Otp `json:"data"`
+	}
 	ReqGetCIF struct {
 		Start     int64  `json:"start" `
 		Lenght    int64  `json:"length"`

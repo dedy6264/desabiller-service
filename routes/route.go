@@ -68,6 +68,7 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 		userapp.POST("/add", hierachySvc.AddUserApp)
 		userapp.POST("/drop", hierachySvc.DropUserApp)
 		userapp.POST("/update", hierachySvc.UpdateUserApp)
+		userapp.POST("/verivicationotp", hierachySvc.VerificationOTP)
 	}
 	{
 		aa := e.Group("/cif")

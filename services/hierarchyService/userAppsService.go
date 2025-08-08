@@ -6,6 +6,8 @@ import (
 	"desabiller/helpers"
 	"desabiller/models"
 	"desabiller/utils"
+	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -141,12 +143,16 @@ func (svc HierarcyService) AddUserApp(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	_, err = svc.service.RepoHierarchy.GetUserApp(*req)
-
 	if err != nil {
 		if err == sql.ErrNoRows {
 			err = helpers.DBTransaction(svc.service.RepoDB, func(Tx *sql.Tx) error {
+				var (
+					respCif     models.CIF
+					respAccount models.RespGetAccount
+					idUserApp   int
+				)
 				//add cifs
-				respCif, err := svc.service.SavingRepo.GetCif(models.ReqGetCIF{
+				respCif, err = svc.service.SavingRepo.GetCif(models.ReqGetCIF{
 					Filter: models.CIF{
 						CifNoID: req.Filter.IdentityNumber,
 					},
@@ -155,6 +161,7 @@ func (svc HierarcyService) AddUserApp(ctx echo.Context) error {
 				// fmt.Println(":::", string(a))
 				if err != nil { //ga ketemu cif nya, bikin ulang semua
 					if err == sql.ErrNoRows {
+						fmt.Println("ga ketemu cif nya, bikin ulang semua")
 						respCif, err = svc.service.SavingRepo.AddCif(models.ReqGetCIF{
 							Filter: models.CIF{
 								CifName:    req.Filter.Name,
@@ -174,7 +181,7 @@ func (svc HierarcyService) AddUserApp(ctx echo.Context) error {
 							utils.Log("AddCif ", svcName, err)
 							return err
 						}
-						respAccount, err := svc.service.SavingRepo.AddAccount(models.ReqGetAccountSaving{
+						respAccount, err = svc.service.SavingRepo.AddAccount(models.ReqGetAccountSaving{
 							Filter: models.Account{
 								CifID:           respCif.ID,
 								AccountNumber:   "19940812" + strconv.Itoa(int(respCif.ID)),
@@ -191,8 +198,10 @@ func (svc HierarcyService) AddUserApp(ctx echo.Context) error {
 							utils.Log("AddAccount ", svcName, err)
 							return err
 						}
+						a, _ := json.Marshal(respAccount)
+						fmt.Println("respAccount|||| ", string(a))
 						req.Filter.AccountID = int64(respAccount.ID)
-						err = svc.service.RepoHierarchy.AddUserApp(models.ReqGetUserApp{
+						idUserApp, err = svc.service.RepoHierarchy.AddUserApp(models.ReqGetUserApp{
 							Filter: models.UserApp{
 								AccountID:      int64(respAccount.ID),
 								Username:       req.Filter.Username,
@@ -219,7 +228,8 @@ func (svc HierarcyService) AddUserApp(ctx echo.Context) error {
 						}
 					}
 				} else {
-					respAccount, err := svc.service.SavingRepo.GetAccount(models.ReqGetAccountSaving{
+					fmt.Println("ketemu cif nya")
+					respAccount, err = svc.service.SavingRepo.GetAccount(models.ReqGetAccountSaving{
 						Filter: models.Account{
 							CifID: respCif.ID,
 						},
@@ -228,8 +238,10 @@ func (svc HierarcyService) AddUserApp(ctx echo.Context) error {
 						utils.Log("GetAccount", svcName, err)
 						return err
 					}
+					d, _ := json.Marshal(respAccount)
+					fmt.Println("respAccount", string(d))
 					//jika cif ada langsung buat user apps
-					err = svc.service.RepoHierarchy.AddUserApp(models.ReqGetUserApp{
+					idUserApp, err = svc.service.RepoHierarchy.AddUserApp(models.ReqGetUserApp{
 						Filter: models.UserApp{
 							AccountID:      int64(respAccount.ID),
 							Username:       req.Filter.Username,
@@ -255,6 +267,39 @@ func (svc HierarcyService) AddUserApp(ctx echo.Context) error {
 						return err
 					}
 				}
+				d, _ := json.Marshal(respAccount)
+				fmt.Println("respAccount", string(d))
+				//generate otp
+				op := helpers.Otp()
+				err = svc.service.RepoHierarchy.AddOtp(models.ReqGetOtp{
+					Filter: models.Otp{
+						UserAppID:       int64(idUserApp),
+						Username:        req.Filter.Username,
+						Otp:             op,
+						ExpiredDuration: 30,
+						Phone:           req.Filter.Phone,
+						CreatedBy:       req.Filter.UpdatedBy,
+						UpdatedBy:       req.Filter.UpdatedBy,
+						CreatedAt:       dbTime,
+						UpdatedAt:       dbTime,
+					},
+				}, Tx)
+
+				if err != nil {
+					utils.Log("GetUserApp", svcName, err)
+					return err
+				}
+				reFonte := models.ReqFonnte{
+					Target: req.Filter.Phone,
+					Message: `VILLER, 
+					jangan berikan kode ini kepada siapapun : ` + op,
+				}
+				respByte, _, err := utils.WorkerPost("https://api.fonnte.com/send", "LyfkJ2o1LA8wER8RiMBe", reFonte, "json")
+				if err != nil {
+					utils.Log("WorkerPostWithBearer", svcName, err)
+					return err
+				}
+				fmt.Println("resp fonnte: ", string(respByte))
 				return nil
 			})
 			if err != nil {
@@ -351,5 +396,105 @@ func (svc HierarcyService) UpdateUserApp(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	result := helpers.ResponseJSON(configs.TRUE_VALUE, configs.RC_SUCCESS[0], configs.RC_SUCCESS[1], configs.RC_SUCCESS[1], req.Filter)
+	return ctx.JSON(http.StatusOK, result)
+}
+func (svc HierarcyService) VerificationOTP(ctx echo.Context) error {
+	var (
+		svcName = "VerificationOTP"
+		t       = time.Now()
+		dbTime  = t.Local().Format(configs.LAYOUT_TIMESTAMP)
+	)
+	req := new(models.Otp)
+	_, err := helpers.BindValidate(req, ctx)
+	if err != nil {
+		utils.Log("", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
+	if req.Otp == "" {
+		utils.Log("OTP cannot be null", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
+	if req.Phone == "" {
+		utils.Log("Phone cannot be null", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
+	respOtp, err := svc.service.RepoHierarchy.GetOtp(models.ReqGetOtp{
+		Filter: models.Otp{
+			Otp:   req.Otp,
+			Phone: req.Phone,
+		},
+	})
+	if err != nil {
+		utils.Log("GetOtp", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_FAILED_DB_NOT_FOUND[0], configs.RC_FAILED_DB_NOT_FOUND[1], err.Error(), nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
+
+	layout := "2006-01-02 15:04:05"
+	createdAt, err := time.ParseInLocation(layout, respOtp.CreatedAt, time.Local)
+	if err != nil {
+		utils.Log("Gagal parse waktu", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
+
+	// Hitung batas waktu valid
+	batasWaktu := createdAt.Add(time.Duration(respOtp.ExpiredDuration) * time.Minute)
+
+	// Ambil waktu saat ini
+	now := time.Now()
+
+	if now.After(batasWaktu) {
+		utils.Log("Waktu sudah kadaluarsa", svcName, nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_FAILED_DB_NOT_FOUND[0], configs.RC_FAILED_DB_NOT_FOUND[1], "", nil)
+		return ctx.JSON(http.StatusOK, result)
+	} else {
+		utils.Log("Masih dalam durasi", svcName, nil)
+		respUserApp, err := svc.service.RepoHierarchy.GetUserApp(models.ReqGetUserApp{
+			Filter: models.UserApp{
+				ID: respOtp.UserAppID,
+			},
+		})
+		if err != nil {
+			utils.Log("GetUserApp", svcName, err)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_FAILED_DB_NOT_FOUND[0], configs.RC_FAILED_DB_NOT_FOUND[1], err.Error(), nil)
+			return ctx.JSON(http.StatusOK, result)
+		}
+		//update verifikasi
+		err = svc.service.RepoHierarchy.UpdateUserApp(models.ReqGetUserApp{
+			Filter: models.UserApp{
+				ID:              respUserApp.ID,
+				Username:        respUserApp.Username,
+				Password:        respUserApp.Password,
+				Name:            respUserApp.Name,
+				IdentityType:    respUserApp.IdentityType,
+				IdentityNumber:  respUserApp.IdentityNumber,
+				Phone:           respUserApp.Phone,
+				Email:           respUserApp.Email,
+				Gender:          respUserApp.Gender,
+				Province:        respUserApp.Province,
+				City:            respUserApp.City,
+				Address:         respUserApp.Address,
+				AccountID:       respUserApp.AccountID,
+				Status:          "isverified",
+				CreatedBy:       respUserApp.Username,
+				UpdatedBy:       respUserApp.Username,
+				CreatedAt:       respUserApp.CreatedAt,
+				UpdatedAt:       dbTime,
+				AccountNumber:   respUserApp.AccountNumber,
+				Balance:         respUserApp.Balance,
+				SavingSegmentID: respUserApp.SavingSegmentID,
+			},
+		}, nil)
+		if err != nil {
+			utils.Log("GetUserApp", svcName, err)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_FAILED_DB_NOT_FOUND[0], configs.RC_FAILED_DB_NOT_FOUND[1], err.Error(), nil)
+			return ctx.JSON(http.StatusOK, result)
+		}
+	}
+	result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_SUCCESS[0], configs.RC_SUCCESS[1], "", nil)
 	return ctx.JSON(http.StatusOK, result)
 }

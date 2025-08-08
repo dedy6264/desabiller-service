@@ -25,3 +25,8 @@ type GetToken struct {
 		ExpiresIn   string `json:"expires_in"`
 	} `json:"result"`
 }
+type ReqFonnte struct {
+	Target  string `json:"target"`
+	Message string `json:"message"`
+	Otp     string `json:"otp"`
+}

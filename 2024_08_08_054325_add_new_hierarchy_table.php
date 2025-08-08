@@ -195,6 +195,18 @@ class AddNewHierarchyTable extends Migration
              $table->string('created_by')->nullable();
             $table->string('updated_by')->nullable();
         });
+        Schema::create('otps', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedInteger("user_app_id");
+            $table->string("username");
+            $table->string("phone");
+            $table->string("otp")->unique();
+            $table->foreign('user_app_id')->references('id')->on('user_apps');
+            $table->string("expired_duration");
+            $table->timestamps();
+            $table->string('created_by')->nullable();
+            $table->string('updated_by')->nullable();
+        });
         Schema::create('saving_transactions', function (Blueprint $table) {
             $table->id();
             $table->string("reference_number");
@@ -214,6 +226,7 @@ class AddNewHierarchyTable extends Migration
     public function down()
     {
         Schema::dropIfExists('saving_transactions');
+        Schema::dropIfExists('otps');
         Schema::dropIfExists('user_apps');
         Schema::dropIfExists('accounts');
         Schema::dropIfExists('saving_segments');

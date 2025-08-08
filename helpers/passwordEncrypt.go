@@ -11,6 +11,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
+	"math/rand"
 	"strconv"
 	"time"
 
@@ -19,6 +20,13 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 )
+
+func Otp() (otp string) {
+	rand.Seed(time.Now().UnixNano())
+
+	otp = fmt.Sprintf("%06d", rand.Intn(1000000))
+	return otp
+}
 
 //	type JwtCustClaim struct {
 //		SnDevice   string `json:"snDevice"`
