@@ -122,6 +122,10 @@ type (
 		CreatedAt       string  `json:"createdAt"`
 		UpdatedAt       string  `json:"updatedAt"`
 	}
+	ReqSetPin struct {
+		Pin   string `json:"pin"`
+		Phone string `json:"phone"`
+	}
 )
 type (
 	ReqLogin struct {

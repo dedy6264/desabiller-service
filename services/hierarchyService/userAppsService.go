@@ -280,7 +280,7 @@ func (svc HierarcyService) AddUserApp(ctx echo.Context) error {
 						Phone:           req.Filter.Phone,
 						CreatedBy:       req.Filter.UpdatedBy,
 						UpdatedBy:       req.Filter.UpdatedBy,
-						CreatedAt:       dbTime,
+						CreatedAt:       req.Filter.CreatedAt,
 						UpdatedAt:       dbTime,
 					},
 				}, Tx)
@@ -402,7 +402,8 @@ func (svc HierarcyService) VerificationOTP(ctx echo.Context) error {
 	var (
 		svcName = "VerificationOTP"
 		t       = time.Now()
-		dbTime  = t.Local().Format(configs.LAYOUT_TIMESTAMP)
+		dbTime  = t.Local().Format(time.RFC3339)
+		// dbTime  = t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	)
 	req := new(models.Otp)
 	_, err := helpers.BindValidate(req, ctx)
@@ -433,20 +434,20 @@ func (svc HierarcyService) VerificationOTP(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 
-	layout := "2006-01-02 15:04:05"
-	createdAt, err := time.ParseInLocation(layout, respOtp.CreatedAt, time.Local)
+	layout := time.RFC3339
+	createdAt, err := time.Parse(layout, respOtp.CreatedAt)
 	if err != nil {
 		utils.Log("Gagal parse waktu", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-
+	fmt.Println(":", createdAt)
 	// Hitung batas waktu valid
 	batasWaktu := createdAt.Add(time.Duration(respOtp.ExpiredDuration) * time.Minute)
 
 	// Ambil waktu saat ini
 	now := time.Now()
-
+	// fmt.Println(now.After(batasWaktu))
 	if now.After(batasWaktu) {
 		utils.Log("Waktu sudah kadaluarsa", svcName, nil)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_FAILED_DB_NOT_FOUND[0], configs.RC_FAILED_DB_NOT_FOUND[1], "", nil)
@@ -495,6 +496,9 @@ func (svc HierarcyService) VerificationOTP(ctx echo.Context) error {
 			return ctx.JSON(http.StatusOK, result)
 		}
 	}
+	// resp:=map[string]string{
+	// 	"cifId":,
+	// }
 	result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_SUCCESS[0], configs.RC_SUCCESS[1], "", nil)
 	return ctx.JSON(http.StatusOK, result)
 }

@@ -76,7 +76,7 @@ func (ctx hierarchy) UpdateOtp(req models.ReqGetOtp, tx *sql.Tx) (err error) {
 }
 func (ctx hierarchy) GetOtp(req models.ReqGetOtp) (result models.Otp, err error) {
 	query := `select 
-	otp,user_app_id,username,phone,expired_duration, created_at, created_by, updated_at, updated_by,
+	id, otp,user_app_id,username,phone,expired_duration, created_at, created_by, updated_at, updated_by
 	from otps where true `
 	if req.Filter.ID != 0 {
 		query += ` and id =` + strconv.Itoa(int(req.Filter.ID))

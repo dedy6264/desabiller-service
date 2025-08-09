@@ -173,6 +173,7 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 		dd.POST("/gets", savingSvc.GetAccounts)
 		dd.POST("/drop", savingSvc.DropAccount)
 		dd.POST("/update", savingSvc.UpdateAccount)
+		dd.POST("/setpin", savingSvc.SetPin)
 	}
 	{
 		proType := e.Group("/product-type")
