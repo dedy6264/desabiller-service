@@ -54,15 +54,6 @@ func (svc savingServices) AddCif(ctx echo.Context) error {
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	if req.Filter.CifPhone == "" {
-		utils.Log(" ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.VALIDATE_ERROR_CODE,
-			"Cif Phone is empty",
-			"Cif Phone is empty",
-			nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
 	if req.Filter.CifEmail == "" {
 		utils.Log(" ", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,

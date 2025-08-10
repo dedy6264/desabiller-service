@@ -83,7 +83,6 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_FAILED_DB_NOT_FOUND[0], configs.RC_FAILED_DB_NOT_FOUND[1], "Data :: empty", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-
 	respProduct, err := svc.services.RepoProduct.GetProduct(models.ReqGetProduct{
 		Filter: models.Product{
 			ProductCode: req.ProductCode,
@@ -203,8 +202,6 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 				ProductReferenceCode:       respProduct.ProductReferenceCode,
 				CustomerID:                 req.AdditionalField.SubscriberNumber,
 				TransactionTotalAmount:     transactionTotalAmount,
-				SavingAccountID:            respUserApp.AccountID,
-				SavingAccountNumber:        respUserApp.AccountNumber,
 				UserAppID:                  respUserApp.ID,
 				Username:                   respUserApp.Username,
 				CreatedAt:                  dbTimeTrx,
@@ -281,8 +278,6 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 				ProductReferenceCode:       respProduct.ProductReferenceCode,
 				CustomerID:                 req.AdditionalField.SubscriberNumber,
 				TransactionTotalAmount:     transactionTotalAmount,
-				SavingAccountID:            respUserApp.AccountID,
-				SavingAccountNumber:        respUserApp.AccountNumber,
 				UserAppID:                  respUserApp.ID,
 				Username:                   respUserApp.Username,
 				CreatedAt:                  dbTimeTrx,

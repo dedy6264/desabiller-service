@@ -65,7 +65,7 @@ func (svc AdministrationService) Login(ctx echo.Context) error {
 	}
 	respAccount, err := svc.service.SavingRepo.GetAccount(models.ReqGetAccountSaving{
 		Filter: models.Account{
-			ID: respGet.AccountID,
+			CifID: respGet.CifID,
 		},
 	})
 	if err != nil {
@@ -90,7 +90,6 @@ func (svc AdministrationService) Login(ctx echo.Context) error {
 			Province:       respGet.Province,
 			City:           respGet.City,
 			Address:        respGet.Address,
-			AccountID:      respGet.AccountID,
 			Status:         respGet.Status,
 			// AccountNumber:  ,
 			IsSetPin: isSetPin,

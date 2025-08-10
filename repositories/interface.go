@@ -6,14 +6,14 @@ import (
 )
 
 type Hierarchyrepo interface {
-	AddUserApp(req models.ReqGetUserApp, tx *sql.Tx) (int, error)
+	AddUserApp(req models.ReqGetUserApp, tx *sql.Tx) (models.UserApp, error)
 	DropUserApp(id int, tx *sql.Tx) (err error)
 	UpdateUserApp(req models.ReqGetUserApp, tx *sql.Tx) (err error)
 	GetUserAppCount(req models.ReqGetUserApp) (result int, err error)
 	GetUserApps(req models.ReqGetUserApp) (result []models.UserApp, err error)
 	GetUserApp(req models.ReqGetUserApp) (result models.UserApp, err error)
 
-	AddOtp(req models.ReqGetOtp, tx *sql.Tx) (err error)
+	AddOtp(req models.ReqGetOtp, tx *sql.Tx) (result models.Otp, err error)
 	DropOtp(id int, tx *sql.Tx) (err error)
 	UpdateOtp(req models.ReqGetOtp, tx *sql.Tx) (err error)
 	GetOtp(req models.ReqGetOtp) (result models.Otp, err error)

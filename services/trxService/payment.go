@@ -74,9 +74,31 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_INVALID_TRANSACTION[0], configs.RC_INVALID_TRANSACTION[1], "Not found", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
+	//get cif
+	resUserApp, err := svc.services.RepoHierarchy.GetUserApp(models.ReqGetUserApp{
+		Filter: models.UserApp{
+			ID: respInqTrx.UserAppID,
+		},
+	})
+	if err != nil {
+		utils.Log("GetUserApp", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_FAILED_DB_NOT_FOUND[0], configs.RC_FAILED_DB_NOT_FOUND[1], "Not found", nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
+	//get saving
+	respSaving, err := svc.services.SavingRepo.GetAccount(models.ReqGetAccountSaving{
+		Filter: models.Account{
+			CifID: resUserApp.CifID,
+		},
+	})
+	if err != nil {
+		utils.Log("GetUserApp", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_FAILED_DB_NOT_FOUND[0], configs.RC_FAILED_DB_NOT_FOUND[1], "Not found", nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
 	//----->> trigger kredit
 	fmt.Println("PIN:::", req.AccountPIN)
-	err = svc.TriggerKredit(respInqTrx.TransactionTotalAmount, respInqTrx.SavingAccountNumber, req.AccountPIN, respInqTrx.ReferenceNumber, configs.TRX_CODE_PAYMENT)
+	err = svc.TriggerKredit(respInqTrx.TransactionTotalAmount, respSaving.AccountNumber, req.AccountPIN, respInqTrx.ReferenceNumber, configs.TRX_CODE_PAYMENT)
 	if err != nil {
 		switch err.Error() {
 		case "UNSETPIN":
@@ -203,8 +225,8 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		OtherReff:                  respInqTrx.OtherReff,
 		OtherCustomerInfo:          respInqTrx.OtherCustomerInfo,
 		SavingAccountName:          respInqTrx.SavingAccountName,
-		SavingAccountID:            respInqTrx.SavingAccountID,
-		SavingAccountNumber:        respInqTrx.SavingAccountNumber,
+		SavingAccountID:            int64(respSaving.ID),
+		SavingAccountNumber:        respSaving.AccountNumber,
 		TransactionTotalAmount:     respInqTrx.TransactionTotalAmount,
 		UserAppID:                  respInqTrx.UserAppID,
 		Username:                   respInqTrx.Username,
@@ -236,7 +258,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		BillInfo:               respProvider.Result.BillInfo,
 	}
 	if statusCode != configs.RC_PENDING[0] && statusCode != configs.RC_SUCCESS[0] {
-		svc.TriggerDebet(respInqTrx.TransactionTotalAmount, respInqTrx.SavingAccountNumber, req.AccountPIN, respInqTrx.ReferenceNumber, configs.TRX_CODE_REVERSAL)
+		svc.TriggerDebet(respInqTrx.TransactionTotalAmount, respSaving.AccountNumber, req.AccountPIN, respInqTrx.ReferenceNumber, configs.TRX_CODE_REVERSAL)
 		result = helpers.ResponseJSON(configs.TRUE_VALUE, statusCode, statusMsg, statusDesc, responsePayment)
 		return ctx.JSON(http.StatusOK, result)
 	}

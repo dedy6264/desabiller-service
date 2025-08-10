@@ -69,6 +69,7 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 		userapp.POST("/drop", hierachySvc.DropUserApp)
 		userapp.POST("/update", hierachySvc.UpdateUserApp)
 		userapp.POST("/verivicationotp", hierachySvc.VerificationOTP)
+		userapp.POST("/resendotp", hierachySvc.ResendOtp)
 	}
 	{
 		aa := e.Group("/cif")
@@ -173,7 +174,7 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 		dd.POST("/gets", savingSvc.GetAccounts)
 		dd.POST("/drop", savingSvc.DropAccount)
 		dd.POST("/update", savingSvc.UpdateAccount)
-		dd.POST("/setpin", savingSvc.SetPin)
+		// dd.POST("/setpin", savingSvc.SetPin)
 	}
 	{
 		proType := e.Group("/product-type")

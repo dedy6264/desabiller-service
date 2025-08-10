@@ -11,22 +11,54 @@ import (
 	"time"
 )
 
-func (ctx hierarchy) AddOtp(req models.ReqGetOtp, tx *sql.Tx) (err error) {
-
+func (ctx hierarchy) AddOtp(req models.ReqGetOtp, tx *sql.Tx) (result models.Otp, err error) {
 	t := time.Now()
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
-	query := `insert into otps (otp,user_app_id,username,phone,expired_duration,created_at,created_by,updated_at,updated_by) values (?,?,?,?,?,?,?,?,?) returning id
+	query := `insert into otps (otp,cif_id,username,phone,expired_duration,created_at,created_by,updated_at,updated_by) values (?,?,?,?,?,?,?,?,?) returning 
+	id,
+	otp,
+	cif_id,
+	username,
+	phone,
+	expired_duration,
+	created_at,
+	created_by,
+	updated_at,
+	updated_by
 				`
 	query = utils.QuerySupport(query)
+	fmt.Println(query)
 	if tx != nil {
-		_, err = tx.Exec(query, req.Filter.Otp, req.Filter.UserAppID, req.Filter.Username, req.Filter.Phone, req.Filter.ExpiredDuration, dbTime, "sys", dbTime, "sys")
+		err = tx.QueryRow(query, req.Filter.Otp, req.Filter.CifID, req.Filter.Username, req.Filter.Phone, req.Filter.ExpiredDuration, dbTime, "sys", dbTime, "sys").Scan(
+			&result.ID,
+			&result.CifID,
+			&result.Username,
+			&result.Otp,
+			&result.ExpiredDuration,
+			&result.Phone,
+			&result.CreatedBy,
+			&result.UpdatedBy,
+			&result.CreatedAt,
+			&result.UpdatedAt,
+		)
 	} else {
-		_, err = ctx.repo.Db.Exec(query, req.Filter.Otp, req.Filter.UserAppID, req.Filter.Username, req.Filter.Phone, req.Filter.ExpiredDuration, dbTime, "sys", dbTime, "sys")
+		err = ctx.repo.Db.QueryRow(query, req.Filter.Otp, req.Filter.CifID, req.Filter.Username, req.Filter.Phone, req.Filter.ExpiredDuration, dbTime, "sys", dbTime, "sys").Scan(
+			&result.ID,
+			&result.CifID,
+			&result.Username,
+			&result.Otp,
+			&result.ExpiredDuration,
+			&result.Phone,
+			&result.CreatedBy,
+			&result.UpdatedBy,
+			&result.CreatedAt,
+			&result.UpdatedAt,
+		)
 	}
 	if err != nil {
-		return err
+		return result, err
 	}
-	return nil
+	return result, nil
 }
 func (ctx hierarchy) DropOtp(id int, tx *sql.Tx) (err error) {
 	query := `delete from otps where id = $1`
@@ -45,7 +77,7 @@ func (ctx hierarchy) UpdateOtp(req models.ReqGetOtp, tx *sql.Tx) (err error) {
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMP)
 	query := `update otps set 
 				otp=?,
-				user_app_id=?,
+				cif_id=?,
 				username=?,
 				phone=?,
 				expired_duration=?,
@@ -59,7 +91,7 @@ func (ctx hierarchy) UpdateOtp(req models.ReqGetOtp, tx *sql.Tx) (err error) {
 	if tx != nil {
 		_, err = tx.Exec(query,
 			req.Filter.Otp,
-			req.Filter.UserAppID,
+			req.Filter.CifID,
 			req.Filter.Username,
 			req.Filter.Phone,
 			req.Filter.ExpiredDuration,
@@ -67,7 +99,7 @@ func (ctx hierarchy) UpdateOtp(req models.ReqGetOtp, tx *sql.Tx) (err error) {
 			"sys",
 			req.Filter.ID)
 	} else {
-		_, err = ctx.repo.Db.Exec(query, req.Filter.Otp, req.Filter.UserAppID, req.Filter.Username, req.Filter.Phone, req.Filter.ExpiredDuration, dbTime, "sys", req.Filter.ID)
+		_, err = ctx.repo.Db.Exec(query, req.Filter.Otp, req.Filter.CifID, req.Filter.Username, req.Filter.Phone, req.Filter.ExpiredDuration, dbTime, "sys", req.Filter.ID)
 	}
 	if err != nil {
 		return err
@@ -76,7 +108,7 @@ func (ctx hierarchy) UpdateOtp(req models.ReqGetOtp, tx *sql.Tx) (err error) {
 }
 func (ctx hierarchy) GetOtp(req models.ReqGetOtp) (result models.Otp, err error) {
 	query := `select 
-	id, otp,user_app_id,username,phone,expired_duration, created_at, created_by, updated_at, updated_by
+	id, otp,cif_id,username,phone,expired_duration, created_at, created_by, updated_at, updated_by
 	from otps where true `
 	if req.Filter.ID != 0 {
 		query += ` and id =` + strconv.Itoa(int(req.Filter.ID))
@@ -91,7 +123,7 @@ func (ctx hierarchy) GetOtp(req models.ReqGetOtp) (result models.Otp, err error)
 	err = ctx.repo.Db.QueryRow(query).Scan(
 		&result.ID,
 		&result.Otp,
-		&result.UserAppID,
+		&result.CifID,
 		&result.Username,
 		&result.Phone,
 		&result.ExpiredDuration,

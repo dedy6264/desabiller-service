@@ -14,27 +14,27 @@ type (
 		Filter    UserApp `json:"filter"`
 	}
 	UserApp struct {
-		ID              int64   `json:"id" `
-		Username        string  `json:"username"`
-		Password        string  `json:"password"`
-		Name            string  `json:"name"`
-		IdentityType    string  `json:"identityType"`
-		IdentityNumber  string  `json:"identityNumber"`
-		Phone           string  `json:"phone"`
-		Email           string  `json:"email"`
-		Gender          string  `json:"gender"`
-		Province        string  `json:"province"`
-		City            string  `json:"city"`
-		Address         string  `json:"address"`
-		AccountID       int64   `json:"accountId"`
-		Status          string  `json:"status"`
-		CreatedBy       string  `json:"createdBy"`
-		UpdatedBy       string  `json:"updatedBy"`
-		CreatedAt       string  `json:"createdAt"`
-		UpdatedAt       string  `json:"updatedAt"`
-		AccountNumber   string  `json:"accountNumber"`
-		Balance         float64 `json:"balance"`
-		SavingSegmentID int64   `json:"savingSegmentId"`
+		ID             int64  `json:"id" `
+		Username       string `json:"username"`
+		Password       string `json:"password"`
+		Name           string `json:"name"`
+		IdentityType   string `json:"identityType"`
+		IdentityNumber string `json:"identityNumber"`
+		Phone          string `json:"phone"`
+		Email          string `json:"email"`
+		Gender         string `json:"gender"`
+		Province       string `json:"province"`
+		City           string `json:"city"`
+		Address        string `json:"address"`
+		CifID          int64  `json:"cifId"`
+		Status         string `json:"status"`
+		CreatedBy      string `json:"createdBy"`
+		UpdatedBy      string `json:"updatedBy"`
+		CreatedAt      string `json:"createdAt"`
+		UpdatedAt      string `json:"updatedAt"`
+		// AccountNumber   string  `json:"accountNumber"`
+		// Balance         float64 `json:"balance"`
+		// SavingSegmentID int64   `json:"savingSegmentId"`
 	}
 
 	RespGetUserApp struct {
@@ -56,7 +56,7 @@ type (
 	}
 	Otp struct {
 		ID              int64  `json:"id" `
-		UserAppID       int64  `json:"iserAppID"`
+		CifID           int64  `json:"cifID"`
 		Username        string `json:"username"`
 		Otp             string `json:"otp"`
 		ExpiredDuration int64  `json:"expiredDuration"`
@@ -90,7 +90,6 @@ type (
 		CifNoID    string `json:"cifNoId"`
 		CifTypeID  string `json:"cifTypeId"`
 		CifIDIndex string `json:"cifIdIndex"`
-		CifPhone   string `json:"cifPhone"`
 		CifEmail   string `json:"cifEmail"`
 		CifAddress string `json:"cifAddress"`
 		CreatedBy  string `json:"createdBy"`
@@ -150,7 +149,7 @@ type (
 		Province       string `json:"province"`
 		City           string `json:"city"`
 		Address        string `json:"address"`
-		AccountID      int64  `json:"accountId"`
+		CifID          int64  `json:"cifId"`
 		Status         string `json:"status"`
 		AccountNumber  string `json:"accountNumber"`
 		IsSetPin       string `json:"isSetPin"`

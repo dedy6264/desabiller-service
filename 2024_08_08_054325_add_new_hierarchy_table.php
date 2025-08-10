@@ -136,7 +136,6 @@ class AddNewHierarchyTable extends Migration
             $table->string("cif_no_id");
             $table->string("cif_type_id");
             $table->string("cif_id_index")->unique();
-            $table->string("cif_phone");
             $table->string("cif_email");
             $table->string("cif_address")->nullable();
             $table->timestamps();
@@ -188,20 +187,20 @@ class AddNewHierarchyTable extends Migration
             $table->string("province")->nullable();
             $table->string("city")->nullable();
             $table->string("address")->nullable();
-            $table->unsignedInteger("account_id");
-            $table->foreign('account_id')->references('id')->on('accounts');
+            $table->unsignedInteger("cif_id");
+            $table->foreign('cif_id')->references('id')->on('cifs');
             $table->string("status")->default('active');
             $table->timestamps();
-             $table->string('created_by')->nullable();
+            $table->string('created_by')->nullable();
             $table->string('updated_by')->nullable();
         });
         Schema::create('otps', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger("user_app_id");
+            $table->unsignedInteger("cif_id");
             $table->string("username");
-            $table->string("phone");
+            $table->string("phone")->unique();
             $table->string("otp")->unique();
-            $table->foreign('user_app_id')->references('id')->on('user_apps');
+            $table->foreign('cif_id')->references('id')->on('cifs');
             $table->string("expired_duration");
             $table->timestamps();
             $table->string('created_by')->nullable();

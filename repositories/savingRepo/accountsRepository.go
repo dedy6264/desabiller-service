@@ -148,7 +148,7 @@ saving_segment_id,created_at,updated_at, created_by,  updated_by) values (?,?,?,
 }
 func (ctx savingRepository) GetAccount(req models.ReqGetAccountSaving) (result models.RespGetAccount, err error) {
 	query := `select id,
-cif_id,account_number,balance,saving_segment_id,COALESCE(account_pin,'') as account_pin,created_at, created_by, updated_at, updated_by from accounts where true`
+	cif_id,account_number,balance,saving_segment_id,COALESCE(account_pin,'') as account_pin,created_at, created_by, updated_at, updated_by from accounts where true`
 
 	if req.Filter.ID != 0 {
 		query += ` and id = ` + strconv.Itoa(int(req.Filter.ID))
@@ -182,7 +182,6 @@ func (ctx savingRepository) GetAccounts(req models.ReqGetAccountSaving) (result 
 	a.id,
 	a.cif_id,
 	b.cif_name,
-	b.cif_phone,
 	b.cif_email,
 	a.account_number,
 	a.balance,
@@ -236,7 +235,6 @@ func AccountDataRow(rows *sql.Rows) (result []models.RespGetAccount, err error) 
 			&val.ID,
 			&val.CifID,
 			&val.CifName,
-			&val.CifPhone,
 			&val.CifEmail,
 			&val.AccountNumber,
 			&val.Balance,
@@ -253,3 +251,25 @@ func AccountDataRow(rows *sql.Rows) (result []models.RespGetAccount, err error) 
 	}
 	return result, nil
 }
+
+// func (ctx savingRepository) GetUserAppComplete(idUserApp int) {
+// 	query := `select
+// 	a.id,
+// 	a.username,
+// 	a.password,
+// 	a.name,
+// 	a.identity_type,
+// 	a.identity_number,
+// 	a.phone,
+// 	a.email,
+// 	a.gender,
+// 	a.province,
+// 	a.city,
+// 	a.address,
+// 	a.account_id,
+// 	a.status, a.created_at, a.created_by, a.updated_at, a.updated_by,
+// 	b.account_number, b.balance, b.saving_segment_id
+// 	from user_apps as a
+// 	join accounts as b on b.id=a.account_id where true `
+
+// }

@@ -13,9 +13,10 @@ import (
 
 func (svc savingServices) AddAccount(ctx echo.Context) error {
 	var (
-		svcName = "AddAccount"
-		t       = time.Now()
-		dbTime  = t.Local().Format(configs.LAYOUT_TIMESTAMP)
+		svcName   = "AddAccount"
+		t         = time.Now()
+		dbTime    = t.Local().Format(configs.LAYOUT_TIMESTAMP)
+		resAddAcc models.RespGetAccount
 	)
 	req := new(models.ReqGetAccountSaving)
 	_, err := helpers.BindValidate(req, ctx)
@@ -37,6 +38,14 @@ func (svc savingServices) AddAccount(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
 			configs.VALIDATE_ERROR_CODE,
 			"Account Number is empty", "Account Number is empty",
+			nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
+	if req.Filter.AccountPin == "" {
+		utils.Log(" ", svcName, nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE,
+			configs.VALIDATE_ERROR_CODE,
+			"Pin is empty", "Pin is empty",
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
@@ -62,7 +71,15 @@ func (svc savingServices) AddAccount(ctx echo.Context) error {
 	req.Filter.UpdatedAt = dbTime
 	req.Filter.CreatedBy = "sys"
 	req.Filter.UpdatedBy = "sys"
-	_, err = svc.services.SavingRepo.AddAccount(*req, nil)
+	req.Filter.AccountPin, err = helpers.PassEncrypt(req.Filter.AccountPin)
+	if err != nil {
+		utils.Log(" PassEncrypt", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE,
+			configs.RC_SYSTEM_ERROR[0],
+			configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
+	resAddAcc, err = svc.services.SavingRepo.AddAccount(*req, nil)
 	if err != nil {
 		utils.Log(" AddAccount", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
@@ -73,7 +90,7 @@ func (svc savingServices) AddAccount(ctx echo.Context) error {
 
 	result := helpers.ResponseJSON(configs.TRUE_VALUE,
 		configs.RC_SUCCESS[0], configs.RC_SUCCESS[1], configs.RC_SUCCESS[1],
-		nil)
+		resAddAcc)
 	return ctx.JSON(http.StatusOK, result)
 }
 func (svc savingServices) GetAccounts(ctx echo.Context) error {
@@ -91,15 +108,15 @@ func (svc savingServices) GetAccounts(ctx echo.Context) error {
 	count, err := svc.services.SavingRepo.GetAccountCount(*req)
 	if err != nil {
 		utils.Log(" GetAccountCount", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_SYSTEM_ERROR[0],
-			configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_FAILED_DB_NOT_FOUND[0],
+			configs.RC_FAILED_DB_NOT_FOUND[1], "", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	resp, err := svc.services.SavingRepo.GetAccounts(*req)
 	if err != nil {
 		utils.Log(" GetAccounts", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_SYSTEM_ERROR[0],
-			configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_FAILED_DB_NOT_FOUND[0],
+			configs.RC_FAILED_DB_NOT_FOUND[1], "", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	respSvc.Data = resp
@@ -134,84 +151,85 @@ func (svc savingServices) DropAccount(ctx echo.Context) error {
 		nil)
 	return ctx.JSON(http.StatusOK, result)
 }
-func (svc savingServices) SetPin(ctx echo.Context) error {
-	var (
-		svcName = "SetPin"
-		t       = time.Now()
-		pin     string
-		dbTime  = t.Local().Format(configs.LAYOUT_TIMESTAMP)
-	)
-	req := new(models.ReqSetPin)
-	_, err := helpers.BindValidate(req, ctx)
-	if err != nil {
-		utils.Log(" ", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
-	if req.Pin == "" {
-		utils.Log(" Pin cannot be null", svcName, nil)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.RC_SYSTEM_ERROR[0],
-			configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
-	pin, err = helpers.PassEncrypt(req.Pin)
-	if err != nil {
-		utils.Log(" PassEncrypt", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.RC_SYSTEM_ERROR[0],
-			configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
-	//get user apps
-	respCif, err := svc.services.SavingRepo.GetCif(models.ReqGetCIF{
-		Filter: models.CIF{
-			CifPhone: req.Phone,
-		},
-	})
-	if err != nil {
-		utils.Log(" PassEncrypt", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.RC_SYSTEM_ERROR[0],
-			configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
-	respAcc, err := svc.services.SavingRepo.GetAccount(models.ReqGetAccountSaving{
-		Filter: models.Account{
-			CifID: respCif.ID,
-		},
-	})
-	if err != nil {
-		utils.Log(" PassEncrypt", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.RC_SYSTEM_ERROR[0],
-			configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
 
-	err = svc.services.SavingRepo.UpdateAccount(models.ReqGetAccountSaving{
-		Filter: models.Account{
-			ID:              int64(respAcc.ID),
-			CifID:           respCif.ID,
-			AccountNumber:   respAcc.AccountNumber,
-			AccountPin:      pin,
-			Balance:         respAcc.Balance,
-			SavingSegmentID: int64(respAcc.SavingSegmentID),
-			UpdatedAt:       dbTime,
-			UpdatedBy:       "sys",
-		},
-	}, nil)
-	if err != nil {
-		utils.Log(" UpdateAccount", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_SYSTEM_ERROR[0],
-			configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
-	result := helpers.ResponseJSON(configs.TRUE_VALUE,
-		configs.RC_SUCCESS[0], configs.RC_SUCCESS[1], configs.RC_SUCCESS[1],
-		nil)
-	return ctx.JSON(http.StatusOK, result)
-}
+// func (svc savingServices) SetPin(ctx echo.Context) error {
+// 	var (
+// 		svcName = "SetPin"
+// 		t       = time.Now()
+// 		pin     string
+// 		dbTime  = t.Local().Format(configs.LAYOUT_TIMESTAMP)
+// 	)
+// 	req := new(models.ReqSetPin)
+// 	_, err := helpers.BindValidate(req, ctx)
+// 	if err != nil {
+// 		utils.Log(" ", svcName, err)
+// 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
+// 		return ctx.JSON(http.StatusOK, result)
+// 	}
+// 	if req.Pin == "" {
+// 		utils.Log(" Pin cannot be null", svcName, nil)
+// 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
+// 			configs.RC_SYSTEM_ERROR[0],
+// 			configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
+// 		return ctx.JSON(http.StatusOK, result)
+// 	}
+// 	pin, err = helpers.PassEncrypt(req.Pin)
+// 	if err != nil {
+// 		utils.Log(" PassEncrypt", svcName, err)
+// 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
+// 			configs.RC_SYSTEM_ERROR[0],
+// 			configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
+// 		return ctx.JSON(http.StatusOK, result)
+// 	}
+// 	//get user apps
+// 	respCif, err := svc.services.SavingRepo.GetCif(models.ReqGetCIF{
+// 		Filter: models.CIF{
+// 			CifPhone: req.Phone,
+// 		},
+// 	})
+// 	if err != nil {
+// 		utils.Log(" PassEncrypt", svcName, err)
+// 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
+// 			configs.RC_SYSTEM_ERROR[0],
+// 			configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
+// 		return ctx.JSON(http.StatusOK, result)
+// 	}
+// 	respAcc, err := svc.services.SavingRepo.GetAccount(models.ReqGetAccountSaving{
+// 		Filter: models.Account{
+// 			CifID: respCif.ID,
+// 		},
+// 	})
+// 	if err != nil {
+// 		utils.Log(" PassEncrypt", svcName, err)
+// 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
+// 			configs.RC_SYSTEM_ERROR[0],
+// 			configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
+// 		return ctx.JSON(http.StatusOK, result)
+// 	}
+
+//		err = svc.services.SavingRepo.UpdateAccount(models.ReqGetAccountSaving{
+//			Filter: models.Account{
+//				ID:              int64(respAcc.ID),
+//				CifID:           respCif.ID,
+//				AccountNumber:   respAcc.AccountNumber,
+//				AccountPin:      pin,
+//				Balance:         respAcc.Balance,
+//				SavingSegmentID: int64(respAcc.SavingSegmentID),
+//				UpdatedAt:       dbTime,
+//				UpdatedBy:       "sys",
+//			},
+//		}, nil)
+//		if err != nil {
+//			utils.Log(" UpdateAccount", svcName, err)
+//			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_SYSTEM_ERROR[0],
+//				configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
+//			return ctx.JSON(http.StatusOK, result)
+//		}
+//		result := helpers.ResponseJSON(configs.TRUE_VALUE,
+//			configs.RC_SUCCESS[0], configs.RC_SUCCESS[1], configs.RC_SUCCESS[1],
+//			nil)
+//		return ctx.JSON(http.StatusOK, result)
+//	}
 func (svc savingServices) UpdateAccount(ctx echo.Context) error {
 	var (
 		svcName = "UpdateAccount"

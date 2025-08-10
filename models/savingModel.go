@@ -5,7 +5,6 @@ type (
 		ID         int    `json:"id"`
 		CifName    string `json:"cifName"`
 		CifNik     string `json:"cifNik"`
-		CifPhone   string `json:"cifPhone"`
 		CifEmail   string `json:"cifEmail"`
 		CifAddress string `json:"cifAddress"`
 		CreatedAt  string `json:"createdAt"`
@@ -30,7 +29,6 @@ type (
 		ID              int     `json:"id"`
 		CifID           int     `json:"cifId"`
 		CifName         string  `json:"cifName"`
-		CifPhone        string  `json:"cifPhone"`
 		CifEmail        string  `json:"cifEmail"`
 		AccountNumber   string  `json:"accountNumber"`
 		Balance         float64 `json:"balance"`
