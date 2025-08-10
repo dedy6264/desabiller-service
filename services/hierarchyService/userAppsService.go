@@ -354,6 +354,7 @@ func (svc HierarcyService) VerificationOTP(ctx echo.Context) error {
 		t       = time.Now()
 		dbTime  = t.Local().Format(time.RFC3339)
 		// dbTime  = t.Local().Format(configs.LAYOUT_TIMESTAMP)
+		respUserApp models.UserApp
 	)
 	req := new(models.Otp)
 	_, err := helpers.BindValidate(req, ctx)
@@ -363,13 +364,13 @@ func (svc HierarcyService) VerificationOTP(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	if req.Otp == "" {
-		utils.Log("OTP cannot be null", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
+		utils.Log("OTP cannot be null", svcName, nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", "", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	if req.CifID == 0 {
-		utils.Log("Cif Id cannot be null", svcName, err)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
+		utils.Log("Cif Id cannot be null", svcName, nil)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", "", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
 	respOtp, err := svc.service.RepoHierarchy.GetOtp(models.ReqGetOtp{
@@ -411,7 +412,7 @@ func (svc HierarcyService) VerificationOTP(ctx echo.Context) error {
 	} else {
 		utils.Log("Masih dalam durasi", svcName, nil)
 		//get user apps
-		respUserApp, err := svc.service.RepoHierarchy.GetUserApp(models.ReqGetUserApp{
+		respUserApp, err = svc.service.RepoHierarchy.GetUserApp(models.ReqGetUserApp{
 			Filter: models.UserApp{
 				CifID: respOtp.CifID,
 			},
@@ -468,7 +469,8 @@ func (svc HierarcyService) VerificationOTP(ctx echo.Context) error {
 		}
 		fmt.Println("resp fonnte: ", string(respByte))
 	}
-	result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_SUCCESS[0], configs.RC_SUCCESS[1], "", nil)
+	respUserApp.Password = ""
+	result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_SUCCESS[0], configs.RC_SUCCESS[1], "", respUserApp)
 	return ctx.JSON(http.StatusOK, result)
 }
 func (svc HierarcyService) ResendOtp(ctx echo.Context) error {

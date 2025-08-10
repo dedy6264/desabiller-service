@@ -63,19 +63,6 @@ func (svc AdministrationService) Login(ctx echo.Context) error {
 		result := helpers.ResponseJSON(false, configs.RC_SYSTEM_ERROR[0], configs.RC_SYSTEM_ERROR[1], configs.RC_SYSTEM_ERROR[1], nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	respAccount, err := svc.service.SavingRepo.GetAccount(models.ReqGetAccountSaving{
-		Filter: models.Account{
-			CifID: respGet.CifID,
-		},
-	})
-	if err != nil {
-		utils.Log(" GetAccount", svcName, err)
-		result := helpers.ResponseJSON(false, configs.RC_SYSTEM_ERROR[0], configs.RC_SYSTEM_ERROR[1], configs.RC_SYSTEM_ERROR[1], nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
-	if respAccount.AccountPin == "" {
-		isSetPin = "N"
-	}
 	resultSvc = models.RespLogin{
 		Data: models.Data{
 			ID:             int(respGet.ID),

@@ -18,7 +18,7 @@ type ()
 type (
 	ReqGetAccount struct {
 		ID              int       `json:"id"`
-		CifID           int       `json:"cifId"`
+		CifID           int       `json:"cifID"`
 		AccountNumber   string    `json:"accountNumber"`
 		Balance         float64   `json:"balance"`
 		SavingSegmentID int       `json:"savingSegmentId"`
@@ -27,7 +27,7 @@ type (
 	}
 	RespGetAccount struct {
 		ID              int     `json:"id"`
-		CifID           int     `json:"cifId"`
+		CifID           int     `json:"cifID"`
 		CifName         string  `json:"cifName"`
 		CifEmail        string  `json:"cifEmail"`
 		AccountNumber   string  `json:"accountNumber"`
