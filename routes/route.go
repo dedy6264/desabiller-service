@@ -291,6 +291,9 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 		}))
 		user.POST("/", admSvc.CekJwt)
 		user.POST("/getuser", hierachySvc.GetUser)
+		user.POST("/getaccount", savingSvc.GetAccount)
+		user.POST("/addaccount", savingSvc.AddAccount)
+
 	}
 	{
 		//BILLER transaksi

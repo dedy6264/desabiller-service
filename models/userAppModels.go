@@ -26,7 +26,7 @@ type (
 		Province       string `json:"province"`
 		City           string `json:"city"`
 		Address        string `json:"address"`
-		CifID          int64  `json:"cifID"`
+		CifID          int64  `json:"cifId"`
 		Status         string `json:"status"`
 		CreatedBy      string `json:"createdBy"`
 		UpdatedBy      string `json:"updatedBy"`
@@ -56,7 +56,7 @@ type (
 	}
 	Otp struct {
 		ID              int64  `json:"id" `
-		CifID           int64  `json:"cifID"`
+		CifID           int64  `json:"cifId"`
 		Username        string `json:"username"`
 		Otp             string `json:"otp"`
 		ExpiredDuration int64  `json:"expiredDuration"`
@@ -89,7 +89,7 @@ type (
 		CifName    string `json:"cifName"`
 		CifNoID    string `json:"cifNoId"`
 		CifTypeID  string `json:"cifTypeId"`
-		CifIDIndex string `json:"cifIDIndex"`
+		CifIDIndex string `json:"cifIdIndex"`
 		CifEmail   string `json:"cifEmail"`
 		CifAddress string `json:"cifAddress"`
 		CreatedBy  string `json:"createdBy"`
@@ -111,7 +111,7 @@ type (
 	}
 	Account struct {
 		ID              int64   `json:"id" `
-		CifID           int64   `json:"cifID"`
+		CifID           int64   `json:"cifId"`
 		AccountNumber   string  `json:"accountNumber"`
 		AccountPin      string  `json:"accountPin"`
 		Balance         float64 `json:"balance"`
@@ -149,7 +149,7 @@ type (
 		Province       string `json:"province"`
 		City           string `json:"city"`
 		Address        string `json:"address"`
-		CifID          int64  `json:"cifID"`
+		CifID          int64  `json:"cifId"`
 		Status         string `json:"status"`
 		AccountNumber  string `json:"accountNumber"`
 		IsSetPin       string `json:"isSetPin"`

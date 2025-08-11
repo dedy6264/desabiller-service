@@ -1,10 +1,12 @@
 package savingservices
 
 import (
+	"database/sql"
 	"desabiller/configs"
 	"desabiller/helpers"
 	"desabiller/models"
 	"desabiller/utils"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -17,6 +19,7 @@ func (svc savingServices) AddAccount(ctx echo.Context) error {
 		t         = time.Now()
 		dbTime    = t.Local().Format(configs.LAYOUT_TIMESTAMP)
 		resAddAcc models.RespGetAccount
+		data      models.DataToken
 	)
 	req := new(models.ReqGetAccountSaving)
 	_, err := helpers.BindValidate(req, ctx)
@@ -25,22 +28,29 @@ func (svc savingServices) AddAccount(ctx echo.Context) error {
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "FAILED", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	if req.Filter.CifID == 0 {
-		utils.Log(" ", svcName, nil)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.VALIDATE_ERROR_CODE,
-			"CIF is empty", "CIF is empty",
-			nil)
-		return ctx.JSON(http.StatusOK, result)
+	if ctx.Get("user") != nil {
+		data = helpers.TokenJWTDecode(ctx)
+		req.Filter.CifID = int64(data.CifID)
+		fmt.Println(":::", data)
+	} else {
+		if req.Filter.CifID == 0 {
+			utils.Log(" ", svcName, nil)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE,
+				configs.VALIDATE_ERROR_CODE,
+				"CIF is empty", "CIF is empty",
+				nil)
+			return ctx.JSON(http.StatusOK, result)
+		}
 	}
-	if req.Filter.AccountNumber == "" {
-		utils.Log(" ", svcName, nil)
-		result := helpers.ResponseJSON(configs.FALSE_VALUE,
-			configs.VALIDATE_ERROR_CODE,
-			"Account Number is empty", "Account Number is empty",
-			nil)
-		return ctx.JSON(http.StatusOK, result)
-	}
+
+	// if req.Filter.AccountNumber == "" {
+	// 	utils.Log(" ", svcName, nil)
+	// 	result := helpers.ResponseJSON(configs.FALSE_VALUE,
+	// 		configs.VALIDATE_ERROR_CODE,
+	// 		"Account Number is empty", "Account Number is empty",
+	// 		nil)
+	// 	return ctx.JSON(http.StatusOK, result)
+	// }
 	if req.Filter.AccountPin == "" {
 		utils.Log(" ", svcName, nil)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE,
@@ -66,6 +76,10 @@ func (svc savingServices) AddAccount(ctx echo.Context) error {
 				configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
 			return ctx.JSON(http.StatusOK, result)
 		}
+	}
+	for i := 0; i < 5; i++ {
+		num, _ := helpers.GenerateAccountNumber("888", 10)
+		req.Filter.AccountNumber = num
 	}
 	req.Filter.CreatedAt = dbTime
 	req.Filter.UpdatedAt = dbTime
@@ -93,10 +107,11 @@ func (svc savingServices) AddAccount(ctx echo.Context) error {
 		resAddAcc)
 	return ctx.JSON(http.StatusOK, result)
 }
-func (svc savingServices) GetAccounts(ctx echo.Context) error {
+func (svc savingServices) GetAccount(ctx echo.Context) error {
 	var (
 		svcName = "GetAccount"
 		respSvc models.ResponseList
+		data    models.DataToken
 	)
 	req := new(models.ReqGetAccountSaving)
 	_, err := helpers.BindValidate(req, ctx)
@@ -104,6 +119,48 @@ func (svc savingServices) GetAccounts(ctx echo.Context) error {
 		utils.Log(" ", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
 		return ctx.JSON(http.StatusOK, result)
+	}
+	if ctx.Get("user") != nil {
+		data = helpers.TokenJWTDecode(ctx)
+		req.Filter.CifID = int64(data.CifID)
+	}
+	resp, err := svc.services.SavingRepo.GetAccount(*req)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			utils.Log(" GetAccounts", svcName, err)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_SUCCESS[0],
+				configs.RC_SUCCESS[1], "", resp)
+			return ctx.JSON(http.StatusOK, result)
+		}
+		utils.Log(" GetAccounts", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_FAILED_DB_NOT_FOUND[0],
+			configs.RC_FAILED_DB_NOT_FOUND[1], "", nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
+	respSvc.Data = resp
+	respSvc.RecordsTotal = 0
+	respSvc.RecordsFiltered = 0
+	result := helpers.ResponseJSON(configs.TRUE_VALUE,
+		configs.RC_SUCCESS[0], configs.RC_SUCCESS[1], configs.RC_SUCCESS[1],
+		respSvc)
+	return ctx.JSON(http.StatusOK, result)
+}
+func (svc savingServices) GetAccounts(ctx echo.Context) error {
+	var (
+		svcName = "GetAccount"
+		respSvc models.ResponseList
+		data    models.DataToken
+	)
+	req := new(models.ReqGetAccountSaving)
+	_, err := helpers.BindValidate(req, ctx)
+	if err != nil {
+		utils.Log(" ", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.VALIDATE_ERROR_CODE, "Failed", err.Error(), nil)
+		return ctx.JSON(http.StatusOK, result)
+	}
+	if ctx.Get("user") != nil {
+		data = helpers.TokenJWTDecode(ctx)
+		req.Filter.CifID = int64(data.CifID)
 	}
 	count, err := svc.services.SavingRepo.GetAccountCount(*req)
 	if err != nil {
@@ -114,6 +171,12 @@ func (svc savingServices) GetAccounts(ctx echo.Context) error {
 	}
 	resp, err := svc.services.SavingRepo.GetAccounts(*req)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			utils.Log(" GetAccounts", svcName, err)
+			result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_SUCCESS[0],
+				configs.RC_SUCCESS[1], "", resp)
+			return ctx.JSON(http.StatusOK, result)
+		}
 		utils.Log(" GetAccounts", svcName, err)
 		result := helpers.ResponseJSON(configs.FALSE_VALUE, configs.RC_FAILED_DB_NOT_FOUND[0],
 			configs.RC_FAILED_DB_NOT_FOUND[1], "", nil)

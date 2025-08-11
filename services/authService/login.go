@@ -57,7 +57,7 @@ func (svc AdministrationService) Login(ctx echo.Context) error {
 		result := helpers.ResponseJSON(false, configs.RC_FAILED_WRONG_PWD_USRNAME[0], configs.RC_FAILED_WRONG_PWD_USRNAME[1], configs.RC_FAILED_WRONG_PWD_USRNAME[1], nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	token, err := helpers.TokenJwtGenerate(int(respGet.ID))
+	token, err := helpers.TokenJwtGenerate(int(respGet.ID), int(respGet.CifID))
 	if err != nil {
 		utils.Log(" TokenJwtGenerate", svcName, err)
 		result := helpers.ResponseJSON(false, configs.RC_SYSTEM_ERROR[0], configs.RC_SYSTEM_ERROR[1], configs.RC_SYSTEM_ERROR[1], nil)

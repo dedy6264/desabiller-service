@@ -1,6 +1,20 @@
 package models
 
 type (
+	RespGetAccount struct {
+		ID              int     `json:"id"`
+		CifID           int     `json:"cifID"`
+		CifName         string  `json:"cifName"`
+		CifEmail        string  `json:"cifEmail"`
+		AccountNumber   string  `json:"accountNumber"`
+		Balance         float64 `json:"balance"`
+		SavingSegmentID int     `json:"savingSegmentId"`
+		AccountPin      string  `json:"accountPin"`
+		CreatedAt       string  `json:"createdAt"`
+		CreatedBy       string  `json:"createdBy"`
+		UpdatedAt       string  `json:"updatedAt"`
+		UpdatedBy       string  `json:"updatedBy"`
+	}
 	ReqGetSavingType struct {
 		Start     int64      `json:"start" `
 		Lenght    int64      `json:"length"`
@@ -38,7 +52,7 @@ type (
 		ID                int     `json:"id"`
 		SavingSegmentName string  `json:"savingSegmentName"`
 		LimitAmount       float64 `json:"limitAmount"`
-		SavingTypeID      int     `json:"savingTypeID"`
+		SavingTypeID      int     `json:"savingTypeId"`
 		SavingTypeName    string  `json:"savingTypeName"`
 		CreatedAt         string  `json:"createdAt"`
 		CreatedBy         string  `json:"createdBy"`

@@ -13,6 +13,7 @@ import (
 	"log"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -20,6 +21,30 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 )
+
+func GenerateAccountNumber(prefix string, length int) (string, error) {
+	randomLength := length - len(prefix)
+	if randomLength <= 0 {
+		return prefix, nil
+	}
+
+	// Buffer untuk angka random
+	bytes := make([]byte, randomLength)
+
+	// Ambil byte random
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+
+	var sb strings.Builder
+	sb.WriteString(prefix)
+
+	for _, b := range bytes {
+		sb.WriteByte('0' + (b % 10)) // Konversi ke digit 0-9
+	}
+
+	return sb.String(), nil
+}
 
 func Otp() (otp string) {
 	rand.Seed(time.Now().UnixNano())
@@ -39,16 +64,17 @@ func TokenJWTDecode(ctx echo.Context) (data models.DataToken) {
 	user := ctx.Get("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
 	data.UserAppId = int(claims["userAppId"].(float64))
+	data.CifID = int(claims["cifId"].(float64))
 	// data.MerchantOutletId = int(claims["outletId"].(float64))
 	// data.MerchantOutletName = claims["outletName"].(string)
 	return data
 }
-func TokenJwtGenerate(uaid int) (tkn string, err error) {
+func TokenJwtGenerate(uaid, cifid int) (tkn string, err error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	// claims["snDevice"] = snDev
 	claims["userAppId"] = uaid
-	// claims["clientId"] = cID
+	claims["cifId"] = cifid
 	//claims["exp"] = time.Now().Add(time.Minute * 5).Unix()
 	claims["exp"] = time.Now().Add(time.Hour * 5).Unix()
 
