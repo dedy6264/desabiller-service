@@ -5,7 +5,6 @@ import (
 	"desabiller/configs"
 	"desabiller/models"
 	"desabiller/utils"
-	"fmt"
 	"strconv"
 	"time"
 )
@@ -302,7 +301,6 @@ func (ctx hierarchy) GetUserApp(req models.ReqGetUserApp) (result models.UserApp
 	if req.Filter.IdentityNumber != "" {
 		query += ` and identity_number ='` + req.Filter.IdentityNumber + `'`
 	}
-	fmt.Println("querine suuuuu....:: ", query)
 	err = ctx.repo.Db.QueryRow(query).Scan(
 		&result.ID,
 		&result.Username,

@@ -34,6 +34,7 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		// transactionTotalAmount float64
 		// billDescByte           []byte
 	)
+
 	t := time.Now()
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMPTRX)
 	req := new(models.ReqPaymentTrx)

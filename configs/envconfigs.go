@@ -28,6 +28,8 @@ var (
 	LocalUrl = GetEnv("PROVIDER_LOCAL_URL")
 
 	TrxPaymentPending = GetEnv("TRX_PAYMENT_PENDING")
+	MAKARIOS_MID      = GetEnv("MAKARIOS_MID")
+	TOKEN             string
 )
 
 func GetEnv(key string, value ...string) string {

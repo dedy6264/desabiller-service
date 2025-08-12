@@ -2,7 +2,6 @@ package configs
 
 const (
 	// MONGO_DB_DEV            = "dbDevRetailAuth"
-	APP_VERSION = "1.0.0-SNAPSHOT"
 	// REGISTRY_URL    = "119.2.53.151:5000"
 	EMPTY_VALUE_INT = 0
 	EMPTY_VALUE     = ""
@@ -27,5 +26,4 @@ const (
 	TRX_CODE_REVERSAL   = "300"
 	CID                 = 1
 	MKEY                = ""
-	TOKEN               = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXJjaGFudF9pZCI6IjEiLCJleHAiOjE3NTQ3MzA2MTB9.6ag-kggkp99S4MxcKImP_5CnV2iyaUHmHX_47o98P2g"
 )

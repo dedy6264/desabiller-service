@@ -31,6 +31,7 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 		productPrice, productAdminFee, productMerchantFee,
 		productProviderPrice, productProviderAdminFee, productProviderMerchantFee, transactionTotalAmount float64
 	)
+
 	t := time.Now()
 	dbTime := t.Local().Format(configs.LAYOUT_TIMESTAMPTRX)
 	dbTimeTrx := t.Local().Format(configs.LAYOUT_TIMESTAMP)

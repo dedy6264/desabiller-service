@@ -60,6 +60,7 @@ func Otp() (otp string) {
 //		MerchantId string `json:"merchantId"`
 //		jwt.RegisteredClaims
 //	}
+
 func TokenJWTDecode(ctx echo.Context) (data models.DataToken) {
 	user := ctx.Get("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
@@ -68,6 +69,19 @@ func TokenJWTDecode(ctx echo.Context) (data models.DataToken) {
 	// data.MerchantOutletId = int(claims["outletId"].(float64))
 	// data.MerchantOutletName = claims["outletName"].(string)
 	return data
+}
+func TokenMakarios() {
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	// claims["snDevice"] = snDev
+	claims["MerchantID"] = configs.MAKARIOS_MID
+	//claims["exp"] = time.Now().Add(time.Minute * 5).Unix()
+
+	t, err := token.SignedString([]byte("abcdef"))
+	if err != nil {
+		log.Panic(err.Error())
+	}
+	configs.TOKEN = t
 }
 func TokenJwtGenerate(uaid, cifid int) (tkn string, err error) {
 	token := jwt.New(jwt.SigningMethodHS256)

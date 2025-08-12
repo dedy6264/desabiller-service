@@ -48,7 +48,7 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 }
 
 func main() {
-
+	helpers.TokenMakarios()
 	if err := configs.OpenConnection(); err != nil {
 		panic(fmt.Sprintf("Open Connection Faild: %s", err.Error()))
 	}

@@ -82,6 +82,7 @@ func (svc trxService) Advice(ctx echo.Context) error {
 		ReferenceNumber:         respTrx.ProviderReferenceNumber,
 		ReferenceNumberMerchant: respTrx.ReferenceNumber,
 	}
+
 	respByte, _, err := utils.WorkerPostWithBearer(url, configs.TOKEN, reqprovider, "json")
 
 	if err != nil {
