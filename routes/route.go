@@ -3,10 +3,13 @@ package routes
 import (
 	"crypto/subtle"
 	"desabiller/configs"
+	"desabiller/models"
 	"desabiller/services"
 	auth "desabiller/services/authService"
 	helperservices "desabiller/services/helperServices"
 	trxservice "desabiller/services/trxService"
+	"desabiller/utils"
+	"fmt"
 
 	// helperservices "desabiller/services/helperServices"
 	hierarchyservicego "desabiller/services/hierarchyService"
@@ -340,5 +343,18 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 			log.Println("[End]")
 		}))
 		helper.POST("/getReference", helperSvc.GetOperatorService)
+		e.POST("/test", func(ctx echo.Context) error {
+			reFonte := models.ReqFonnte{
+				Target:  "089678971119",
+				Message: "OTP : ",
+			}
+			respByte, _, err := utils.WorkerPost("https://api.fonnte.com/send", "LyfkJ2o1LA8wER8RiMBe", reFonte, "json")
+			if err != nil {
+				utils.Log("WorkerPost", "TEST", err)
+				return err
+			}
+			fmt.Println("resp fonnte: ", string(respByte))
+			return nil
+		})
 	}
 }

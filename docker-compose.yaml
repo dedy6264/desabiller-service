@@ -8,20 +8,6 @@ services:
     # restart: unless-stopped
     tty: true
     ports:
-      - "10010:${APP_PORT}"
+      - "10002:${APP_PORT}"
     environment:
       TZ: "Asia/Jakarta"
-
-      # PREFIX_API: ${PREFIX_API}
-      # APP_ENV: ${APP_ENV}
-      # CALLBACKECOSYSTEM: ${CALLBACKECOSYSTEM}
-      # MYBILLS_CALL_DEV_URL: ${MYBILLS_CALL_DEV_URL}
-      # MYBILLS_CALL_PROD_URL: ${MYBILLS_CALL_PROD_URL}
-      # PLINK_PROD_URL: ${PLINK_PROD_URL}
-      # PLINK_PROD_URL_BACKUP: ${PLINK_PROD_URL_BACKUP}
-      # PLINK_DEV_URL: ${PLINK_DEV_URL}
-      # PLINK_USER_ID_DEV: ${PLINK_USER_ID_DEV}
-      # PLINK_PASSWORD_DEV: ${PLINK_PASSWORD_DEV}
-      # PLINK_USER_ID_PROD: ${PLINK_USER_ID_PROD}
-      # PLINK_PASSWORD_PROD: ${PLINK_PASSWORD_PROD}
-      

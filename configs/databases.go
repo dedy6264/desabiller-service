@@ -28,6 +28,11 @@ func setupConnection() (*sql.DB, error) {
 	if err != nil {
 		return db, errors.New("Connection closed: Failed Connect Database")
 	}
+	// err = db.Ping()
+	// if err != nil {
+	// 	log.Fatal("Error connecting to database:", err)
+	// }
+	fmt.Println("CONNECTION: ", err, "|sukses")
 	return db, nil
 }
 

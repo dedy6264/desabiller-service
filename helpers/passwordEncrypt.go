@@ -77,7 +77,7 @@ func TokenMakarios() {
 	claims["MerchantID"] = configs.MAKARIOS_MID
 	//claims["exp"] = time.Now().Add(time.Minute * 5).Unix()
 
-	t, err := token.SignedString([]byte("abcdef"))
+	t, err := token.SignedString([]byte(configs.APP_KEY))
 	if err != nil {
 		log.Panic(err.Error())
 	}
