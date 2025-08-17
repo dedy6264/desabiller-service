@@ -126,10 +126,8 @@ func (svc trxService) InquiryBiller(ctx echo.Context) error {
 	switch configs.AppEnv {
 	case "DEV":
 		url = configs.DevUrl + configs.ENDPOINT_PROVIDER_INQUIRY
-	case "PROD":
-		url = configs.ProdUrl + configs.ENDPOINT_PROVIDER_INQUIRY
 	default:
-		url = configs.LocalUrl + configs.ENDPOINT_PROVIDER_INQUIRY
+		url = configs.ProdUrl + configs.ENDPOINT_PROVIDER_INQUIRY
 	}
 	if respProduct.ProductTypeID == 2 { //PREPAID
 

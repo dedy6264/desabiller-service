@@ -23,9 +23,8 @@ var (
 	// MONGODBDEV = MONGO_DB_DEV
 	APPPort = GetEnv("APP_PORT")
 
-	ProdUrl  = GetEnv("PROVIDER_PROD_URL")
-	DevUrl   = GetEnv("PROVIDER_DEV_URL")
-	LocalUrl = GetEnv("PROVIDER_LOCAL_URL")
+	ProdUrl = GetEnv("PROVIDER_PROD_URL")
+	DevUrl  = GetEnv("PROVIDER_DEV_URL")
 
 	TrxPaymentPending = GetEnv("TRX_PAYMENT_PENDING")
 	MAKARIOS_MID      = GetEnv("MAKARIOS_MID")

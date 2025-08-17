@@ -71,13 +71,10 @@ func (svc trxService) Advice(ctx echo.Context) error {
 	}
 	if configs.AppEnv == "DEV" {
 		url = configs.DevUrl + "/api/v1/advice"
-	}
-	if configs.AppEnv == "PROD" {
+	} else {
 		url = configs.ProdUrl + "/api/v1/advice"
 	}
-	if configs.AppEnv == "LOCAL" {
-		url = configs.LocalUrl + "/api/v1/advice"
-	}
+
 	reqprovider := models.ReqPaymentProvider{
 		ReferenceNumber:         respTrx.ProviderReferenceNumber,
 		ReferenceNumberMerchant: respTrx.ReferenceNumber,

@@ -121,13 +121,9 @@ func (svc trxService) PaymentBiller(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, result)
 	}
 	// billDescPay := BillInfoBPJS{}
-	if configs.AppEnv == "LOCAL" {
-		url = configs.LocalUrl + configs.ENDPOINT_PROVIDER_PAYMENT
-	}
 	if configs.AppEnv == "DEV" {
 		url = configs.DevUrl + configs.ENDPOINT_PROVIDER_PAYMENT
-	}
-	if configs.AppEnv == "PROD" {
+	} else {
 		url = configs.ProdUrl + configs.ENDPOINT_PROVIDER_PAYMENT
 	}
 	reqprovider := models.ReqInquiryProvider{

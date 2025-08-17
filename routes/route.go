@@ -40,6 +40,10 @@ func RouteApi(e echo.Echo, service services.UsecaseService) {
 	helperSvc := helperservices.NewApiHelperService(service)
 	trxSvc := trxservice.NewRepoTrxService(service)
 	savingSvc := savingservices.NewApiSavingServices(service)
+	e.GET("/", func(ctx echo.Context) error {
+		fmt.Println("done")
+		return nil
+	})
 	login := e.Group("/login")
 	login.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
 		log.Println("[Start]")

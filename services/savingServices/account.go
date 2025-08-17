@@ -67,16 +67,16 @@ func (svc savingServices) AddAccount(ctx echo.Context) error {
 			nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
-	if req.Filter.AccountPin != "" {
-		req.Filter.AccountPin, err = helpers.PassEncrypt(req.Filter.AccountPin)
-		if err != nil {
-			utils.Log(" PassEncrypt", svcName, err)
-			result := helpers.ResponseJSON(configs.FALSE_VALUE,
-				configs.RC_SYSTEM_ERROR[0],
-				configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
-			return ctx.JSON(http.StatusOK, result)
-		}
+	// if req.Filter.AccountPin != "" {
+	req.Filter.AccountPin, err = helpers.PassEncrypt(req.Filter.AccountPin)
+	if err != nil {
+		utils.Log(" PassEncrypt", svcName, err)
+		result := helpers.ResponseJSON(configs.FALSE_VALUE,
+			configs.RC_SYSTEM_ERROR[0],
+			configs.RC_SYSTEM_ERROR[1], err.Error(), nil)
+		return ctx.JSON(http.StatusOK, result)
 	}
+	// }
 	for i := 0; i < 5; i++ {
 		num, _ := helpers.GenerateAccountNumber("888", 10)
 		req.Filter.AccountNumber = num
@@ -137,6 +137,7 @@ func (svc savingServices) GetAccount(ctx echo.Context) error {
 			configs.RC_FAILED_DB_NOT_FOUND[1], "", nil)
 		return ctx.JSON(http.StatusOK, result)
 	}
+	resp.AccountPin = ""
 	respSvc.Data = resp
 	respSvc.RecordsTotal = 0
 	respSvc.RecordsFiltered = 0
